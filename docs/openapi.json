@@ -1,0 +1,4655 @@
+{
+  "basePath": "/",
+  "consumes": [
+    "application/json"
+  ],
+  "definitions": {
+    "Absensi": {
+      "properties": {
+        "akurasi_gps": {
+          "type": "number"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "full_name": {
+          "example": "Budi Santoso",
+          "type": "string"
+        },
+        "id_absensi": {
+          "example": 101,
+          "type": "integer"
+        },
+        "id_lokasi_kantor": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_pegawai": {
+          "example": 7,
+          "type": "integer"
+        },
+        "jam_jadwal": {
+          "description": "Snapshot jam jadwal (HH:MM)",
+          "example": "07:30",
+          "type": "string"
+        },
+        "jarak_meter": {
+          "description": "Jarak ke titik kantor",
+          "type": "number"
+        },
+        "jenis": {
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "lokasi_kantor_name": {
+          "example": "Kantor Desa",
+          "type": "string"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "skor_wajah": {
+          "description": "0-1, makin tinggi makin mirip",
+          "type": "number"
+        },
+        "status": {
+          "enum": [
+            "tepat_waktu",
+            "terlambat",
+            "pulang_cepat"
+          ],
+          "example": "tepat_waktu",
+          "type": "string"
+        },
+        "tanggal": {
+          "example": "2026-11-11",
+          "format": "date",
+          "type": "string"
+        },
+        "terlambat_menit": {
+          "example": 0,
+          "type": "integer"
+        },
+        "waktu_absen": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiGagal": {
+      "properties": {
+        "akurasi_gps": {
+          "type": "number"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "detail": {
+          "type": "object"
+        },
+        "error_code": {
+          "example": "OUTSIDE_RADIUS",
+          "type": "string"
+        },
+        "error_message": {
+          "type": "string"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "has_photo": {
+          "description": "true = ada foto, ambil lewat /absensi/gagal/{id}/foto",
+          "type": "boolean"
+        },
+        "id_absensi_gagal": {
+          "type": "integer"
+        },
+        "id_lokasi_kantor": {
+          "type": "integer"
+        },
+        "id_pegawai": {
+          "type": "integer"
+        },
+        "jarak_meter": {
+          "type": "number"
+        },
+        "jenis": {
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "skor_wajah": {
+          "type": "number"
+        },
+        "source": {
+          "enum": [
+            "client",
+            "server"
+          ],
+          "example": "client",
+          "type": "string"
+        },
+        "stage": {
+          "enum": [
+            "GPS",
+            "CAMERA",
+            "LOCATION",
+            "FACE",
+            "SCHEDULE",
+            "SYSTEM"
+          ],
+          "example": "GPS",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiGagalClient": {
+      "properties": {
+        "akurasi_gps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "detail": {
+          "description": "Info tambahan (object), mis. versi app / model HP",
+          "type": "object"
+        },
+        "error_code": {
+          "example": "GPS_PERMISSION_DENIED",
+          "pattern": "^[A-Z0-9_]{1,50}$",
+          "type": "string"
+        },
+        "error_message": {
+          "maxLength": 500,
+          "type": "string"
+        },
+        "jenis": {
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
+          "type": "string"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "type": "number"
+        },
+        "stage": {
+          "enum": [
+            "GPS",
+            "CAMERA",
+            "LOCATION",
+            "FACE"
+          ],
+          "example": "GPS",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error_code",
+        "stage"
+      ],
+      "type": "object"
+    },
+    "AbsensiGagalListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/AbsensiGagal"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiHariIni": {
+      "properties": {
+        "gps_max_akurasi_meter": {
+          "example": 50,
+          "type": "number"
+        },
+        "hari_kerja": {
+          "type": "boolean"
+        },
+        "jadwal": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/AbsensiJadwalHariIni"
+            }
+          ],
+          "description": "null jika bukan hari kerja"
+        },
+        "keterangan": {
+          "type": "string"
+        },
+        "kode": {
+          "description": "Alasan bukan hari kerja: HOLIDAY / NOT_WORKDAY / NO_SCHEDULE",
+          "type": "string"
+        },
+        "lokasi": {
+          "items": {
+            "$ref": "#/definitions/LokasiAbsen"
+          },
+          "type": "array"
+        },
+        "masuk": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Absensi"
+            }
+          ],
+          "description": "null = belum absen masuk"
+        },
+        "pegawai": {
+          "$ref": "#/definitions/AbsensiPegawaiRingkas"
+        },
+        "pulang": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Absensi"
+            }
+          ],
+          "description": "null = belum absen pulang"
+        },
+        "tanggal": {
+          "format": "date",
+          "type": "string"
+        },
+        "waktu_server": {
+          "description": "Pakai ini, bukan jam HP",
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiHariIniResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/AbsensiHariIni"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiJadwalHariIni": {
+      "properties": {
+        "masuk": {
+          "example": "07:30",
+          "type": "string"
+        },
+        "masuk_dibuka": {
+          "example": "06:30",
+          "type": "string"
+        },
+        "nama": {
+          "type": "string"
+        },
+        "pulang": {
+          "example": "15:30",
+          "type": "string"
+        },
+        "toleransi_terlambat_menit": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Absensi"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiPegawaiRingkas": {
+      "properties": {
+        "face_enrolled": {
+          "description": "false = belum bisa absen",
+          "type": "boolean"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "id_pegawai": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Absensi"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "AuthUser": {
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "full_name": {
+          "description": "Nama pegawai, null jika non-pegawai",
+          "type": "string"
+        },
+        "id_pegawai": {
+          "description": "null jika akun non-pegawai",
+          "type": "integer"
+        },
+        "id_user": {
+          "example": 1,
+          "type": "integer"
+        },
+        "permissions": {
+          "example": [
+            "absensi.self",
+            "perizinan.self"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "photo_path": {
+          "type": "string"
+        },
+        "roles": {
+          "example": [
+            "PEGAWAI"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "username": {
+          "example": "budi",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AuthUserResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/AuthUser"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "EmptyResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "description": "null",
+          "type": "object"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "ErrorResponse": {
+      "properties": {
+        "code": {
+          "description": "Kode error UPPER_SNAKE_CASE",
+          "example": "VALIDATION_ERROR",
+          "type": "string"
+        },
+        "errors": {
+          "description": "Detail per field (object) atau null",
+          "type": "object"
+        },
+        "message": {
+          "example": "Validasi gagal",
+          "type": "string"
+        },
+        "success": {
+          "example": false,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "HariLibur": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_hari_libur": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "jenis": {
+          "enum": [
+            "nasional",
+            "cuti_bersama",
+            "lokal"
+          ],
+          "example": "nasional",
+          "type": "string"
+        },
+        "name": {
+          "example": "Hari Raya Natal",
+          "type": "string"
+        },
+        "tanggal": {
+          "example": "2026-12-25",
+          "format": "date",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "HariLiburInput": {
+      "properties": {
+        "jenis": {
+          "default": "nasional",
+          "enum": [
+            "nasional",
+            "cuti_bersama",
+            "lokal"
+          ],
+          "example": "nasional",
+          "type": "string"
+        },
+        "name": {
+          "example": "Hari Raya Natal",
+          "maxLength": 150,
+          "minLength": 1,
+          "type": "string"
+        },
+        "tanggal": {
+          "description": "Format YYYY-MM-DD",
+          "example": "2026-12-25",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "tanggal"
+      ],
+      "type": "object"
+    },
+    "HariLiburListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/HariLibur"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "HariLiburResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/HariLibur"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Jabatan": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_jabatan": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "name": {
+          "example": "Kaur Keuangan",
+          "type": "string"
+        },
+        "sort_order": {
+          "example": 1,
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "JabatanInput": {
+      "properties": {
+        "name": {
+          "example": "Kaur Keuangan",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "sort_order": {
+          "default": 0,
+          "description": "Urutan tampil (kecil = atas)",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "JabatanListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Jabatan"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "JabatanResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Jabatan"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "JadwalKerja": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_jadwal_kerja": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "jadwal_harian": {
+          "description": "7 hari lengkap; null = libur",
+          "example": {
+            "jumat": {
+              "masuk": "07:30",
+              "pulang": "11:30"
+            },
+            "kamis": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            },
+            "minggu": null,
+            "rabu": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            },
+            "sabtu": null,
+            "selasa": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            },
+            "senin": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            }
+          },
+          "type": "object"
+        },
+        "name": {
+          "example": "Jadwal Normal",
+          "type": "string"
+        },
+        "toleransi_terlambat_menit": {
+          "example": 15,
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "JadwalKerjaInput": {
+      "properties": {
+        "jadwal_harian": {
+          "description": "Per hari: {masuk, pulang} format HH:MM, atau null = libur. Hari yang tidak diisi dianggap libur.",
+          "example": {
+            "jumat": {
+              "masuk": "07:30",
+              "pulang": "11:30"
+            },
+            "kamis": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            },
+            "minggu": null,
+            "rabu": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            },
+            "sabtu": null,
+            "selasa": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            },
+            "senin": {
+              "masuk": "07:30",
+              "pulang": "15:30"
+            }
+          },
+          "type": "object"
+        },
+        "name": {
+          "example": "Jadwal Normal",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "toleransi_terlambat_menit": {
+          "default": 0,
+          "example": 15,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "jadwal_harian",
+        "name"
+      ],
+      "type": "object"
+    },
+    "JadwalKerjaListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/JadwalKerja"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "JadwalKerjaResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/JadwalKerja"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "JenisIzin": {
+      "properties": {
+        "butuh_lampiran": {
+          "example": 1,
+          "type": "integer"
+        },
+        "code": {
+          "example": "SAKIT",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "dihitung_hadir": {
+          "example": 0,
+          "type": "integer"
+        },
+        "id_jenis_izin": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "name": {
+          "example": "Sakit",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "JenisIzinInput": {
+      "properties": {
+        "butuh_lampiran": {
+          "default": 0,
+          "description": "1 = wajib lampiran",
+          "example": 1,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "code": {
+          "description": "Huruf/angka/_ ; disimpan HURUF BESAR",
+          "example": "SAKIT",
+          "maxLength": 30,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_]+$",
+          "type": "string"
+        },
+        "dihitung_hadir": {
+          "default": 0,
+          "description": "1 = dihitung hadir",
+          "example": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "name": {
+          "example": "Sakit",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "name"
+      ],
+      "type": "object"
+    },
+    "JenisIzinListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/JenisIzin"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "JenisIzinResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/JenisIzin"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Login": {
+      "properties": {
+        "password": {
+          "description": "Password atau kode pemulihan",
+          "example": "rahasia",
+          "minLength": 1,
+          "type": "string"
+        },
+        "username": {
+          "example": "budi",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "password",
+        "username"
+      ],
+      "type": "object"
+    },
+    "LoginResult": {
+      "properties": {
+        "access_token": {
+          "type": "string"
+        },
+        "refresh_token": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/AuthUser"
+        }
+      },
+      "type": "object"
+    },
+    "LoginResultResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/LoginResult"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "LokasiAbsen": {
+      "properties": {
+        "id_lokasi_kantor": {
+          "type": "integer"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "radius_meter": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "LokasiKantor": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_lokasi_kantor": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "latitude": {
+          "example": -8.654321,
+          "type": "number"
+        },
+        "longitude": {
+          "example": 116.123456,
+          "type": "number"
+        },
+        "name": {
+          "example": "Kantor Desa Karang Bongkot",
+          "type": "string"
+        },
+        "radius_meter": {
+          "example": 100,
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "LokasiKantorInput": {
+      "properties": {
+        "latitude": {
+          "example": -8.654321,
+          "maximum": 90,
+          "minimum": -90,
+          "type": "number"
+        },
+        "longitude": {
+          "example": 116.123456,
+          "maximum": 180,
+          "minimum": -180,
+          "type": "number"
+        },
+        "name": {
+          "example": "Kantor Desa Karang Bongkot",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "radius_meter": {
+          "default": 100,
+          "description": "Radius absen sah (meter)",
+          "example": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude",
+        "name"
+      ],
+      "type": "object"
+    },
+    "LokasiKantorListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/LokasiKantor"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "LokasiKantorResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/LokasiKantor"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Pegawai": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "full_name": {
+          "example": "Budi Santoso",
+          "type": "string"
+        },
+        "has_face": {
+          "description": "true = foto wajah sudah didaftarkan (bisa absen)",
+          "type": "boolean"
+        },
+        "id_jabatan": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_jadwal_kerja": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_pegawai": {
+          "example": 7,
+          "type": "integer"
+        },
+        "id_user": {
+          "example": 3,
+          "type": "integer"
+        },
+        "is_active": {
+          "example": 1,
+          "type": "integer"
+        },
+        "jabatan_name": {
+          "example": "Kaur Keuangan",
+          "type": "string"
+        },
+        "jadwal_kerja_name": {
+          "example": "Jadwal Normal",
+          "type": "string"
+        },
+        "last_login_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "nip": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "photo_path": {
+          "description": "Path internal; ambil gambar lewat GET /pegawai/{id}/foto",
+          "type": "string"
+        },
+        "roles": {
+          "items": {
+            "$ref": "#/definitions/PegawaiRoleRef"
+          },
+          "type": "array"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "user_is_active": {
+          "example": 1,
+          "type": "integer"
+        },
+        "username": {
+          "example": "budi",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PegawaiListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Pegawai"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PegawaiPassword": {
+      "properties": {
+        "password": {
+          "example": "rahasiabaru",
+          "minLength": 8,
+          "type": "string"
+        }
+      },
+      "required": [
+        "password"
+      ],
+      "type": "object"
+    },
+    "PegawaiResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Pegawai"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PegawaiRoleRef": {
+      "properties": {
+        "code": {
+          "example": "PEGAWAI",
+          "type": "string"
+        },
+        "id_role": {
+          "example": 5,
+          "type": "integer"
+        },
+        "name": {
+          "example": "Pegawai",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PegawaiUpdate": {
+      "properties": {
+        "email": {
+          "example": "budi@desa.id",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "full_name": {
+          "example": "Budi Santoso",
+          "maxLength": 150,
+          "minLength": 1,
+          "type": "string"
+        },
+        "id_jabatan": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_jadwal_kerja": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_roles": {
+          "description": "Isi untuk ganti role",
+          "example": [
+            5
+          ],
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "nip": {
+          "example": "198501012010011001",
+          "maxLength": 30,
+          "type": "string"
+        },
+        "phone": {
+          "example": "081234567890",
+          "maxLength": 20,
+          "type": "string"
+        },
+        "username": {
+          "example": "budi",
+          "maxLength": 50,
+          "minLength": 3,
+          "type": "string"
+        }
+      },
+      "required": [
+        "full_name",
+        "id_jabatan",
+        "id_jadwal_kerja",
+        "username"
+      ],
+      "type": "object"
+    },
+    "Refresh": {
+      "properties": {
+        "refresh_token": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "refresh_token"
+      ],
+      "type": "object"
+    },
+    "RefreshResult": {
+      "properties": {
+        "access_token": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RefreshResultResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/RefreshResult"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "RoleRef": {
+      "properties": {
+        "code": {
+          "example": "PEGAWAI",
+          "type": "string"
+        },
+        "id_role": {
+          "example": 5,
+          "type": "integer"
+        },
+        "name": {
+          "example": "Pegawai",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "User": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "id_user": {
+          "example": 2,
+          "type": "integer"
+        },
+        "is_active": {
+          "example": 1,
+          "type": "integer"
+        },
+        "last_login_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "roles": {
+          "items": {
+            "$ref": "#/definitions/RoleRef"
+          },
+          "type": "array"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "username": {
+          "example": "budi",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "UserCreate": {
+      "properties": {
+        "email": {
+          "example": "budi@desa.id",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "password": {
+          "example": "rahasia123",
+          "minLength": 5,
+          "type": "string"
+        },
+        "username": {
+          "example": "budi",
+          "maxLength": 50,
+          "minLength": 3,
+          "type": "string"
+        }
+      },
+      "required": [
+        "password",
+        "username"
+      ],
+      "type": "object"
+    },
+    "UserDetail": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "id_user": {
+          "example": 2,
+          "type": "integer"
+        },
+        "is_active": {
+          "example": 1,
+          "type": "integer"
+        },
+        "kode_pemulihan": {
+          "description": "Kode login cadangan 6 karakter",
+          "example": "A1B2C3",
+          "type": "string"
+        },
+        "last_login_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "roles": {
+          "items": {
+            "$ref": "#/definitions/RoleRef"
+          },
+          "type": "array"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "username": {
+          "example": "budi",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "UserDetailResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/UserDetail"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "UserListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/User"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "UserRoles": {
+      "properties": {
+        "id_roles": {
+          "example": [
+            2
+          ],
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "id_roles"
+      ],
+      "type": "object"
+    },
+    "UserUpdate": {
+      "properties": {
+        "email": {
+          "example": "budi@desa.id",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "password": {
+          "example": "rahasiabaru",
+          "minLength": 8,
+          "type": "string"
+        },
+        "username": {
+          "example": "budi",
+          "maxLength": 50,
+          "minLength": 3,
+          "type": "string"
+        }
+      },
+      "required": [
+        "username"
+      ],
+      "type": "object"
+    }
+  },
+  "info": {
+    "description": "HRIS Backend Webkarbon",
+    "title": "Webkarbon API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/absensi": {
+      "get": {
+        "description": "view_all. Daftar absensi semua pegawai per rentang tanggal (default hari ini).",
+        "operationId": "get_absensi_list",
+        "parameters": [
+          {
+            "description": "YYYY-MM-DD, default hari ini",
+            "in": "query",
+            "name": "tanggal_mulai",
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD, default = tanggal_mulai",
+            "in": "query",
+            "name": "tanggal_selesai",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id_pegawai",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "self. Absen masuk/pulang: GPS + foto selfie. multipart/form-data.",
+        "operationId": "post_absensi_list",
+        "parameters": [
+          {
+            "enum": [
+              "masuk",
+              "pulang"
+            ],
+            "in": "formData",
+            "name": "jenis",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "latitude",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "formData",
+            "name": "longitude",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "description": "Akurasi GPS dari perangkat (meter)",
+            "in": "formData",
+            "name": "akurasi_gps",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "description": "Foto selfie (jpg/png)",
+            "in": "formData",
+            "name": "foto",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Absen tercatat. 422 = ditolak aturan absen (lihat code)",
+            "schema": {
+              "$ref": "#/definitions/AbsensiResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/gagal": {
+      "get": {
+        "description": "view. Log absen gagal per rentang tanggal (maks 1000 baris).",
+        "operationId": "get_absensi_gagal",
+        "parameters": [
+          {
+            "description": "YYYY-MM-DD, default hari ini",
+            "in": "query",
+            "name": "tanggal_mulai",
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD, default = tanggal_mulai",
+            "in": "query",
+            "name": "tanggal_selesai",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id_pegawai",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiGagalListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi_gagal",
+        "tags": [
+          "absensi"
+        ]
+      },
+      "post": {
+        "description": "self. Laporkan kegagalan dari aplikasi (izin GPS/kamera ditolak, dsb.).",
+        "operationId": "post_absensi_gagal",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AbsensiGagalClient"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/gagal/{id_absensi_gagal}/foto": {
+      "get": {
+        "description": "view. Foto percobaan absen yang wajahnya tidak cocok.",
+        "operationId": "get_absensi_gagal_foto",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi_gagal",
+        "tags": [
+          "absensi"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_absensi_gagal",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/absensi/hari-ini": {
+      "get": {
+        "description": "self. Status absen hari ini: jadwal, sudah masuk/pulang, lokasi kantor.",
+        "operationId": "get_absensi_hari_ini",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiHariIniResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/riwayat": {
+      "get": {
+        "description": "self. Riwayat absensi sendiri (id_pegawai diabaikan).",
+        "operationId": "get_absensi_riwayat",
+        "parameters": [
+          {
+            "description": "YYYY-MM-DD, default hari ini",
+            "in": "query",
+            "name": "tanggal_mulai",
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD, default = tanggal_mulai",
+            "in": "query",
+            "name": "tanggal_selesai",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id_pegawai",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/{id_absensi}": {
+      "get": {
+        "description": "view_all. Detail absensi.",
+        "operationId": "get_absensi_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_absensi",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/absensi/{id_absensi}/foto": {
+      "get": {
+        "description": "self) atau absensi.view_all. Foto selfie absen (image/jpeg).",
+        "operationId": "get_absensi_foto",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pemilik (absensi",
+        "tags": [
+          "absensi"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_absensi",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Login; field password menerima password atau kode pemulihan.",
+        "operationId": "post_login_resource",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LoginResultResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [],
+        "summary": "Akses: publik",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "description": "Data akun yang sedang login.",
+        "operationId": "get_me_resource",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AuthUserResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Tukar refresh token dengan access token baru.",
+        "operationId": "post_refresh_resource",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Refresh"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/RefreshResultResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [],
+        "summary": "Akses: refresh token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/master/hari-libur": {
+      "get": {
+        "description": "manage. Daftar hari libur aktif, urut tanggal.",
+        "operationId": "get_hari_libur_list",
+        "parameters": [
+          {
+            "description": "Filter tahun, mis. 2026 (opsional)",
+            "in": "query",
+            "name": "tahun",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/HariLiburListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: hari_libur",
+        "tags": [
+          "master/hari-libur"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah hari libur.",
+        "operationId": "post_hari_libur_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HariLiburInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/HariLiburResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: hari_libur",
+        "tags": [
+          "master/hari-libur"
+        ]
+      }
+    },
+    "/master/hari-libur/{id_hari_libur}": {
+      "delete": {
+        "description": "manage. Nonaktifkan hari libur.",
+        "operationId": "delete_hari_libur_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: hari_libur",
+        "tags": [
+          "master/hari-libur"
+        ]
+      },
+      "get": {
+        "description": "manage. Detail hari libur.",
+        "operationId": "get_hari_libur_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/HariLiburResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: hari_libur",
+        "tags": [
+          "master/hari-libur"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_hari_libur",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah hari libur.",
+        "operationId": "put_hari_libur_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HariLiburInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/HariLiburResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: hari_libur",
+        "tags": [
+          "master/hari-libur"
+        ]
+      }
+    },
+    "/master/hari-libur/{id_hari_libur}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_hari_libur",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali hari libur.",
+        "operationId": "post_hari_libur_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/HariLiburResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: hari_libur",
+        "tags": [
+          "master/hari-libur"
+        ]
+      }
+    },
+    "/master/jabatan": {
+      "get": {
+        "description": "manage. Daftar jabatan aktif.",
+        "operationId": "get_jabatan_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JabatanListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jabatan",
+        "tags": [
+          "master/jabatan"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah jabatan.",
+        "operationId": "post_jabatan_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JabatanInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JabatanResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jabatan",
+        "tags": [
+          "master/jabatan"
+        ]
+      }
+    },
+    "/master/jabatan/{id_jabatan}": {
+      "delete": {
+        "description": "manage. Nonaktifkan jabatan (ditolak jika masih dipakai pegawai aktif).",
+        "operationId": "delete_jabatan_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jabatan",
+        "tags": [
+          "master/jabatan"
+        ]
+      },
+      "get": {
+        "description": "manage. Detail jabatan.",
+        "operationId": "get_jabatan_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JabatanResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jabatan",
+        "tags": [
+          "master/jabatan"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jabatan",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah jabatan.",
+        "operationId": "put_jabatan_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JabatanInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JabatanResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jabatan",
+        "tags": [
+          "master/jabatan"
+        ]
+      }
+    },
+    "/master/jabatan/{id_jabatan}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jabatan",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali jabatan.",
+        "operationId": "post_jabatan_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JabatanResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jabatan",
+        "tags": [
+          "master/jabatan"
+        ]
+      }
+    },
+    "/master/jadwal-kerja": {
+      "get": {
+        "description": "manage. Daftar jadwal kerja aktif.",
+        "operationId": "get_jadwal_kerja_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JadwalKerjaListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jadwal_kerja",
+        "tags": [
+          "master/jadwal-kerja"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah jadwal kerja.",
+        "operationId": "post_jadwal_kerja_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JadwalKerjaInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JadwalKerjaResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jadwal_kerja",
+        "tags": [
+          "master/jadwal-kerja"
+        ]
+      }
+    },
+    "/master/jadwal-kerja/{id_jadwal_kerja}": {
+      "delete": {
+        "description": "manage. Nonaktifkan jadwal kerja (ditolak jika masih dipakai pegawai aktif).",
+        "operationId": "delete_jadwal_kerja_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jadwal_kerja",
+        "tags": [
+          "master/jadwal-kerja"
+        ]
+      },
+      "get": {
+        "description": "manage. Detail jadwal kerja.",
+        "operationId": "get_jadwal_kerja_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JadwalKerjaResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jadwal_kerja",
+        "tags": [
+          "master/jadwal-kerja"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jadwal_kerja",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah jadwal kerja.",
+        "operationId": "put_jadwal_kerja_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JadwalKerjaInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JadwalKerjaResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jadwal_kerja",
+        "tags": [
+          "master/jadwal-kerja"
+        ]
+      }
+    },
+    "/master/jadwal-kerja/{id_jadwal_kerja}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jadwal_kerja",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali jadwal kerja.",
+        "operationId": "post_jadwal_kerja_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JadwalKerjaResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jadwal_kerja",
+        "tags": [
+          "master/jadwal-kerja"
+        ]
+      }
+    },
+    "/master/jenis-izin": {
+      "get": {
+        "description": "manage. Daftar jenis izin aktif.",
+        "operationId": "get_jenis_izin_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisIzinListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_izin",
+        "tags": [
+          "master/jenis-izin"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah jenis izin.",
+        "operationId": "post_jenis_izin_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JenisIzinInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisIzinResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_izin",
+        "tags": [
+          "master/jenis-izin"
+        ]
+      }
+    },
+    "/master/jenis-izin/{id_jenis_izin}": {
+      "delete": {
+        "description": "manage. Nonaktifkan jenis izin (ditolak jika masih ada pengajuan berstatus diajukan).",
+        "operationId": "delete_jenis_izin_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_izin",
+        "tags": [
+          "master/jenis-izin"
+        ]
+      },
+      "get": {
+        "description": "manage. Detail jenis izin.",
+        "operationId": "get_jenis_izin_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisIzinResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_izin",
+        "tags": [
+          "master/jenis-izin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jenis_izin",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah jenis izin.",
+        "operationId": "put_jenis_izin_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JenisIzinInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisIzinResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_izin",
+        "tags": [
+          "master/jenis-izin"
+        ]
+      }
+    },
+    "/master/jenis-izin/{id_jenis_izin}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jenis_izin",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali jenis izin.",
+        "operationId": "post_jenis_izin_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisIzinResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_izin",
+        "tags": [
+          "master/jenis-izin"
+        ]
+      }
+    },
+    "/master/lokasi-kantor": {
+      "get": {
+        "description": "manage. Daftar lokasi kantor aktif.",
+        "operationId": "get_lokasi_kantor_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LokasiKantorListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: lokasi_kantor",
+        "tags": [
+          "master/lokasi-kantor"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah lokasi kantor.",
+        "operationId": "post_lokasi_kantor_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LokasiKantorInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LokasiKantorResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: lokasi_kantor",
+        "tags": [
+          "master/lokasi-kantor"
+        ]
+      }
+    },
+    "/master/lokasi-kantor/{id_lokasi_kantor}": {
+      "delete": {
+        "description": "manage. Nonaktifkan lokasi kantor (ditolak jika masih dipakai pegawai aktif).",
+        "operationId": "delete_lokasi_kantor_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: lokasi_kantor",
+        "tags": [
+          "master/lokasi-kantor"
+        ]
+      },
+      "get": {
+        "description": "manage. Detail lokasi kantor.",
+        "operationId": "get_lokasi_kantor_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LokasiKantorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: lokasi_kantor",
+        "tags": [
+          "master/lokasi-kantor"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_lokasi_kantor",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah lokasi kantor.",
+        "operationId": "put_lokasi_kantor_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LokasiKantorInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LokasiKantorResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: lokasi_kantor",
+        "tags": [
+          "master/lokasi-kantor"
+        ]
+      }
+    },
+    "/master/lokasi-kantor/{id_lokasi_kantor}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_lokasi_kantor",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali lokasi kantor.",
+        "operationId": "post_lokasi_kantor_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LokasiKantorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: lokasi_kantor",
+        "tags": [
+          "master/lokasi-kantor"
+        ]
+      }
+    },
+    "/pegawai": {
+      "get": {
+        "description": "view. Daftar pegawai aktif beserta akun user.",
+        "operationId": "get_pegawai_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PegawaiListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "manage. Tambah pegawai + akun user (+ foto wajah opsional). multipart/form-data.",
+        "operationId": "post_pegawai_list",
+        "parameters": [
+          {
+            "description": "Nama lengkap",
+            "in": "formData",
+            "name": "full_name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "id_jabatan",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "default": 1,
+            "description": "Default 1",
+            "in": "formData",
+            "name": "id_jadwal_kerja",
+            "type": "integer"
+          },
+          {
+            "in": "formData",
+            "name": "nip",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "phone",
+            "type": "string"
+          },
+          {
+            "description": "Username login",
+            "in": "formData",
+            "name": "username",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "description": "Minimal 8 karakter",
+            "in": "formData",
+            "name": "password",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "collectionFormat": "multi",
+            "description": "Kosong = PEGAWAI. 1 SUPER_ADMIN, 2 ADMIN, 3 SEKDES, 4 KADES, 5 PEGAWAI",
+            "in": "formData",
+            "items": {
+              "type": "integer"
+            },
+            "name": "id_roles",
+            "type": "array"
+          },
+          {
+            "description": "Opsional. Foto wajah (jpg/png) untuk absensi",
+            "in": "formData",
+            "name": "foto",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PegawaiResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      }
+    },
+    "/pegawai/{id_pegawai}": {
+      "delete": {
+        "description": "manage. Nonaktifkan pegawai beserta akun user-nya.",
+        "operationId": "delete_pegawai_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      },
+      "get": {
+        "description": "view. Detail pegawai beserta akun user.",
+        "operationId": "get_pegawai_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PegawaiResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_pegawai",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah data umum pegawai + user; id_roles kosong = tidak diubah.",
+        "operationId": "put_pegawai_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PegawaiUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PegawaiResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      }
+    },
+    "/pegawai/{id_pegawai}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_pegawai",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali pegawai beserta akun user-nya.",
+        "operationId": "post_pegawai_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PegawaiResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      }
+    },
+    "/pegawai/{id_pegawai}/foto": {
+      "get": {
+        "description": "view. Unduh foto wajah pegawai (image/jpeg).",
+        "operationId": "get_pegawai_foto",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_pegawai",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "enroll_face. Ganti/tambah foto wajah untuk absensi. multipart/form-data.",
+        "operationId": "put_pegawai_foto",
+        "parameters": [
+          {
+            "description": "Foto wajah (jpg/png)",
+            "in": "formData",
+            "name": "foto",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PegawaiResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      }
+    },
+    "/pegawai/{id_pegawai}/password": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_pegawai",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ganti password akun user pegawai.",
+        "operationId": "put_pegawai_password",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PegawaiPassword"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: pegawai",
+        "tags": [
+          "pegawai"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "view. Daftar user aktif.",
+        "operationId": "get_user_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/UserListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah user + role (kode_pemulihan dibuat otomatis).",
+        "operationId": "post_user_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/UserDetailResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id_user}": {
+      "delete": {
+        "description": "manage. Nonaktifkan user (soft delete).",
+        "operationId": "delete_user_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      },
+      "get": {
+        "description": "view. Detail user (termasuk kode_pemulihan).",
+        "operationId": "get_user_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/UserDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_user",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah user; password diisi = ganti password.",
+        "operationId": "put_user_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/UserDetailResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id_user}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_user",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali user.",
+        "operationId": "post_user_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/UserDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id_user}/kode-pemulihan": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_user",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Buat ulang kode_pemulihan.",
+        "operationId": "post_user_kode_pemulihan",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/UserDetailResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id_user}/roles": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_user",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "assign. Ganti seluruh role user.",
+        "operationId": "put_user_roles",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserRoles"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/UserDetailResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user_role",
+        "tags": [
+          "users"
+        ]
+      }
+    }
+  },
+  "produces": [
+    "application/json"
+  ],
+  "responses": {
+    "AppError": {},
+    "Exception": {},
+    "ExpiredSignatureError": {},
+    "HTTPException": {},
+    "MaskError": {
+      "description": "When any error occurs on mask"
+    },
+    "ParseError": {
+      "description": "When a mask can't be parsed"
+    }
+  },
+  "security": [
+    {
+      "Bearer Auth": []
+    }
+  ],
+  "securityDefinitions": {
+    "Bearer Auth": {
+      "description": "Gunakan format: **Bearer &lt;JWT&gt;**",
+      "in": "header",
+      "name": "Authorization",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0",
+  "tags": [
+    {
+      "description": "Authentication Module",
+      "name": "auth"
+    },
+    {
+      "description": "Users Module",
+      "name": "users"
+    },
+    {
+      "description": "Pegawai Module",
+      "name": "pegawai"
+    },
+    {
+      "description": "Absensi wajah + GPS",
+      "name": "absensi"
+    },
+    {
+      "description": "Master Jabatan",
+      "name": "master/jabatan"
+    },
+    {
+      "description": "Master Lokasi Kantor (titik & radius absen sah)",
+      "name": "master/lokasi-kantor"
+    },
+    {
+      "description": "Master Jadwal Kerja (jam masuk/pulang per hari)",
+      "name": "master/jadwal-kerja"
+    },
+    {
+      "description": "Master Jenis Izin (sakit, cuti, dinas luar, ...)",
+      "name": "master/jenis-izin"
+    },
+    {
+      "description": "Master Hari Libur",
+      "name": "master/hari-libur"
+    }
+  ]
+}

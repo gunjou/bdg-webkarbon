@@ -1,0 +1,29 @@
+# Rahasia
+.env
+.env.*
+!.env.example
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Upload (foto absen, enrollment wajah, lampiran izin)
+uploads/
+
+# Log
+*.log
+logs/
+
+# Claude Code: setting lokal per developer (skills tetap di-commit)
+.claude/settings.local.json
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
