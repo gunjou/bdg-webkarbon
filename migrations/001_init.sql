@@ -231,7 +231,6 @@ CREATE TABLE pegawai (
 CREATE UNIQUE INDEX uq_pegawai_nip ON pegawai (nip) WHERE nip IS NOT NULL;
 CREATE INDEX ix_pegawai_id_jabatan       ON pegawai (id_jabatan);
 CREATE INDEX ix_pegawai_id_jadwal_kerja  ON pegawai (id_jadwal_kerja);
-CREATE INDEX ix_pegawai_id_lokasi_kantor ON pegawai (id_lokasi_kantor);
 
 -- FK users -> pegawai (ditunda karena pegawai dibuat setelah users)
 ALTER TABLE users
