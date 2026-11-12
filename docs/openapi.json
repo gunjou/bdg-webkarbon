@@ -13,29 +13,38 @@
           "format": "date-time",
           "type": "string"
         },
+        "created_by": {
+          "type": "integer"
+        },
         "full_name": {
           "example": "Budi Santoso",
           "type": "string"
+        },
+        "has_photo": {
+          "description": "false untuk absen hasil koreksi",
+          "type": "boolean"
         },
         "id_absensi": {
           "example": 101,
           "type": "integer"
         },
         "id_lokasi_kantor": {
-          "example": 1,
+          "description": "null jika hasil koreksi",
           "type": "integer"
         },
         "id_pegawai": {
           "example": 7,
           "type": "integer"
         },
+        "is_koreksi": {
+          "description": "true = dibuat/diubah oleh akun selain pegawai itu",
+          "type": "boolean"
+        },
         "jam_jadwal": {
-          "description": "Snapshot jam jadwal (HH:MM)",
           "example": "07:30",
           "type": "string"
         },
         "jarak_meter": {
-          "description": "Jarak ke titik kantor",
           "type": "number"
         },
         "jenis": {
@@ -50,14 +59,15 @@
           "type": "number"
         },
         "lokasi_kantor_name": {
-          "example": "Kantor Desa",
           "type": "string"
         },
         "longitude": {
           "type": "number"
         },
+        "nip": {
+          "type": "string"
+        },
         "skor_wajah": {
-          "description": "0-1, makin tinggi makin mirip",
           "type": "number"
         },
         "status": {
@@ -70,12 +80,17 @@
           "type": "string"
         },
         "tanggal": {
-          "example": "2026-11-11",
           "format": "date",
           "type": "string"
         },
         "terlambat_menit": {
-          "example": 0,
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
           "type": "integer"
         },
         "waktu_absen": {
@@ -108,7 +123,7 @@
           "type": "string"
         },
         "has_photo": {
-          "description": "true = ada foto, ambil lewat /absensi/gagal/{id}/foto",
+          "description": "true = ambil lewat /absensi/gagal/{id}/foto",
           "type": "boolean"
         },
         "id_absensi_gagal": {
@@ -163,60 +178,6 @@
       },
       "type": "object"
     },
-    "AbsensiGagalClient": {
-      "properties": {
-        "akurasi_gps": {
-          "minimum": 0,
-          "type": "number"
-        },
-        "detail": {
-          "description": "Info tambahan (object), mis. versi app / model HP",
-          "type": "object"
-        },
-        "error_code": {
-          "example": "GPS_PERMISSION_DENIED",
-          "pattern": "^[A-Z0-9_]{1,50}$",
-          "type": "string"
-        },
-        "error_message": {
-          "maxLength": 500,
-          "type": "string"
-        },
-        "jenis": {
-          "enum": [
-            "masuk",
-            "pulang"
-          ],
-          "example": "masuk",
-          "type": "string"
-        },
-        "latitude": {
-          "maximum": 90,
-          "minimum": -90,
-          "type": "number"
-        },
-        "longitude": {
-          "maximum": 180,
-          "minimum": -180,
-          "type": "number"
-        },
-        "stage": {
-          "enum": [
-            "GPS",
-            "CAMERA",
-            "LOCATION",
-            "FACE"
-          ],
-          "example": "GPS",
-          "type": "string"
-        }
-      },
-      "required": [
-        "error_code",
-        "stage"
-      ],
-      "type": "object"
-    },
     "AbsensiGagalListResponse": {
       "properties": {
         "code": {
@@ -244,75 +205,76 @@
       },
       "type": "object"
     },
-    "AbsensiHariIni": {
+    "AbsensiHarian": {
       "properties": {
-        "gps_max_akurasi_meter": {
-          "example": 50,
-          "type": "number"
-        },
-        "hari_kerja": {
-          "type": "boolean"
-        },
-        "jadwal": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/AbsensiJadwalHariIni"
-            }
-          ],
-          "description": "null jika bukan hari kerja"
-        },
-        "keterangan": {
-          "type": "string"
-        },
-        "kode": {
-          "description": "Alasan bukan hari kerja: HOLIDAY / NOT_WORKDAY / NO_SCHEDULE",
-          "type": "string"
-        },
-        "lokasi": {
+        "pegawai": {
           "items": {
-            "$ref": "#/definitions/LokasiAbsen"
+            "$ref": "#/definitions/AbsensiHarianPegawai"
           },
           "type": "array"
         },
-        "masuk": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Absensi"
-            }
-          ],
-          "description": "null = belum absen masuk"
-        },
-        "pegawai": {
-          "$ref": "#/definitions/AbsensiPegawaiRingkas"
-        },
-        "pulang": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Absensi"
-            }
-          ],
-          "description": "null = belum absen pulang"
-        },
         "tanggal": {
           "format": "date",
-          "type": "string"
-        },
-        "waktu_server": {
-          "description": "Pakai ini, bukan jam HP",
-          "format": "date-time",
           "type": "string"
         }
       },
       "type": "object"
     },
-    "AbsensiHariIniResponse": {
+    "AbsensiHarianPegawai": {
+      "properties": {
+        "full_name": {
+          "type": "string"
+        },
+        "id_pegawai": {
+          "type": "integer"
+        },
+        "izin": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/AbsensiIzinRingkas"
+            }
+          ],
+          "description": "Izin diajukan/disetujui hari itu"
+        },
+        "jabatan_name": {
+          "type": "string"
+        },
+        "keterangan": {
+          "description": "Nama hari libur, jika ada",
+          "type": "string"
+        },
+        "masuk": {
+          "$ref": "#/definitions/Absensi"
+        },
+        "nip": {
+          "type": "string"
+        },
+        "pulang": {
+          "$ref": "#/definitions/Absensi"
+        },
+        "status_hari": {
+          "enum": [
+            "hadir",
+            "izin",
+            "libur",
+            "bukan_hari_kerja",
+            "alpha",
+            "belum_absen"
+          ],
+          "example": "hadir",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiHarianResponse": {
       "properties": {
         "code": {
           "example": 200,
           "type": "integer"
         },
         "data": {
-          "$ref": "#/definitions/AbsensiHariIni"
+          "$ref": "#/definitions/AbsensiHarian"
         },
         "message": {
           "example": "Success",
@@ -329,27 +291,87 @@
       },
       "type": "object"
     },
-    "AbsensiJadwalHariIni": {
+    "AbsensiIzinRingkas": {
       "properties": {
-        "masuk": {
+        "dihitung_hadir": {
+          "type": "integer"
+        },
+        "id_perizinan": {
+          "type": "integer"
+        },
+        "jenis_izin_code": {
+          "example": "SAKIT",
+          "type": "string"
+        },
+        "jenis_izin_name": {
+          "example": "Sakit",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "diajukan",
+            "disetujui"
+          ],
+          "example": "diajukan",
+          "type": "string"
+        },
+        "tanggal_mulai": {
+          "format": "date",
+          "type": "string"
+        },
+        "tanggal_selesai": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiKoreksiInput": {
+      "properties": {
+        "id_pegawai": {
+          "example": 7,
+          "type": "integer"
+        },
+        "jam": {
+          "description": "HH:MM (WITA)",
           "example": "07:30",
           "type": "string"
         },
-        "masuk_dibuka": {
-          "example": "06:30",
+        "jenis": {
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
           "type": "string"
         },
-        "nama": {
+        "status": {
+          "description": "Default tepat_waktu",
+          "enum": [
+            "tepat_waktu",
+            "terlambat",
+            "pulang_cepat"
+          ],
+          "example": "tepat_waktu",
           "type": "string"
         },
-        "pulang": {
-          "example": "15:30",
+        "tanggal": {
+          "description": "YYYY-MM-DD, tidak boleh masa depan",
+          "example": "2026-11-12",
           "type": "string"
         },
-        "toleransi_terlambat_menit": {
+        "terlambat_menit": {
+          "description": "Hanya dipakai jika status terlambat",
+          "minimum": 0,
           "type": "integer"
         }
       },
+      "required": [
+        "id_pegawai",
+        "jam",
+        "jenis",
+        "tanggal"
+      ],
       "type": "object"
     },
     "AbsensiListResponse": {
@@ -379,17 +401,253 @@
       },
       "type": "object"
     },
-    "AbsensiPegawaiRingkas": {
+    "AbsensiPerizinan": {
       "properties": {
-        "face_enrolled": {
-          "description": "false = belum bisa absen",
-          "type": "boolean"
+        "alasan": {
+          "type": "string"
+        },
+        "catatan_peninjau": {
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
         },
         "full_name": {
           "type": "string"
         },
+        "has_lampiran": {
+          "description": "true = ambil lewat /absensi/perizinan/{id}/lampiran",
+          "type": "boolean"
+        },
+        "id_jenis_izin": {
+          "type": "integer"
+        },
         "id_pegawai": {
           "type": "integer"
+        },
+        "id_perizinan": {
+          "type": "integer"
+        },
+        "jam_koreksi": {
+          "example": "07:25",
+          "type": "string"
+        },
+        "jenis_absen": {
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
+          "type": "string"
+        },
+        "jenis_izin_code": {
+          "type": "string"
+        },
+        "jenis_izin_name": {
+          "type": "string"
+        },
+        "jenis_pengajuan": {
+          "enum": [
+            "izin",
+            "koreksi"
+          ],
+          "example": "izin",
+          "type": "string"
+        },
+        "nip": {
+          "type": "string"
+        },
+        "reviewed_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "reviewed_by": {
+          "type": "integer"
+        },
+        "reviewed_by_name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "diajukan",
+            "disetujui",
+            "ditolak",
+            "dibatalkan"
+          ],
+          "example": "diajukan",
+          "type": "string"
+        },
+        "tanggal_mulai": {
+          "format": "date",
+          "type": "string"
+        },
+        "tanggal_selesai": {
+          "format": "date",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiPerizinanListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/AbsensiPerizinan"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiPerizinanResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/AbsensiPerizinan"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiRekap": {
+      "properties": {
+        "bulan": {
+          "example": "2026-11",
+          "type": "string"
+        },
+        "pegawai": {
+          "items": {
+            "$ref": "#/definitions/AbsensiRekapPegawai"
+          },
+          "type": "array"
+        },
+        "tanggal_mulai": {
+          "format": "date",
+          "type": "string"
+        },
+        "tanggal_selesai": {
+          "description": "Akhir bulan, atau hari ini jika bulan berjalan",
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiRekapPegawai": {
+      "properties": {
+        "alpha": {
+          "description": "Hari kerja tanpa absen & tanpa izin disetujui",
+          "type": "integer"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "hadir": {
+          "type": "integer"
+        },
+        "hari_kerja": {
+          "description": "Hari kerja menurut jadwal, di luar hari libur",
+          "type": "integer"
+        },
+        "id_pegawai": {
+          "type": "integer"
+        },
+        "izin": {
+          "description": "Hari izin disetujui",
+          "type": "integer"
+        },
+        "izin_per_jenis": {
+          "example": {
+            "SAKIT": 2
+          },
+          "type": "object"
+        },
+        "jabatan_name": {
+          "type": "string"
+        },
+        "libur": {
+          "type": "integer"
+        },
+        "nip": {
+          "type": "string"
+        },
+        "pulang_cepat": {
+          "type": "integer"
+        },
+        "tanpa_masuk": {
+          "description": "Hadir tapi tidak absen masuk",
+          "type": "integer"
+        },
+        "tanpa_pulang": {
+          "description": "Hadir tapi tidak absen pulang (hari ini tidak dihitung)",
+          "type": "integer"
+        },
+        "terlambat": {
+          "description": "Jumlah hari terlambat",
+          "type": "integer"
+        },
+        "terlambat_menit": {
+          "description": "Total menit terlambat",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "AbsensiRekapResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/AbsensiRekap"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
         }
       },
       "type": "object"
@@ -397,7 +655,7 @@
     "AbsensiResponse": {
       "properties": {
         "code": {
-          "example": 201,
+          "example": 200,
           "type": "integer"
         },
         "data": {
@@ -1144,26 +1402,6 @@
       },
       "type": "object"
     },
-    "LokasiAbsen": {
-      "properties": {
-        "id_lokasi_kantor": {
-          "type": "integer"
-        },
-        "latitude": {
-          "type": "number"
-        },
-        "longitude": {
-          "type": "number"
-        },
-        "name": {
-          "type": "string"
-        },
-        "radius_meter": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
     "LokasiKantor": {
       "properties": {
         "created_at": {
@@ -1512,6 +1750,549 @@
       ],
       "type": "object"
     },
+    "PerizinanReviewInput": {
+      "properties": {
+        "catatan_peninjau": {
+          "description": "Wajib jika ditolak",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "disetujui",
+            "ditolak"
+          ],
+          "example": "disetujui",
+          "type": "string"
+        },
+        "status_absen": {
+          "description": "Hanya koreksi disetujui; default tepat_waktu",
+          "enum": [
+            "tepat_waktu",
+            "terlambat",
+            "pulang_cepat"
+          ],
+          "example": "tepat_waktu",
+          "type": "string"
+        },
+        "terlambat_menit": {
+          "description": "Hanya koreksi dgn status_absen terlambat",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "type": "object"
+    },
+    "Presensi": {
+      "properties": {
+        "akurasi_gps": {
+          "type": "number"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "id_absensi": {
+          "example": 101,
+          "type": "integer"
+        },
+        "id_lokasi_kantor": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_pegawai": {
+          "example": 7,
+          "type": "integer"
+        },
+        "is_koreksi": {
+          "description": "true = dikoreksi admin (tampilkan label Koreksi)",
+          "type": "boolean"
+        },
+        "jam_jadwal": {
+          "description": "Snapshot jam jadwal",
+          "example": "07:30",
+          "type": "string"
+        },
+        "jarak_meter": {
+          "description": "Jarak ke titik kantor",
+          "type": "number"
+        },
+        "jenis": {
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "lokasi_kantor_name": {
+          "example": "Kantor Desa",
+          "type": "string"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "skor_wajah": {
+          "description": "0-1, makin tinggi makin mirip",
+          "type": "number"
+        },
+        "status": {
+          "enum": [
+            "tepat_waktu",
+            "terlambat",
+            "pulang_cepat"
+          ],
+          "example": "tepat_waktu",
+          "type": "string"
+        },
+        "tanggal": {
+          "example": "2026-11-11",
+          "format": "date",
+          "type": "string"
+        },
+        "terlambat_menit": {
+          "example": 0,
+          "type": "integer"
+        },
+        "waktu_absen": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiGagalInput": {
+      "properties": {
+        "akurasi_gps": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "detail": {
+          "description": "Info tambahan (object), mis. versi app / model HP",
+          "type": "object"
+        },
+        "error_code": {
+          "example": "GPS_PERMISSION_DENIED",
+          "pattern": "^[A-Z0-9_]{1,50}$",
+          "type": "string"
+        },
+        "error_message": {
+          "maxLength": 500,
+          "type": "string"
+        },
+        "jenis": {
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
+          "type": "string"
+        },
+        "latitude": {
+          "maximum": 90,
+          "minimum": -90,
+          "type": "number"
+        },
+        "longitude": {
+          "maximum": 180,
+          "minimum": -180,
+          "type": "number"
+        },
+        "stage": {
+          "enum": [
+            "GPS",
+            "CAMERA",
+            "LOCATION",
+            "FACE"
+          ],
+          "example": "GPS",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error_code",
+        "stage"
+      ],
+      "type": "object"
+    },
+    "PresensiHariIni": {
+      "properties": {
+        "gps_max_akurasi_meter": {
+          "description": "Kirim absen hanya jika akurasi GPS HP <= nilai ini (meter)",
+          "example": 50,
+          "type": "number"
+        },
+        "hari_kerja": {
+          "type": "boolean"
+        },
+        "izin": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PresensiPerizinan"
+            }
+          ],
+          "description": "Izin diajukan/disetujui yang mencakup hari ini; null = tidak ada"
+        },
+        "jadwal": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PresensiJadwal"
+            }
+          ],
+          "description": "null jika bukan hari kerja"
+        },
+        "keterangan": {
+          "type": "string"
+        },
+        "kode": {
+          "description": "Alasan bukan hari kerja: HOLIDAY / NOT_WORKDAY / NO_SCHEDULE",
+          "type": "string"
+        },
+        "masuk": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Presensi"
+            }
+          ],
+          "description": "null = belum absen masuk"
+        },
+        "pegawai": {
+          "$ref": "#/definitions/PresensiPegawai"
+        },
+        "pulang": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Presensi"
+            }
+          ],
+          "description": "null = belum absen pulang"
+        },
+        "tanggal": {
+          "format": "date",
+          "type": "string"
+        },
+        "waktu_server": {
+          "description": "Pakai ini, bukan jam HP",
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiHariIniResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/PresensiHariIni"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiJadwal": {
+      "properties": {
+        "masuk": {
+          "example": "07:30",
+          "type": "string"
+        },
+        "masuk_dibuka": {
+          "example": "06:30",
+          "type": "string"
+        },
+        "nama": {
+          "type": "string"
+        },
+        "pulang": {
+          "example": "15:30",
+          "type": "string"
+        },
+        "toleransi_terlambat_menit": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiJenisIzin": {
+      "properties": {
+        "butuh_lampiran": {
+          "description": "1 = lampiran wajib",
+          "example": 1,
+          "type": "integer"
+        },
+        "code": {
+          "example": "SAKIT",
+          "type": "string"
+        },
+        "dihitung_hadir": {
+          "example": 0,
+          "type": "integer"
+        },
+        "id_jenis_izin": {
+          "example": 1,
+          "type": "integer"
+        },
+        "name": {
+          "example": "Sakit",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiJenisIzinListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/PresensiJenisIzin"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Presensi"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiPegawai": {
+      "properties": {
+        "face_enrolled": {
+          "description": "false = belum bisa absen",
+          "type": "boolean"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "id_pegawai": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiPerizinan": {
+      "properties": {
+        "alasan": {
+          "type": "string"
+        },
+        "catatan_peninjau": {
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "has_lampiran": {
+          "description": "true = ambil lewat /presensi/perizinan/{id}/lampiran",
+          "type": "boolean"
+        },
+        "id_jenis_izin": {
+          "description": "null untuk koreksi",
+          "type": "integer"
+        },
+        "id_pegawai": {
+          "type": "integer"
+        },
+        "id_perizinan": {
+          "example": 12,
+          "type": "integer"
+        },
+        "jam_koreksi": {
+          "description": "Hanya koreksi",
+          "example": "07:25",
+          "type": "string"
+        },
+        "jenis_absen": {
+          "description": "Hanya koreksi",
+          "enum": [
+            "masuk",
+            "pulang"
+          ],
+          "example": "masuk",
+          "type": "string"
+        },
+        "jenis_izin_code": {
+          "example": "SAKIT",
+          "type": "string"
+        },
+        "jenis_izin_name": {
+          "example": "Sakit",
+          "type": "string"
+        },
+        "jenis_pengajuan": {
+          "enum": [
+            "izin",
+            "koreksi"
+          ],
+          "example": "izin",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "reviewed_by": {
+          "type": "integer"
+        },
+        "reviewed_by_name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "diajukan",
+            "disetujui",
+            "ditolak",
+            "dibatalkan"
+          ],
+          "example": "diajukan",
+          "type": "string"
+        },
+        "tanggal_mulai": {
+          "format": "date",
+          "type": "string"
+        },
+        "tanggal_selesai": {
+          "format": "date",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiPerizinanListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/PresensiPerizinan"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiPerizinanResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/PresensiPerizinan"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PresensiResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Presensi"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "Refresh": {
       "properties": {
         "refresh_token": {
@@ -1781,7 +2562,7 @@
   "paths": {
     "/absensi": {
       "get": {
-        "description": "view_all. Daftar absensi semua pegawai per rentang tanggal (default hari ini).",
+        "description": "view_all. Daftar absen per rentang tanggal (default hari ini, maks 62 hari).",
         "operationId": "get_absensi_list",
         "parameters": [
           {
@@ -1800,6 +2581,16 @@
             "in": "query",
             "name": "id_pegawai",
             "type": "integer"
+          },
+          {
+            "enum": [
+              "tepat_waktu",
+              "terlambat",
+              "pulang_cepat"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1828,7 +2619,7 @@
             }
           }
         },
-        "summary": "[ADMIN] Akses: absensi",
+        "summary": "Akses: absensi",
         "tags": [
           "absensi"
         ]
@@ -1855,6 +2646,12 @@
             "in": "query",
             "name": "id_pegawai",
             "type": "integer"
+          },
+          {
+            "description": "mis. FACE_NOT_MATCH",
+            "in": "query",
+            "name": "error_code",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1883,7 +2680,7 @@
             }
           }
         },
-        "summary": "[ADMIN] Akses: absensi_gagal",
+        "summary": "Akses: absensi_gagal",
         "tags": [
           "absensi"
         ]
@@ -1891,7 +2688,7 @@
     },
     "/absensi/gagal/{id_absensi_gagal}/foto": {
       "get": {
-        "description": "view. Foto percobaan absen yang wajahnya tidak cocok.",
+        "description": "view. Foto percobaan absen yang wajahnya tidak cocok (image/jpeg).",
         "operationId": "get_absensi_gagal_foto",
         "produces": [
           "image/jpeg"
@@ -1919,7 +2716,7 @@
             }
           }
         },
-        "summary": "[ADMIN] Akses: absensi_gagal",
+        "summary": "Akses: absensi_gagal",
         "tags": [
           "absensi"
         ]
@@ -1933,54 +2730,67 @@
         }
       ]
     },
-    "/absensi/saya": {
-      "post": {
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "description": "self. Absen masuk/pulang: GPS + foto selfie. multipart/form-data.",
-        "operationId": "post_absen_saya",
+    "/absensi/harian": {
+      "get": {
+        "description": "view_all. Status semua pegawai aktif pada satu tanggal (default hari ini).",
+        "operationId": "get_absensi_harian",
         "parameters": [
           {
-            "enum": [
-              "masuk",
-              "pulang"
-            ],
-            "in": "formData",
-            "name": "jenis",
-            "required": true,
+            "description": "YYYY-MM-DD, default hari ini",
+            "in": "query",
+            "name": "tanggal",
             "type": "string"
-          },
-          {
-            "in": "formData",
-            "name": "latitude",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "in": "formData",
-            "name": "longitude",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "description": "Akurasi GPS dari perangkat (meter)",
-            "in": "formData",
-            "name": "akurasi_gps",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "description": "Foto selfie (jpg/png)",
-            "in": "formData",
-            "name": "foto",
-            "required": true,
-            "type": "file"
           }
         ],
         "responses": {
-          "201": {
-            "description": "Absen tercatat. 422 = ditolak aturan absen (lihat code)",
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiHarianResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/koreksi": {
+      "put": {
+        "description": "koreksi. Buat / timpa absen pegawai (per tanggal & jenis) dengan jam & status pilihan admin.",
+        "operationId": "put_absensi_koreksi",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AbsensiKoreksiInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
             "schema": {
               "$ref": "#/definitions/AbsensiResponse"
             }
@@ -2003,12 +2813,6 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
-          "413": {
-            "description": "File terlalu besar",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
           "422": {
             "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
             "schema": {
@@ -2016,31 +2820,62 @@
             }
           }
         },
-        "summary": "[ABSEN] Akses: absensi",
+        "summary": "Akses: absensi",
         "tags": [
-          "absensi-saya"
+          "absensi"
         ]
       }
     },
-    "/absensi/saya/gagal": {
-      "post": {
-        "description": "self. Laporkan kegagalan dari aplikasi (izin GPS/kamera ditolak, dsb.).",
-        "operationId": "post_absensi_gagal_saya",
+    "/absensi/perizinan": {
+      "get": {
+        "description": "view_all. Daftar pengajuan semua pegawai (default status diajukan; status=semua).",
+        "operationId": "get_absensi_perizinan_list",
         "parameters": [
           {
-            "in": "body",
-            "name": "payload",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AbsensiGagalClient"
-            }
+            "description": "Default diajukan (antrean review)",
+            "enum": [
+              "diajukan",
+              "disetujui",
+              "ditolak",
+              "dibatalkan",
+              "semua"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "enum": [
+              "izin",
+              "koreksi"
+            ],
+            "in": "query",
+            "name": "jenis_pengajuan",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id_pegawai",
+            "type": "integer"
+          },
+          {
+            "description": "YYYY-MM-DD; filter irisan tanggal izin",
+            "in": "query",
+            "name": "tanggal_mulai",
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD",
+            "in": "query",
+            "name": "tanggal_selesai",
+            "type": "string"
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "description": "Sukses",
             "schema": {
-              "$ref": "#/definitions/EmptyResponse"
+              "$ref": "#/definitions/AbsensiPerizinanListResponse"
             }
           },
           "400": {
@@ -2068,70 +2903,21 @@
             }
           }
         },
-        "summary": "[ABSEN] Akses: absensi",
+        "summary": "Akses: perizinan",
         "tags": [
-          "absensi-saya"
+          "absensi"
         ]
       }
     },
-    "/absensi/saya/hari-ini": {
+    "/absensi/perizinan/{id_perizinan}": {
       "get": {
-        "description": "self. Status absen hari ini: jadwal, sudah masuk/pulang, lokasi kantor.",
-        "operationId": "get_absensi_hari_ini",
+        "description": "view_all. Detail pengajuan.",
+        "operationId": "get_absensi_perizinan_detail",
         "responses": {
           "200": {
             "description": "Sukses",
             "schema": {
-              "$ref": "#/definitions/AbsensiHariIniResponse"
-            }
-          },
-          "401": {
-            "description": "Token tidak ada / tidak valid / expired",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Tidak punya akses",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "summary": "[ABSEN] Akses: absensi",
-        "tags": [
-          "absensi-saya"
-        ]
-      }
-    },
-    "/absensi/saya/riwayat": {
-      "get": {
-        "description": "self. Riwayat absensi sendiri (id_pegawai diabaikan).",
-        "operationId": "get_absensi_riwayat",
-        "parameters": [
-          {
-            "description": "YYYY-MM-DD, default hari ini",
-            "in": "query",
-            "name": "tanggal_mulai",
-            "type": "string"
-          },
-          {
-            "description": "YYYY-MM-DD, default = tanggal_mulai",
-            "in": "query",
-            "name": "tanggal_selesai",
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "id_pegawai",
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sukses",
-            "schema": {
-              "$ref": "#/definitions/AbsensiListResponse"
+              "$ref": "#/definitions/AbsensiPerizinanResponse"
             }
           },
           "401": {
@@ -2146,23 +2932,31 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
-          "422": {
-            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+          "404": {
+            "description": "Data tidak ditemukan",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
           }
         },
-        "summary": "[ABSEN] Akses: absensi",
+        "summary": "Akses: perizinan",
         "tags": [
-          "absensi-saya"
+          "absensi"
         ]
-      }
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_perizinan",
+          "required": true,
+          "type": "integer"
+        }
+      ]
     },
-    "/absensi/saya/{id_absensi}/foto": {
+    "/absensi/perizinan/{id_perizinan}/lampiran": {
       "get": {
-        "description": "self, hanya milik sendiri. Foto selfie absen (image/jpeg).",
-        "operationId": "get_absensi_foto_saya",
+        "description": "view_all. Unduh lampiran (image/jpeg atau application/pdf).",
+        "operationId": "get_absensi_perizinan_lampiran",
         "produces": [
           "image/jpeg"
         ],
@@ -2189,23 +2983,138 @@
             }
           }
         },
-        "summary": "[ABSEN] Akses: absensi",
+        "summary": "Akses: perizinan",
         "tags": [
-          "absensi-saya"
+          "absensi"
         ]
       },
       "parameters": [
         {
           "in": "path",
-          "name": "id_absensi",
+          "name": "id_perizinan",
           "required": true,
           "type": "integer"
         }
       ]
     },
+    "/absensi/perizinan/{id_perizinan}/review": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_perizinan",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "review. Setujui/tolak. Koreksi disetujui -> absen tercatat otomatis.",
+        "operationId": "put_absensi_perizinan_review",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PerizinanReviewInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiPerizinanResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/rekap": {
+      "get": {
+        "description": "view_all. Rekap bulanan per pegawai (hadir, terlambat, izin, alpha, ...).",
+        "operationId": "get_absensi_rekap",
+        "parameters": [
+          {
+            "description": "YYYY-MM, default bulan ini",
+            "in": "query",
+            "name": "bulan",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id_pegawai",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiRekapResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
     "/absensi/{id_absensi}": {
       "get": {
-        "description": "view_all. Detail absensi.",
+        "description": "view_all. Detail absen.",
         "operationId": "get_absensi_detail",
         "responses": {
           "200": {
@@ -2233,7 +3142,7 @@
             }
           }
         },
-        "summary": "[ADMIN] Akses: absensi",
+        "summary": "Akses: absensi",
         "tags": [
           "absensi"
         ]
@@ -2277,7 +3186,7 @@
             }
           }
         },
-        "summary": "[ADMIN] Akses: absensi",
+        "summary": "Akses: absensi",
         "tags": [
           "absensi"
         ]
@@ -4277,6 +5186,608 @@
         ]
       }
     },
+    "/presensi": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "self. Absen masuk/pulang: GPS + foto selfie. multipart/form-data.",
+        "operationId": "post_presensi_absen",
+        "parameters": [
+          {
+            "enum": [
+              "masuk",
+              "pulang"
+            ],
+            "in": "formData",
+            "name": "jenis",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "latitude",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "formData",
+            "name": "longitude",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "description": "Akurasi GPS dari perangkat (meter)",
+            "in": "formData",
+            "name": "akurasi_gps",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "description": "Foto selfie (jpg/png)",
+            "in": "formData",
+            "name": "foto",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Absen tercatat. 422 = ditolak aturan absen (lihat code)",
+            "schema": {
+              "$ref": "#/definitions/PresensiResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "presensi"
+        ]
+      }
+    },
+    "/presensi/gagal": {
+      "post": {
+        "description": "self. Laporkan kegagalan di HP (izin GPS/kamera ditolak, timeout, jaringan).",
+        "operationId": "post_presensi_gagal",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PresensiGagalInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "presensi"
+        ]
+      }
+    },
+    "/presensi/hari-ini": {
+      "get": {
+        "description": "self. Status absen hari ini: jadwal, sudah masuk/pulang, batas akurasi GPS.",
+        "operationId": "get_presensi_hari_ini",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PresensiHariIniResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "presensi"
+        ]
+      }
+    },
+    "/presensi/jenis-izin": {
+      "get": {
+        "description": "self. Pilihan jenis izin aktif (untuk form pengajuan).",
+        "operationId": "get_presensi_jenis_izin",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PresensiJenisIzinListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "presensi"
+        ]
+      }
+    },
+    "/presensi/perizinan": {
+      "get": {
+        "description": "self. Daftar pengajuan sendiri (terbaru di atas).",
+        "operationId": "get_presensi_perizinan_list",
+        "parameters": [
+          {
+            "enum": [
+              "diajukan",
+              "disetujui",
+              "ditolak",
+              "dibatalkan"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "description": "Tahun tanggal_mulai, mis. 2026",
+            "in": "query",
+            "name": "tahun",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PresensiPerizinanListResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "presensi"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "self. Ajukan izin / koreksi absen. multipart/form-data.",
+        "operationId": "post_presensi_perizinan_list",
+        "parameters": [
+          {
+            "enum": [
+              "izin",
+              "koreksi"
+            ],
+            "in": "formData",
+            "name": "jenis_pengajuan",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD",
+            "in": "formData",
+            "name": "tanggal_mulai",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD. izin: default = tanggal_mulai. koreksi: diabaikan",
+            "in": "formData",
+            "name": "tanggal_selesai",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "alasan",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Wajib untuk izin",
+            "in": "formData",
+            "name": "id_jenis_izin",
+            "type": "integer"
+          },
+          {
+            "description": "Wajib untuk koreksi",
+            "enum": [
+              "masuk",
+              "pulang"
+            ],
+            "in": "formData",
+            "name": "jenis_absen",
+            "type": "string"
+          },
+          {
+            "description": "HH:MM, wajib untuk koreksi",
+            "in": "formData",
+            "name": "jam_koreksi",
+            "type": "string"
+          },
+          {
+            "description": "Opsional (wajib jika jenis izin butuh_lampiran). jpg/png/pdf",
+            "in": "formData",
+            "name": "lampiran",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PresensiPerizinanResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "presensi"
+        ]
+      }
+    },
+    "/presensi/perizinan/{id_perizinan}": {
+      "get": {
+        "description": "self. Detail pengajuan sendiri (termasuk catatan peninjau).",
+        "operationId": "get_presensi_perizinan_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PresensiPerizinanResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "presensi"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_perizinan",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/presensi/perizinan/{id_perizinan}/batal": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_perizinan",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "self. Batalkan pengajuan yang masih berstatus diajukan.",
+        "operationId": "put_presensi_perizinan_batal",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PresensiPerizinanResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "presensi"
+        ]
+      }
+    },
+    "/presensi/perizinan/{id_perizinan}/lampiran": {
+      "get": {
+        "description": "self. Unduh lampiran pengajuan sendiri (image/jpeg atau application/pdf).",
+        "operationId": "get_presensi_perizinan_lampiran",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "presensi"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_perizinan",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/presensi/riwayat": {
+      "get": {
+        "description": "self. Riwayat absen sendiri (default bulan berjalan, maks 62 hari).",
+        "operationId": "get_presensi_riwayat",
+        "parameters": [
+          {
+            "description": "YYYY-MM-DD, default awal bulan ini",
+            "in": "query",
+            "name": "tanggal_mulai",
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD, default hari ini",
+            "in": "query",
+            "name": "tanggal_selesai",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PresensiListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "presensi"
+        ]
+      }
+    },
+    "/presensi/{id_absensi}/foto": {
+      "get": {
+        "description": "self, hanya milik sendiri. Foto selfie absen (image/jpeg).",
+        "operationId": "get_presensi_foto",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: absensi",
+        "tags": [
+          "presensi"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_absensi",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
     "/users": {
       "get": {
         "description": "view. Daftar user aktif.",
@@ -4695,12 +6206,12 @@
       "name": "pegawai"
     },
     {
-      "description": "[Aplikasi ADMIN] Rekap absensi semua pegawai & log absen gagal",
-      "name": "absensi"
+      "description": "[Aplikasi ABSEN] Pegawai absen masuk/pulang, riwayat & foto milik sendiri",
+      "name": "presensi"
     },
     {
-      "description": "[Aplikasi ABSEN] Pegawai absen masuk/pulang untuk dirinya sendiri",
-      "name": "absensi-saya"
+      "description": "[Aplikasi ADMIN] Monitoring presensi, rekap, koreksi & review perizinan",
+      "name": "absensi"
     },
     {
       "description": "Master Jabatan",

@@ -35,7 +35,8 @@ api/
     ├── auth/          login, refresh, me
     ├── users/         akun & role; juga validasi user untuk pegawai (prepare_new/prepare_update)
     ├── pegawai/       pegawai + akun user + foto wajah (selalu 1 pegawai = 1 user)
-    ├── absensi/       absen wajah + GPS, riwayat, log gagal
+    ├── absensi/       aplikasi ADMIN: harian, rekap, log gagal, koreksi absen, review perizinan
+    ├── presensi/      aplikasi ABSEN: absen wajah + GPS, riwayat, lapor gagal, perizinan & koreksi milik sendiri
     └── master/        sub-modul: jabatan, lokasi_kantor, jadwal_kerja, jenis_izin, hari_libur
 ```
 
@@ -132,12 +133,18 @@ JWT_ACCESS_EXPIRES (menit), JWT_REFRESH_EXPIRES (hari), UPLOAD_DIR (default uplo
 - Bahasa pesan ke user: Bahasa Indonesia. Kode error: UPPER_SNAKE_CASE bahasa Inggris.
 - Jangan tulis data ke DB remote saat testing tanpa izin pemilik; uji service dengan mock `query`.
 
-## Absensi
+## Presensi
 
-Ketentuan lengkap ada di docstring `api/modules/absensi/service.py` (sumber kebenaran). Ringkas:
-endpoint dipisah per aplikasi: `/absensi/saya/...` (namespace `ns_saya`, aplikasi ABSEN, `absensi.self`,
-data diri dari token) dan `/absensi/...` (namespace `ns`, aplikasi ADMIN, rekap baca saja).
-jenis dipilih client (`masuk|pulang`), urutan cek akun → jadwal/libur → GPS → wajah, waktu = jam server WITA,
-setiap gagal dicatat ke `absensi_gagal` (source `server`; client lapor lewat `POST /absensi/saya/gagal`).
-Key `settings` yang dipakai (default di `DEFAULT_SETTINGS`): `ABSEN_MASUK_BUKA_MENIT` (60),
-`GPS_MAX_AKURASI_METER` (50), `FACE_MATCH_THRESHOLD` (0.5).
+Ketentuan lengkap di docstring `api/modules/presensi/service.py` (sumber kebenaran). Ringkas: hanya untuk
+pegawai (`absensi.self`), pegawai diambil dari token. Urutan cek akun → jadwal/libur → GPS → wajah, waktu =
+jam server WITA, lokasi sah = lokasi kantor aktif terdekat (pegawai tidak diikat ke lokasi). Setiap gagal
+dicatat ke `absensi_gagal`. `settings`: `ABSEN_MASUK_BUKA_MENIT` (60), `GPS_MAX_AKURASI_METER` (50),
+`FACE_MATCH_THRESHOLD` (0.5). Perizinan pegawai (`perizinan.self`) juga di modul ini; `hari-ini.izin` dipakai
+frontend untuk memblokir presensi (server tidak memblokir).
+
+## Absensi (admin)
+
+Ketentuan di docstring `api/modules/absensi/service.py`. Tabel `absensi` TIDAK lagi append-only murni:
+koreksi (admin `absensi.koreksi` atau review koreksi disetujui) meng-upsert per (pegawai, tanggal, jenis) dan mengisi
+`created_by`/`updated_by`. `is_koreksi` = pembuat/pengubah terakhir bukan akun pegawai itu (presensi mengisi
+`created_by` = akun pegawai). `absensi_gagal` tetap append-only.

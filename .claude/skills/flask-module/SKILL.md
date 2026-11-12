@@ -180,6 +180,6 @@ class <Nama>Detail(Resource):
 - [ ] Tidak ada `return error(...)` / `abort()` di endpoint — pakai `raise`
 - [ ] Tidak import `query` modul lain
 - [ ] Setiap endpoint punya `@permission_required` (kecuali memang publik)
-- [ ] Hapus (soft delete) = `UPDATE ... SET is_active = 0`, bukan `DELETE` — kecuali tabel transaksi append-only (`absensi`, `absensi_gagal`) yang tidak boleh diubah/dihapus
+- [ ] Hapus (soft delete) = `UPDATE ... SET is_active = 0`, bukan `DELETE` — kecuali tabel transaksi: `absensi_gagal` append-only; `absensi` hanya berubah lewat koreksi (upsert + `updated_by`), tidak pernah DELETE
 - [ ] Setiap endpoint punya `@api_doc(...)` dengan model output (`@file_doc` untuk file)
 - [ ] Namespace terdaftar di `api/__init__.py`

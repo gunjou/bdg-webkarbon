@@ -1,112 +1,102 @@
 # api/modules/absensi/query.py
-# absensi & absensi_gagal append-only: hanya INSERT & SELECT.
-import json
 
 from sqlalchemy import text
 
 from api.core.database import get_engine
 from api.utils.datetime import get_wita
 
-_ABSENSI_COLS = """
-    a.id_absensi, a.id_pegawai, p.full_name, a.id_lokasi_kantor, lk.name AS lokasi_kantor_name,
+# absen = koreksi bila user pembuat/pengubah terakhir bukan akun pegawai itu sendiri
+_KOREKSI = """
+    (COALESCE(a.updated_by, a.created_by) IS NOT NULL AND
+     (SELECT u.id_pegawai FROM users u WHERE u.id_user = COALESCE(a.updated_by, a.created_by))
+       IS DISTINCT FROM a.id_pegawai)
+"""
+_ABSENSI_COLS = f"""
+    a.id_absensi, a.id_pegawai, p.full_name, p.nip, a.id_lokasi_kantor, lk.name AS lokasi_kantor_name,
     a.tanggal, a.jenis, a.waktu_absen, a.latitude, a.longitude, a.akurasi_gps, a.jarak_meter,
-    a.skor_wajah, a.jam_jadwal, a.terlambat_menit, a.status, a.created_at
+    a.skor_wajah, a.jam_jadwal, a.terlambat_menit, a.status, (a.photo_path IS NOT NULL) AS has_photo,
+    {_KOREKSI} AS is_koreksi, a.created_at, a.created_by, a.updated_at, a.updated_by
+"""
+_ABSENSI_FROM = """
+    FROM absensi a
+    JOIN pegawai p ON p.id_pegawai = a.id_pegawai
+    LEFT JOIN lokasi_kantor lk ON lk.id_lokasi_kantor = a.id_lokasi_kantor
 """
 
 
-def get_settings(keys):
-    sql = text("SELECT key, value FROM settings WHERE key = ANY(:keys)")
-    with get_engine().connect() as conn:
-        return {r["key"]: r["value"] for r in conn.execute(sql, {"keys": list(keys)}).mappings()}
-
-
-def get_context(id_user, tanggal):
-    """Pegawai milik user + jadwal + info hari libur pada tanggal tsb."""
+# ---------------- presensi ----------------
+def get_pegawai_aktif(id_pegawai=None):
     sql = text("""
-        SELECT p.id_pegawai, p.full_name, p.is_active, p.embedding, p.id_lokasi_kantor, p.id_jadwal_kerja,
-               jk.name AS jadwal_kerja_name, jk.jadwal_harian, jk.toleransi_terlambat_menit,
-               (SELECT name FROM hari_libur WHERE tanggal = :tanggal AND is_active = 1) AS libur
-        FROM users u
-        JOIN pegawai p ON p.id_pegawai = u.id_pegawai
-        LEFT JOIN jadwal_kerja jk ON jk.id_jadwal_kerja = p.id_jadwal_kerja
-        WHERE u.id_user = :id_user
+        SELECT p.id_pegawai, p.full_name, p.nip, j.name AS jabatan_name,
+               jk.jadwal_harian, jk.name AS jadwal_kerja_name
+        FROM pegawai p
+        JOIN jabatan j ON j.id_jabatan = p.id_jabatan
+        LEFT JOIN jadwal_kerja jk ON jk.id_jadwal_kerja = p.id_jadwal_kerja AND jk.is_active = 1
+        WHERE p.is_active = 1
+          AND (CAST(:id AS INTEGER) IS NULL OR p.id_pegawai = CAST(:id AS INTEGER))
+        ORDER BY p.full_name
     """)
     with get_engine().connect() as conn:
-        return conn.execute(sql, {"id_user": id_user, "tanggal": tanggal}).mappings().first()
+        return conn.execute(sql, {"id": id_pegawai}).mappings().all()
 
 
-def get_lokasi_aktif(id_lokasi_kantor=None):
-    """id_lokasi_kantor None = semua lokasi aktif."""
-    sql = text("""
-        SELECT id_lokasi_kantor, name, latitude, longitude, radius_meter FROM lokasi_kantor
-        WHERE is_active = 1
-          AND (CAST(:id AS INTEGER) IS NULL OR id_lokasi_kantor = CAST(:id AS INTEGER))
-        ORDER BY name
-    """)
+def get_libur(mulai, selesai):
+    sql = text("SELECT tanggal, name FROM hari_libur WHERE is_active = 1 AND tanggal BETWEEN :mulai AND :selesai")
     with get_engine().connect() as conn:
-        return conn.execute(sql, {"id": id_lokasi_kantor}).mappings().all()
+        return {r["tanggal"]: r["name"] for r in conn.execute(sql, {"mulai": mulai, "selesai": selesai}).mappings()}
 
 
-def get_range(mulai, selesai, id_pegawai=None):
+def get_absensi_range(mulai, selesai, id_pegawai=None, status=None):
     sql = text(f"""
-        SELECT {_ABSENSI_COLS}
-        FROM absensi a
-        JOIN pegawai p ON p.id_pegawai = a.id_pegawai
-        JOIN lokasi_kantor lk ON lk.id_lokasi_kantor = a.id_lokasi_kantor
+        SELECT {_ABSENSI_COLS} {_ABSENSI_FROM}
         WHERE a.tanggal BETWEEN :mulai AND :selesai
           AND (CAST(:id_pegawai AS INTEGER) IS NULL OR a.id_pegawai = CAST(:id_pegawai AS INTEGER))
+          AND (CAST(:status AS VARCHAR) IS NULL OR a.status = CAST(:status AS VARCHAR))
         ORDER BY a.tanggal DESC, p.full_name, a.jenis
     """)
     with get_engine().connect() as conn:
-        params = {"mulai": mulai, "selesai": selesai, "id_pegawai": id_pegawai}
+        params = {"mulai": mulai, "selesai": selesai, "id_pegawai": id_pegawai, "status": status}
         return conn.execute(sql, params).mappings().all()
 
 
-def get_by_id(id_absensi):
-    sql = text(f"""
-        SELECT {_ABSENSI_COLS}, a.photo_path
-        FROM absensi a
-        JOIN pegawai p ON p.id_pegawai = a.id_pegawai
-        JOIN lokasi_kantor lk ON lk.id_lokasi_kantor = a.id_lokasi_kantor
-        WHERE a.id_absensi = :id_absensi
+def get_absensi(id_absensi):
+    sql = text(f"SELECT {_ABSENSI_COLS}, a.photo_path {_ABSENSI_FROM} WHERE a.id_absensi = :id")
+    with get_engine().connect() as conn:
+        return conn.execute(sql, {"id": id_absensi}).mappings().first()
+
+
+def get_izin_range(mulai, selesai, status, id_pegawai=None):
+    """Izin (bukan koreksi) dengan status dalam `status` yang beririsan dengan rentang."""
+    sql = text("""
+        SELECT z.id_perizinan, z.id_pegawai, z.tanggal_mulai, z.tanggal_selesai, z.status,
+               ji.code AS jenis_izin_code, ji.name AS jenis_izin_name, ji.dihitung_hadir
+        FROM perizinan z JOIN jenis_izin ji ON ji.id_jenis_izin = z.id_jenis_izin
+        WHERE z.jenis_pengajuan = 'izin' AND z.status = ANY(:status)
+          AND z.tanggal_mulai <= :selesai AND z.tanggal_selesai >= :mulai
+          AND (CAST(:id_pegawai AS INTEGER) IS NULL OR z.id_pegawai = CAST(:id_pegawai AS INTEGER))
     """)
     with get_engine().connect() as conn:
-        return conn.execute(sql, {"id_absensi": id_absensi}).mappings().first()
+        params = {"mulai": mulai, "selesai": selesai, "status": list(status), "id_pegawai": id_pegawai}
+        return conn.execute(sql, params).mappings().all()
 
 
-def insert(data):
-    """Kembalikan id_absensi, atau None jika sudah ada (UNIQUE pegawai+tanggal+jenis; aman dari double submit)."""
-    sql = text("""
-        INSERT INTO absensi (id_pegawai, id_lokasi_kantor, tanggal, jenis, waktu_absen, latitude, longitude,
-                             akurasi_gps, jarak_meter, skor_wajah, photo_path, jam_jadwal, terlambat_menit,
-                             status, created_at)
-        VALUES (:id_pegawai, :id_lokasi_kantor, :tanggal, :jenis, :waktu_absen, :latitude, :longitude,
-                :akurasi_gps, :jarak_meter, :skor_wajah, :photo_path, :jam_jadwal, :terlambat_menit,
-                :status, :now)
-        ON CONFLICT ON CONSTRAINT uq_absensi_pegawai_tanggal_jenis DO NOTHING
-        RETURNING id_absensi
-    """)
+_UPSERT_KOREKSI = text("""
+    INSERT INTO absensi (id_pegawai, tanggal, jenis, waktu_absen, terlambat_menit, status, created_at, created_by)
+    VALUES (:id_pegawai, :tanggal, :jenis, :waktu_absen, :terlambat_menit, :status, :now, :id_user)
+    ON CONFLICT ON CONSTRAINT uq_absensi_pegawai_tanggal_jenis DO UPDATE
+    SET waktu_absen = EXCLUDED.waktu_absen, terlambat_menit = EXCLUDED.terlambat_menit,
+        status = EXCLUDED.status, updated_at = :now, updated_by = :id_user
+    RETURNING id_absensi
+""")
+
+
+def upsert_koreksi(data, id_user):
     with get_engine().begin() as conn:
-        return conn.execute(sql, {**data, "now": get_wita()}).scalar()
+        return conn.execute(_UPSERT_KOREKSI, {**data, "now": get_wita(), "id_user": id_user}).scalar()
 
 
-_GAGAL_FIELDS = ("id_pegawai", "id_lokasi_kantor", "jenis", "source", "stage", "error_code", "error_message",
-                 "latitude", "longitude", "akurasi_gps", "jarak_meter", "skor_wajah", "photo_path")
-
-
-def insert_gagal(data):
-    row = {k: data.get(k) for k in _GAGAL_FIELDS}
-    row["detail"] = json.dumps(data["detail"]) if data.get("detail") is not None else None
-    sql = text(f"""
-        INSERT INTO absensi_gagal ({", ".join(_GAGAL_FIELDS)}, detail, created_at)
-        VALUES ({", ".join(":" + k for k in _GAGAL_FIELDS)}, CAST(:detail AS JSONB), :now)
-        RETURNING id_absensi_gagal
-    """)
-    with get_engine().begin() as conn:
-        return conn.execute(sql, {**row, "now": get_wita()}).scalar()
-
-
-def get_gagal_range(mulai, selesai, id_pegawai=None):
+# ---------------- absensi gagal ----------------
+def get_gagal_range(mulai, selesai, id_pegawai=None, error_code=None):
     # created_at di-cast ke tanggal WITA agar filter tidak bergeser di DB ber-zona UTC
     sql = text("""
         SELECT g.id_absensi_gagal, g.id_pegawai, p.full_name, g.id_lokasi_kantor, g.jenis, g.source, g.stage,
@@ -116,11 +106,12 @@ def get_gagal_range(mulai, selesai, id_pegawai=None):
         JOIN pegawai p ON p.id_pegawai = g.id_pegawai
         WHERE (g.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN :mulai AND :selesai
           AND (CAST(:id_pegawai AS INTEGER) IS NULL OR g.id_pegawai = CAST(:id_pegawai AS INTEGER))
+          AND (CAST(:error_code AS VARCHAR) IS NULL OR g.error_code = CAST(:error_code AS VARCHAR))
         ORDER BY g.created_at DESC
         LIMIT 1000
     """)
     with get_engine().connect() as conn:
-        params = {"mulai": mulai, "selesai": selesai, "id_pegawai": id_pegawai}
+        params = {"mulai": mulai, "selesai": selesai, "id_pegawai": id_pegawai, "error_code": error_code}
         return conn.execute(sql, params).mappings().all()
 
 
@@ -128,3 +119,56 @@ def get_gagal_photo(id_absensi_gagal):
     sql = text("SELECT photo_path FROM absensi_gagal WHERE id_absensi_gagal = :id")
     with get_engine().connect() as conn:
         return conn.execute(sql, {"id": id_absensi_gagal}).scalar()
+
+
+# ---------------- perizinan ----------------
+_IZIN_COLS = """
+    z.id_perizinan, z.id_pegawai, p.full_name, p.nip, z.jenis_pengajuan, z.id_jenis_izin,
+    ji.code AS jenis_izin_code, ji.name AS jenis_izin_name, z.jenis_absen, z.tanggal_mulai, z.tanggal_selesai,
+    z.jam_koreksi, z.alasan, (z.lampiran_path IS NOT NULL) AS has_lampiran, z.status, z.reviewed_by,
+    COALESCE(rp.full_name, ru.username) AS reviewed_by_name, z.reviewed_at, z.catatan_peninjau,
+    z.created_at, z.updated_at
+"""
+_IZIN_FROM = """
+    FROM perizinan z
+    JOIN pegawai p ON p.id_pegawai = z.id_pegawai
+    LEFT JOIN jenis_izin ji ON ji.id_jenis_izin = z.id_jenis_izin
+    LEFT JOIN users ru ON ru.id_user = z.reviewed_by
+    LEFT JOIN pegawai rp ON rp.id_pegawai = ru.id_pegawai
+"""
+
+
+def get_perizinan_list(f):
+    sql = text(f"""
+        SELECT {_IZIN_COLS} {_IZIN_FROM}
+        WHERE (CAST(:status AS VARCHAR) IS NULL OR z.status = CAST(:status AS VARCHAR))
+          AND (CAST(:jenis_pengajuan AS VARCHAR) IS NULL OR z.jenis_pengajuan = CAST(:jenis_pengajuan AS VARCHAR))
+          AND (CAST(:id_pegawai AS INTEGER) IS NULL OR z.id_pegawai = CAST(:id_pegawai AS INTEGER))
+          AND z.tanggal_mulai <= :selesai AND z.tanggal_selesai >= :mulai
+        ORDER BY z.created_at DESC
+    """)
+    with get_engine().connect() as conn:
+        return conn.execute(sql, f).mappings().all()
+
+
+def get_perizinan(id_perizinan):
+    sql = text(f"SELECT {_IZIN_COLS}, z.lampiran_path {_IZIN_FROM} WHERE z.id_perizinan = :id")
+    with get_engine().connect() as conn:
+        return conn.execute(sql, {"id": id_perizinan}).mappings().first()
+
+
+def review_perizinan(id_perizinan, status, catatan, id_user, koreksi=None):
+    """Satu transaksi: ubah status (hanya jika masih 'diajukan') + catat absen koreksi bila disetujui.
+    Kembalikan rowcount perizinan (0 = sudah tidak diajukan, tidak ada yang diubah)."""
+    now = get_wita()
+    sql = text("""
+        UPDATE perizinan SET status = :status, catatan_peninjau = :catatan, reviewed_by = :id_user,
+               reviewed_at = :now, updated_at = :now, updated_by = :id_user
+        WHERE id_perizinan = :id AND status = 'diajukan'
+    """)
+    with get_engine().begin() as conn:
+        params = {"id": id_perizinan, "status": status, "catatan": catatan, "id_user": id_user, "now": now}
+        count = conn.execute(sql, params).rowcount
+        if count and koreksi:
+            conn.execute(_UPSERT_KOREKSI, {**koreksi, "now": now, "id_user": id_user})
+        return count

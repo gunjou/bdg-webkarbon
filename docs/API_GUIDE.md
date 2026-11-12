@@ -5,8 +5,7 @@ Dokumen ini menjelaskan **cara pakai** API. Daftar endpoint, body, dan bentuk re
 - **Swagger UI**: `<server>/docs` (bisa dicoba langsung)
 - **Spec**: `docs/openapi.json` atau `<server>/swagger.json` → generate client React dengan `npx orval`
 
-Jika dokumen ini berbeda dengan spec, **spec yang benar**. Aturan bisnis absen bersumber dari docstring
-`api/modules/absensi/service.py`.
+Jika dokumen ini berbeda dengan spec, **spec yang benar**.
 
 ---
 
@@ -25,7 +24,7 @@ Jika dokumen ini berbeda dengan spec, **spec yang benar**. Aturan bisnis absen b
 
 **Field boleh `null`** (spec Swagger 2.0 tidak bisa menandainya): semua field opsional seperti `email`, `nip`,
 `phone`, `photo_path`, `updated_at`, `updated_by`, `last_login_at`, `id_pegawai`, `full_name` (akun non-pegawai),
-`errors`, `meta`, serta `masuk`/`pulang`/`jadwal` di `GET /absensi/saya/hari-ini`. Selalu tangani `null`.
+`errors`, `meta`. Selalu tangani `null`.
 
 ### Format respons
 
@@ -97,9 +96,13 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 
 | Permission | Menu / fitur | Endpoint |
 |---|---|---|
-| `absensi.self` | **Aplikasi ABSEN**: absen & riwayat saya | `/absensi/saya/hari-ini`, `POST /absensi/saya`, `/absensi/saya/riwayat`, `/absensi/saya/{id}/foto`, `POST /absensi/saya/gagal` |
-| `absensi.view_all` | **Aplikasi ADMIN**: rekap absensi | `GET /absensi`, `/absensi/{id}`, `/absensi/{id}/foto` |
+| `absensi.self` | **Aplikasi ABSEN**: presensi saya | `GET /presensi/hari-ini`, `POST /presensi`, `POST /presensi/gagal`, `GET /presensi/riwayat`, `/presensi/{id}/foto` |
+| `perizinan.self` | **Aplikasi ABSEN**: pengajuan izin & koreksi saya | `GET /presensi/jenis-izin`, `GET/POST /presensi/perizinan`, `/presensi/perizinan/{id}`, `PUT /presensi/perizinan/{id}/batal`, `/presensi/perizinan/{id}/lampiran` |
+| `absensi.view_all` | **Aplikasi ADMIN**: monitoring & rekap presensi | `GET /absensi/harian`, `/absensi/rekap`, `/absensi`, `/absensi/{id}`, `/absensi/{id}/foto` |
+| `absensi.koreksi` | **Aplikasi ADMIN**: koreksi absen | `PUT /absensi/koreksi` |
 | `absensi_gagal.view` | **Aplikasi ADMIN**: log absen gagal | `GET /absensi/gagal`, `/absensi/gagal/{id}/foto` |
+| `perizinan.view_all` | **Aplikasi ADMIN**: daftar pengajuan | `GET /absensi/perizinan`, `/absensi/perizinan/{id}`, `/absensi/perizinan/{id}/lampiran` |
+| `perizinan.review` | **Aplikasi ADMIN**: setujui/tolak | `PUT /absensi/perizinan/{id}/review` |
 | `pegawai.view` | Daftar pegawai | `GET /pegawai`, `/pegawai/{id}`, `/pegawai/{id}/foto` |
 | `pegawai.manage` | Tambah/ubah/nonaktifkan pegawai, ganti password | `POST/PUT/DELETE /pegawai...`, `PUT /pegawai/{id}/password` |
 | `pegawai.enroll_face` | Ganti foto wajah | `PUT /pegawai/{id}/foto` |
@@ -117,100 +120,73 @@ Aturan khusus yang akan ditolak backend (tampilkan `message`):
 
 ---
 
-## 4. Alur absen (aplikasi pegawai)
+## 4. Presensi (aplikasi ABSEN, pegawai)
 
-Endpoint absensi dibagi per aplikasi (grup Swagger terpisah):
-- `/absensi/saya/...` (tag `absensi-saya`) → **aplikasi ABSEN**, pegawai menandai hadir; data selalu milik akun di token.
-- `/absensi/...` (tag `absensi`) → **aplikasi ADMIN**, hanya baca/rekap semua pegawai.
+Semua endpoint butuh `absensi.self`; data selalu milik akun di token. Aturan lengkap: docstring
+`api/modules/presensi/service.py`.
 
-### 4.1 Layar absen
-
-```
-GET /absensi/saya/hari-ini
-```
-Pakai respons ini untuk menyusun layar, **bukan** jam/tanggal HP:
-
-| Field | Pakai untuk |
+| Endpoint | Fungsi |
 |---|---|
-| `waktu_server` | jam yang ditampilkan |
-| `pegawai.face_enrolled` | `false` → tombol absen nonaktif, pesan "Foto wajah belum didaftarkan, hubungi admin" |
-| `hari_kerja`, `keterangan` | `false` → tampilkan `keterangan` (libur / bukan hari kerja / belum punya jadwal) |
-| `jadwal.masuk_dibuka`, `jadwal.masuk`, `jadwal.pulang` | info jam & kapan tombol masuk aktif |
-| `masuk`, `pulang` | `null` = belum; object = sudah (tampilkan jam & `status`) |
-| `lokasi[]` | titik & radius kantor → peta / hitung jarak di client |
-| `gps_max_akurasi_meter` | tunggu GPS sampai akurasi ≤ nilai ini sebelum kirim |
+| `GET /presensi/hari-ini` | Layar absen: `waktu_server` (pakai ini, bukan jam HP), `pegawai.face_enrolled`, `hari_kerja` + `keterangan`, `jadwal` (`masuk_dibuka`, `masuk`, `pulang`), `masuk`/`pulang` (`null` = belum), `gps_max_akurasi_meter` (tunggu GPS sampai `coords.accuracy` ≤ nilai ini sebelum kirim). |
+| `POST /presensi` (multipart) | Absen: `jenis` (`masuk|pulang`), `latitude`, `longitude`, `akurasi_gps`, `foto`. Cek: akun → jadwal → GPS → wajah. `201` berisi `status` (`tepat_waktu|terlambat|pulang_cepat`) & `terlambat_menit`. |
+| `POST /presensi/gagal` (JSON) | Lapor gagal sebelum request terkirim: `stage` (`GPS|CAMERA|LOCATION|FACE`), `error_code` (mis. `GPS_PERMISSION_DENIED`), `jenis`, `error_message`, `detail`. Fire-and-forget. |
+| `GET /presensi/riwayat?tanggal_mulai&tanggal_selesai` | Riwayat sendiri. Default awal bulan ini s/d hari ini, maks 62 hari. `is_koreksi = true` → absen dikoreksi admin (beri label). |
+| `GET /presensi/{id}/foto` | Foto selfie absen sendiri (milik orang lain → 404). |
 
-Tombol yang ditampilkan:
-- `masuk == null` → tombol **Absen Masuk**
-- `masuk != null && pulang == null` → tombol **Absen Pulang**
-  (sebelum `jadwal.pulang` beri konfirmasi: "Belum jam pulang, tetap absen? (tercatat pulang cepat)")
-- `masuk == null` dan sudah lewat `jadwal.pulang` → tombol **Absen Pulang** (lupa absen masuk; koreksi lewat perizinan)
-- keduanya terisi → "Absen hari ini selesai"
+Tombol: `masuk == null` → **Absen Masuk**; `masuk != null && pulang == null` → **Absen Pulang**
+(sebelum `jadwal.pulang` beri konfirmasi pulang cepat); `masuk == null` dan sudah lewat `jadwal.pulang` →
+**Absen Pulang** (lupa masuk, koreksi lewat perizinan); keduanya terisi → selesai.
+Lokasi sah = lokasi kantor aktif terdekat (semua lokasi aktif berlaku untuk semua pegawai).
 
-### 4.2 Kirim absen
+Kode gagal `422` (sudah tercatat di server; tampilkan `message`):
+`FACE_NOT_ENROLLED`, `HOLIDAY`, `NOT_WORKDAY`, `NO_SCHEDULE`, `OUTSIDE_TIME_WINDOW`, `ALREADY_CHECKED`,
+`NOT_CHECKED_IN`, `GPS_LOW_ACCURACY`, `NO_OFFICE_LOCATION`, `OUTSIDE_RADIUS`, `FACE_NOT_DETECTED`, `FACE_NOT_MATCH`.
+Lain: `400` field kurang, `413` foto > 5 MB, `403` akun tidak tertaut ke pegawai aktif.
+Absen tidak bisa diubah/dihapus; koreksi lewat perizinan di bawah.
 
-```
-POST /absensi/saya   (multipart/form-data)
-  jenis        masuk | pulang
-  latitude     number
-  longitude    number
-  akurasi_gps  number (meter, dari Geolocation API: coords.accuracy)
-  foto         file selfie (jpg/png, maks 5 MB)
-```
+**Blokir presensi saat izin:** `GET /presensi/hari-ini` berisi `izin` = izin (bukan koreksi) berstatus
+`diajukan`/`disetujui` yang mencakup hari ini, atau `null`. Jika tidak `null`, sembunyikan tombol absen dan tampilkan
+`izin.jenis_izin_name` + `izin.status`. (Server tidak memblokir; aturan ini di frontend.)
 
-Urutan cek di server: **akun → jadwal → GPS → wajah**. Sukses = `201` berisi data absen
-(`status`: `tepat_waktu` / `terlambat` / `pulang_cepat`, `terlambat_menit`).
-Pengenalan wajah butuh ±1–2 detik → tampilkan loading & cegah tombol ditekan ulang.
+### Perizinan pegawai (`perizinan.self`)
 
-### 4.3 Kode gagal absen (`422`)
+| Endpoint | Fungsi |
+|---|---|
+| `GET /presensi/jenis-izin` | Pilihan jenis izin aktif; `butuh_lampiran = 1` → lampiran wajib. |
+| `POST /presensi/perizinan` (multipart) | Ajukan. Umum: `jenis_pengajuan` (`izin|koreksi`), `tanggal_mulai`, `alasan`, `lampiran?` (jpg/png/pdf, maks 5 MB; gambar dikompres ≤ 200 KB). **izin**: + `id_jenis_izin`, `tanggal_selesai` (default = mulai). **koreksi**: + `jenis_absen` (`masuk|pulang`), `jam_koreksi` (HH:MM). |
+| `GET /presensi/perizinan?status=&tahun=` | Daftar pengajuan sendiri, terbaru di atas. |
+| `GET /presensi/perizinan/{id}` | Detail, termasuk `catatan_peninjau`, `reviewed_by_name`. |
+| `PUT /presensi/perizinan/{id}/batal` | Batalkan (hanya status `diajukan`). |
+| `GET /presensi/perizinan/{id}/lampiran` | Unduh lampiran (`image/jpeg` / `application/pdf`). |
 
-Semua sudah tercatat otomatis di log server. Tampilkan `message`; `code` untuk logika UI.
-
-| `code` | Tahap | Arti | Saran UI |
-|---|---|---|---|
-| `FACE_NOT_ENROLLED` | akun | belum ada foto wajah | minta hubungi admin |
-| `HOLIDAY` | jadwal | hari libur | — |
-| `NOT_WORKDAY` | jadwal | bukan hari kerja | — |
-| `NO_SCHEDULE` | jadwal | pegawai belum punya jadwal | minta hubungi admin |
-| `OUTSIDE_TIME_WINDOW` | jadwal | masuk belum dibuka / sudah ditutup | `message` berisi jamnya |
-| `ALREADY_CHECKED` | jadwal | sudah absen jenis ini hari ini | muat ulang `/hari-ini` |
-| `NOT_CHECKED_IN` | jadwal | pulang sebelum jam pulang tanpa absen masuk | arahkan ke absen masuk |
-| `GPS_LOW_ACCURACY` | GPS | akurasi > batas | "Pindah ke area terbuka", coba lagi |
-| `NO_OFFICE_LOCATION` | lokasi | lokasi kantor belum diatur | hubungi admin |
-| `OUTSIDE_RADIUS` | lokasi | di luar radius kantor | `message` berisi jarak & batas |
-| `FACE_NOT_DETECTED` | wajah | tidak ada / lebih dari 1 wajah / bukan gambar | ambil ulang foto, wajah sendiri, cahaya cukup |
-| `FACE_NOT_MATCH` | wajah | wajah tidak cocok | ambil ulang; jika terus gagal hubungi admin |
-
-Error lain: `400` (field form kurang/salah), `413` (foto > 5 MB → kompres dulu di client), `403` (akun tidak
-tertaut ke pegawai aktif).
-
-### 4.4 Laporkan kegagalan di HP
-
-Kegagalan yang terjadi **sebelum** request terkirim tidak terlihat server. Laporkan:
-
-```
-POST /absensi/saya/gagal   (JSON)
-{ "stage": "GPS", "error_code": "GPS_PERMISSION_DENIED", "jenis": "masuk",
-  "error_message": "User menolak izin lokasi", "detail": { "app_version": "1.0.0" } }
-```
-
-`stage`: `GPS | CAMERA | LOCATION | FACE`. `error_code`: huruf besar/angka/`_`, bebas tapi konsisten. Disarankan:
-`GPS_PERMISSION_DENIED`, `GPS_TIMEOUT`, `GPS_UNAVAILABLE`, `CAMERA_PERMISSION_DENIED`, `CAMERA_UNAVAILABLE`,
-`NETWORK_ERROR`. Kirim tanpa menunggu (fire-and-forget); gagal kirim boleh diabaikan.
-
-### 4.5 Riwayat & rekap
-
-```
-GET /absensi/saya/riwayat?tanggal_mulai=2026-11-01&tanggal_selesai=2026-11-30     (milik sendiri)
-GET /absensi?tanggal_mulai=...&tanggal_selesai=...&id_pegawai=7             (absensi.view_all)
-GET /absensi/gagal?tanggal_mulai=...                                         (absensi_gagal.view, maks 1000 baris)
-```
-Default = hari ini. Rentang maksimal **62 hari** (lebih → `422`).
-Absensi **tidak bisa diubah/dihapus**; koreksi lewat modul perizinan (belum tersedia).
+Aturan (`422` jika dilanggar): izin maks 30 hari & tidak beririsan dengan izin lain yang diajukan/disetujui;
+koreksi hanya hari ini s/d 7 hari ke belakang, absen jenis itu belum tercatat, dan belum ada koreksi aktif yang sama.
+Tidak ada ubah pengajuan: batalkan lalu ajukan ulang. Setuju/tolak dilakukan admin (modul terpisah, belum ada).
 
 ---
 
-## 5. Pegawai (admin)
+## 5. Absensi (aplikasi ADMIN)
+
+Aturan lengkap: docstring `api/modules/absensi/service.py`.
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET /absensi/harian?tanggal=` | Semua pegawai aktif + `status_hari` (`hadir|izin|libur|bukan_hari_kerja|alpha|belum_absen`), `masuk`, `pulang`, `izin` (diajukan/disetujui). Dashboard "siapa belum hadir". |
+| `GET /absensi/rekap?bulan=YYYY-MM&id_pegawai=` | Rekap per pegawai: `hari_kerja, hadir, terlambat, terlambat_menit, pulang_cepat, tanpa_masuk, tanpa_pulang, izin, izin_per_jenis, alpha, libur`. Bulan berjalan dihitung s/d hari ini. |
+| `GET /absensi?tanggal_mulai&tanggal_selesai&id_pegawai&status` | Daftar absen (default hari ini, maks 62 hari). |
+| `GET /absensi/{id}`, `/absensi/{id}/foto` | Detail & foto selfie (absen hasil koreksi tidak punya foto → `has_photo=false`). |
+| `PUT /absensi/koreksi` (JSON) | Buat/timpa absen: `id_pegawai, tanggal, jenis, jam, status?` (default `tepat_waktu`), `terlambat_menit?`. |
+| `GET /absensi/gagal?...&error_code=`, `/absensi/gagal/{id}/foto` | Log absen gagal (maks 1000) & foto wajah tidak cocok. |
+| `GET /absensi/perizinan?status&jenis_pengajuan&id_pegawai&tanggal_mulai&tanggal_selesai` | Daftar pengajuan. Default `status=diajukan` (antrean); `status=semua` untuk semua. |
+| `GET /absensi/perizinan/{id}`, `/lampiran` | Detail & lampiran. |
+| `PUT /absensi/perizinan/{id}/review` (JSON) | `status` (`disetujui|ditolak`), `catatan_peninjau` (wajib jika ditolak). Koreksi disetujui → absen tercatat otomatis; `status_absen?` (default `tepat_waktu`), `terlambat_menit?`. Tidak boleh meninjau pengajuan sendiri (403). |
+
+`is_koreksi = true` pada absen = dibuat/diubah oleh akun selain pegawai itu sendiri (tampilkan label "Koreksi").
+Alpha = hari kerja (jadwal pegawai saat ini, bukan libur) yang sudah lewat tanpa absen dan tanpa izin disetujui.
+
+---
+
+## 6. Pegawai (admin)
 
 - `POST /pegawai` = **multipart/form-data**: data pegawai + akun login sekaligus, foto opsional.
   - Wajib: `full_name`, `id_jabatan`, `username`, `password` (≥ 8).
@@ -227,7 +203,7 @@ Form validasi: tampilkan `errors[field]` di bawah input yang sesuai.
 
 ---
 
-## 6. Master data
+## 7. Master data
 
 Pola sama untuk `/master/jabatan`, `/master/lokasi-kantor`, `/master/jadwal-kerja`, `/master/jenis-izin`,
 `/master/hari-libur`: `GET` list (aktif saja), `POST`, `GET/PUT/DELETE /{id}`, `POST /{id}/activate`.
@@ -244,7 +220,7 @@ Catatan per master:
 
 ---
 
-## 7. Gambar (foto)
+## 8. Gambar (foto)
 
 Endpoint foto mengembalikan `image/jpeg` dan **butuh header Authorization**, jadi `<img src="...">` langsung
 tidak bisa. Ambil sebagai blob:
@@ -258,7 +234,7 @@ const url = URL.createObjectURL(res.data);   // pakai di <img src={url}>, revoke
 
 ---
 
-## 8. Ringkasan status HTTP
+## 9. Ringkasan status HTTP
 
 | Status | `code` umum | Arti |
 |---|---|---|
@@ -273,7 +249,7 @@ const url = URL.createObjectURL(res.data);   // pakai di <img src={url}>, revoke
 
 ---
 
-## 9. Saat backend berubah
+## 10. Saat backend berubah
 
 1. Backend: `venv/bin/python scripts/export_openapi.py` → commit `docs/openapi.json` (+ update dokumen ini bila
    alur/aturan berubah).

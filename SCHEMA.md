@@ -72,7 +72,6 @@ error_code: `WRONG_PASSWORD, USER_INACTIVE, PEGAWAI_INACTIVE, NO_ACTIVE_ROLE, CL
 | id_pegawai       | INTEGER PK       |                                                     |
 | id_jabatan       | FK jabatan       | wajib                                               |
 | id_jadwal_kerja  | FK jadwal_kerja  |                                                     |
-| id_lokasi_kantor | FK lokasi_kantor | NULL = boleh absen di semua lokasi aktif            |
 | nip              | VARCHAR(30)      | unik jika diisi                                     |
 | full_name        | VARCHAR(150)     |                                                     |
 | phone            | VARCHAR(20)      |                                                     |
@@ -82,12 +81,13 @@ error_code: `WRONG_PASSWORD, USER_INACTIVE, PEGAWAI_INACTIVE, NO_ACTIVE_ROLE, CL
 
 ## 3. Transaksi absensi
 
-### absensi — hanya absen BERHASIL, append-only
+### absensi — absen BERHASIL (+ hasil koreksi, migrasi 003)
 
 `id_absensi` BIGINT PK, `id_pegawai` FK, `id_lokasi_kantor` FK, `tanggal` DATE, `jenis` (`masuk|pulang`),
 `waktu_absen` TIMESTAMPTZ, `latitude`, `longitude`, `akurasi_gps`, `jarak_meter`, `skor_wajah`,
 `photo_path` (wajib), `jam_jadwal` TIME (snapshot), `terlambat_menit` (snapshot, ≥0),
-`status` (`tepat_waktu|terlambat|pulang_cepat`), `created_at`.
+`status` (`tepat_waktu|terlambat|pulang_cepat`), `created_at`, `created_by`, `updated_at`, `updated_by`.
+`id_lokasi_kantor`, `latitude`, `longitude`, `photo_path` NULL untuk absen hasil koreksi.
 UNIQUE (id_pegawai, tanggal, jenis) → 1x masuk & 1x pulang per hari.
 
 ### absensi_gagal — semua percobaan gagal (client & server)
@@ -123,6 +123,7 @@ Aturan (CHECK):
 | pegawai.manage, pegawai.enroll_face                                        |     ✅      |  ✅   |        |       |         |
 | jabatan / lokasi_kantor / jadwal_kerja / hari_libur / jenis_izin `.manage` |     ✅      |  ✅   |        |       |         |
 | absensi.view_all                                                           |     ✅      |  ✅   |   ✅   |  ✅   |         |
+| absensi.koreksi (migrasi 003)                                              |     ✅      |  ✅   |   ✅   |  ✅   |         |
 | absensi_gagal.view                                                         |     ✅      |  ✅   |        |       |         |
 | perizinan.view_all                                                         |     ✅      |  ✅   |   ✅   |  ✅   |         |
 | perizinan.review                                                           |     ✅      |       |   ✅   |  ✅   |         |

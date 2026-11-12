@@ -1,219 +1,47 @@
 # api/modules/absensi/service.py
 """
-Ketentuan absensi (semua waktu = jam server WITA, bukan jam HP):
+Aplikasi ADMIN: monitoring presensi, rekap, log gagal, koreksi absen, review perizinan.
 
-1. Akun harus tertaut ke pegawai aktif yang sudah punya foto wajah (embedding) dan jadwal kerja.
-2. Jadwal  : bukan hari libur aktif, dan hari ini hari kerja di jadwal_harian.
-   - masuk  : dibuka ABSEN_MASUK_BUKA_MENIT sebelum jam masuk, ditutup saat jam pulang.
-              Lewat jam masuk + toleransi -> status 'terlambat', terlambat_menit dihitung dari jam masuk.
-   - pulang : boleh jika sudah absen masuk, atau (lupa masuk) jam pulang sudah lewat. Sampai akhir hari.
-              Sebelum jam pulang -> status 'pulang_cepat'.
-   - Masing-masing hanya 1x per hari.
-3. GPS     : akurasi <= GPS_MAX_AKURASI_METER, dan di dalam radius lokasi kantor
-             (lokasi pegawai, atau lokasi aktif terdekat jika pegawai tidak diikat ke satu lokasi).
-4. Wajah   : foto harus berisi tepat 1 wajah dan cocok dgn foto enrollment (jarak <= FACE_MATCH_THRESHOLD).
-Urutan cek: akun -> jadwal -> GPS -> wajah (yang murah dulu). Setiap kegagalan dicatat ke absensi_gagal.
+Status harian pegawai (urutan menentukan):
+  izin (izin disetujui mencakup tanggal) -> hadir (ada absen masuk/pulang) -> libur (hari_libur aktif)
+  -> bukan_hari_kerja (jadwal hari itu null / tanpa jadwal) -> alpha (tanggal sudah lewat) -> belum_absen (hari ini).
+  Izin yang masih 'diajukan' tidak membebaskan dari alpha. Jadwal = jadwal pegawai SAAT INI (tidak ada histori).
+
+Koreksi absen (admin langsung, atau persetujuan pengajuan koreksi pegawai):
+  upsert absensi per (pegawai, tanggal, jenis): waktu = tanggal + jam (WITA), status bebas dipilih admin
+  (default tepat_waktu, tidak dihitung dari jadwal). Ditandai is_koreksi karena created_by/updated_by bukan akun
+  pegawai itu sendiri. GPS/foto kosong pada absen yang dibuat lewat koreksi.
+
+Review perizinan: hanya status 'diajukan'; tidak boleh meninjau pengajuan sendiri; ditolak wajib catatan.
 """
+import calendar
 import os
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 
 from api.core import storage
 from api.modules.master.jadwal_kerja.service import HARI
-from api.shared.exceptions import AppError, ForbiddenError, NotFoundError, ValidationError
-from api.utils.datetime import get_wita
-from api.utils.face import FaceError, face_distance, process_face_photo
-from api.utils.geo import haversine_m
+from api.shared.exceptions import ForbiddenError, NotFoundError, ValidationError
+from api.utils.datetime import WITA, get_wita
 from . import query
 
-# default; bisa ditimpa lewat tabel settings (key sama)
-DEFAULT_SETTINGS = {
-    "ABSEN_MASUK_BUKA_MENIT": 60,
-    "GPS_MAX_AKURASI_METER": 50,
-    "FACE_MATCH_THRESHOLD": 0.5,
-}
 MAX_RANGE_HARI = 62
+STATUS_ABSEN = ("tepat_waktu", "terlambat", "pulang_cepat")
 
 
-class AbsenError(AppError):
-    def __init__(self, code, message):
-        super().__init__(message=message, code=code, status_code=422)
-
-
-def _settings():
-    return {**DEFAULT_SETTINGS, **query.get_settings(DEFAULT_SETTINGS)}
-
-
-def _fail(ctx, stage, code, message, **extra):
-    """Catat ke absensi_gagal lalu raise. Pencatatan transaksi sendiri, jadi tetap tersimpan."""
-    query.insert_gagal({"id_pegawai": ctx["id_pegawai"], "source": "server", "stage": stage,
-                        "error_code": code, "error_message": message, **extra})
-    raise AbsenError(code, message)
-
-
-def _context(id_user, tanggal):
-    ctx = query.get_context(id_user, tanggal)
-    if not ctx:
-        raise ForbiddenError("Akun tidak tertaut ke data pegawai")
-    if ctx["is_active"] != 1:
-        raise ForbiddenError("Pegawai tidak aktif")
-    return ctx
-
-
-def _today_rows(id_pegawai, tanggal):
-    return {r["jenis"]: r for r in query.get_range(tanggal, tanggal, id_pegawai)}
-
-
-def _jadwal_hari_ini(ctx, now):
-    """Kembalikan (jam_masuk_dt, jam_pulang_dt) atau (None, alasan_code, pesan)."""
-    if ctx["libur"]:
-        return None, "HOLIDAY", f"Hari ini libur: {ctx['libur']}"
-    if not ctx["jadwal_harian"]:
-        return None, "NO_SCHEDULE", "Pegawai belum punya jadwal kerja"
-    hari = ctx["jadwal_harian"].get(HARI[now.weekday()])
-    if not hari:
-        return None, "NOT_WORKDAY", "Hari ini bukan hari kerja"
-
-    def at(hhmm):
-        h, m = map(int, hhmm.split(":"))
-        return now.replace(hour=h, minute=m, second=0, microsecond=0)
-
-    return (at(hari["masuk"]), at(hari["pulang"])), None, None
-
-
-def _cek_jadwal(ctx, jenis, now, done, cfg):
-    """Kembalikan dict jam_jadwal, terlambat_menit, status. Gagal -> _fail stage SCHEDULE."""
-    jadwal, code, msg = _jadwal_hari_ini(ctx, now)
-    if not jadwal:
-        _fail(ctx, "SCHEDULE", code, msg, jenis=jenis)
-    masuk, pulang = jadwal
-    if jenis in done:
-        _fail(ctx, "SCHEDULE", "ALREADY_CHECKED", f"Sudah absen {jenis} hari ini", jenis=jenis)
-
-    if jenis == "masuk":
-        buka = masuk - timedelta(minutes=int(cfg["ABSEN_MASUK_BUKA_MENIT"]))
-        if now < buka:
-            _fail(ctx, "SCHEDULE", "OUTSIDE_TIME_WINDOW",
-                  f"Absen masuk dibuka pukul {buka:%H:%M}", jenis=jenis)
-        if now >= pulang:
-            _fail(ctx, "SCHEDULE", "OUTSIDE_TIME_WINDOW",
-                  f"Absen masuk ditutup pukul {pulang:%H:%M}, ajukan koreksi absen", jenis=jenis)
-        telat = int((now - masuk).total_seconds() // 60)
-        if telat > int(ctx["toleransi_terlambat_menit"] or 0):
-            return {"jam_jadwal": masuk.time(), "terlambat_menit": telat, "status": "terlambat"}
-        return {"jam_jadwal": masuk.time(), "terlambat_menit": 0, "status": "tepat_waktu"}
-
-    # pulang
-    if "masuk" not in done and now < pulang:
-        _fail(ctx, "SCHEDULE", "NOT_CHECKED_IN", "Belum absen masuk", jenis=jenis)
-    status = "pulang_cepat" if now < pulang else "tepat_waktu"
-    return {"jam_jadwal": pulang.time(), "terlambat_menit": 0, "status": status}
-
-
-def _cek_lokasi(ctx, jenis, lat, lon, akurasi, cfg):
-    gps = {"jenis": jenis, "latitude": lat, "longitude": lon, "akurasi_gps": akurasi}
-    if akurasi is None or akurasi < 0 or akurasi > float(cfg["GPS_MAX_AKURASI_METER"]):
-        _fail(ctx, "GPS", "GPS_LOW_ACCURACY",
-              f"Akurasi GPS kurang baik (maks {cfg['GPS_MAX_AKURASI_METER']} m), coba di area terbuka", **gps)
-    lokasi = query.get_lokasi_aktif(ctx["id_lokasi_kantor"])
-    if not lokasi:
-        _fail(ctx, "LOCATION", "NO_OFFICE_LOCATION", "Lokasi kantor belum diatur", **gps)
-    jarak, lk = min((haversine_m(lat, lon, lk["latitude"], lk["longitude"]), lk) for lk in lokasi)
-    jarak = round(jarak, 2)
-    if jarak > lk["radius_meter"]:
-        _fail(ctx, "LOCATION", "OUTSIDE_RADIUS",
-              f"Di luar area {lk['name']} ({jarak:.0f} m, maks {lk['radius_meter']} m)",
-              id_lokasi_kantor=lk["id_lokasi_kantor"], jarak_meter=jarak, **gps)
-    return lk, jarak
-
-
-def _cek_wajah(ctx, jenis, foto, gps, cfg):
-    """Kembalikan (jpeg, skor). Foto gagal-cocok disimpan untuk audit."""
+# ---------------- helper ----------------
+def _tgl(value, field, default):
+    if not value:
+        return default
     try:
-        jpeg, embedding = process_face_photo(foto)
-    except FaceError as e:
-        _fail(ctx, "FACE", "FACE_NOT_DETECTED", str(e), jenis=jenis, **gps)
-    dist = face_distance(ctx["embedding"], embedding)
-    skor = round(max(0.0, 1 - dist), 4)
-    if dist > float(cfg["FACE_MATCH_THRESHOLD"]):
-        path = storage.save_file(jpeg, f"absensi_gagal/{get_wita():%Y-%m}", "jpg")
-        _fail(ctx, "FACE", "FACE_NOT_MATCH", "Wajah tidak cocok", jenis=jenis, skor_wajah=skor,
-              photo_path=path, detail={"distance": round(dist, 4)}, **gps)
-    return jpeg, skor
-
-
-def absen(id_user, jenis, lat, lon, akurasi, foto):
-    now = get_wita()
-    tanggal = now.date()
-    ctx = _context(id_user, tanggal)
-    if not ctx["embedding"]:
-        _fail(ctx, "FACE", "FACE_NOT_ENROLLED", "Foto wajah belum didaftarkan, hubungi admin", jenis=jenis)
-    cfg = _settings()
-
-    done = _today_rows(ctx["id_pegawai"], tanggal)
-    jadwal = _cek_jadwal(ctx, jenis, now, done, cfg)
-    lk, jarak = _cek_lokasi(ctx, jenis, lat, lon, akurasi, cfg)
-    gps = {"latitude": lat, "longitude": lon, "akurasi_gps": akurasi,
-           "id_lokasi_kantor": lk["id_lokasi_kantor"], "jarak_meter": jarak}
-    jpeg, skor = _cek_wajah(ctx, jenis, foto, gps, cfg)
-
-    path = storage.save_file(jpeg, f"absensi/{now:%Y-%m}", "jpg")
-    data = {"id_pegawai": ctx["id_pegawai"], "tanggal": tanggal, "jenis": jenis, "waktu_absen": now,
-            "skor_wajah": skor, "photo_path": path, **gps, **jadwal}
-    try:
-        id_absensi = query.insert(data)
-    except Exception:
-        storage.delete_file(path)
-        raise
-    if id_absensi is None:  # double submit bersamaan
-        storage.delete_file(path)
-        raise AbsenError("ALREADY_CHECKED", f"Sudah absen {jenis} hari ini")
-    return get(id_absensi)
-
-
-def status_hari_ini(id_user):
-    """Info untuk layar absen: jadwal hari ini, yang sudah dilakukan, lokasi kantor."""
-    now = get_wita()
-    ctx = _context(id_user, now.date())
-    cfg = _settings()
-    done = _today_rows(ctx["id_pegawai"], now.date())
-    jadwal, code, msg = _jadwal_hari_ini(ctx, now)
-    return {
-        "tanggal": now.date(),
-        "waktu_server": now,
-        "pegawai": {"id_pegawai": ctx["id_pegawai"], "full_name": ctx["full_name"],
-                    "face_enrolled": bool(ctx["embedding"])},
-        "hari_kerja": jadwal is not None,
-        "keterangan": msg,
-        "kode": code,
-        "jadwal": jadwal and {
-            "nama": ctx["jadwal_kerja_name"],
-            "masuk": jadwal[0].time(), "pulang": jadwal[1].time(),
-            "masuk_dibuka": (jadwal[0] - timedelta(minutes=int(cfg["ABSEN_MASUK_BUKA_MENIT"]))).time(),
-            "toleransi_terlambat_menit": ctx["toleransi_terlambat_menit"],
-        },
-        "masuk": done.get("masuk"),
-        "pulang": done.get("pulang"),
-        "lokasi": query.get_lokasi_aktif(ctx["id_lokasi_kantor"]),
-        "gps_max_akurasi_meter": cfg["GPS_MAX_AKURASI_METER"],
-    }
-
-
-def lapor_gagal_client(id_user, data):
-    ctx = _context(id_user, get_wita().date())
-    detail = data.get("detail")
-    if detail is not None and not isinstance(detail, dict):
-        raise ValidationError("detail harus object", {"detail": "object"})
-    query.insert_gagal({**data, "id_pegawai": ctx["id_pegawai"], "source": "client",
-                        "error_message": (data.get("error_message") or "")[:500] or None})
-
-
-def _range(args):
-    today = get_wita().date()
-    try:
-        mulai = date.fromisoformat(args["tanggal_mulai"]) if args.get("tanggal_mulai") else today
-        selesai = date.fromisoformat(args["tanggal_selesai"]) if args.get("tanggal_selesai") else mulai
+        return date.fromisoformat(value)
     except ValueError:
-        raise ValidationError("Format tanggal YYYY-MM-DD")
+        raise ValidationError("Format tanggal YYYY-MM-DD", {field: "YYYY-MM-DD"})
+
+
+def _range(args, default_mulai=None):
+    today = get_wita().date()
+    mulai = _tgl(args.get("tanggal_mulai"), "tanggal_mulai", default_mulai or today)
+    selesai = _tgl(args.get("tanggal_selesai"), "tanggal_selesai", today if default_mulai else mulai)
     if selesai < mulai:
         raise ValidationError("tanggal_selesai harus >= tanggal_mulai")
     if (selesai - mulai).days >= MAX_RANGE_HARI:
@@ -221,44 +49,209 @@ def _range(args):
     return mulai, selesai
 
 
-def riwayat_saya(id_user, args):
-    ctx = _context(id_user, get_wita().date())
-    return query.get_range(*_range(args), ctx["id_pegawai"])
+def _file(rel, pesan):
+    full = rel and storage.full_path(rel)
+    if not full or not os.path.exists(full):
+        raise NotFoundError(pesan)
+    return full
 
 
-def list_all(args):
-    return query.get_range(*_range(args), args.get("id_pegawai"))
+def _status_hari(peg, tgl, absen, izin, libur, today):
+    if izin and izin["status"] == "disetujui":
+        return "izin"
+    if absen:
+        return "hadir"
+    if tgl in libur:
+        return "libur"
+    if not (peg["jadwal_harian"] or {}).get(HARI[tgl.weekday()]):
+        return "bukan_hari_kerja"
+    return "alpha" if tgl < today else "belum_absen"
 
 
-def list_gagal(args):
-    return query.get_gagal_range(*_range(args), args.get("id_pegawai"))
+def _index(mulai, selesai, id_pegawai, izin_status):
+    """absen[(id_pegawai, tanggal)] = {jenis: row}; izin(id_pegawai, tanggal) -> row/None; libur {tanggal: nama}."""
+    absen = {}
+    for r in query.get_absensi_range(mulai, selesai, id_pegawai):
+        absen.setdefault((r["id_pegawai"], r["tanggal"]), {})[r["jenis"]] = r
+    izin_rows = sorted(query.get_izin_range(mulai, selesai, izin_status, id_pegawai),
+                       key=lambda z: z["status"] != "disetujui")  # disetujui didahulukan
+
+    def izin(id_pegawai, tgl):
+        return next((z for z in izin_rows if z["id_pegawai"] == id_pegawai
+                     and z["tanggal_mulai"] <= tgl <= z["tanggal_selesai"]), None)
+
+    return absen, izin, query.get_libur(mulai, selesai)
 
 
-def get(id_absensi):
-    row = query.get_by_id(id_absensi)
+# ---------------- presensi ----------------
+def harian(args):
+    today = get_wita().date()
+    tgl = _tgl(args.get("tanggal"), "tanggal", today)
+    absen, izin, libur = _index(tgl, tgl, None, ("diajukan", "disetujui"))
+    result = []
+    for peg in query.get_pegawai_aktif():
+        rows = absen.get((peg["id_pegawai"], tgl), {})
+        z = izin(peg["id_pegawai"], tgl)
+        result.append({
+            "id_pegawai": peg["id_pegawai"], "full_name": peg["full_name"], "nip": peg["nip"],
+            "jabatan_name": peg["jabatan_name"],
+            "status_hari": _status_hari(peg, tgl, rows, z, libur, today),
+            "keterangan": libur.get(tgl),
+            "masuk": rows.get("masuk"), "pulang": rows.get("pulang"), "izin": z,
+        })
+    return {"tanggal": tgl, "pegawai": result}
+
+
+def list_absensi(args):
+    return query.get_absensi_range(*_range(args), args.get("id_pegawai"), args.get("status"))
+
+
+def get_absensi(id_absensi):
+    row = query.get_absensi(id_absensi)
     if not row:
         raise NotFoundError("Absensi tidak ditemukan")
     return {k: v for k, v in row.items() if k != "photo_path"}
 
 
-def _file(rel):
-    full = rel and storage.full_path(rel)
-    if not full or not os.path.exists(full):
-        raise NotFoundError("Foto tidak ditemukan")
-    return full
-
-
-def foto_path(id_absensi, id_user=None):
-    """id_user None = admin (sudah dicek absensi.view_all di endpoint); selain itu wajib milik sendiri."""
-    row = query.get_by_id(id_absensi)
+def foto_absensi(id_absensi):
+    row = query.get_absensi(id_absensi)
     if not row:
         raise NotFoundError("Absensi tidak ditemukan")
-    if id_user is not None:
-        ctx = query.get_context(id_user, row["tanggal"])
-        if not ctx or ctx["id_pegawai"] != row["id_pegawai"]:
-            raise ForbiddenError("Akses tidak diizinkan")
-    return _file(row["photo_path"])
+    return _file(row["photo_path"], "Foto tidak ada (absen hasil koreksi tidak punya foto)")
 
 
-def foto_gagal_path(id_absensi_gagal):
-    return _file(query.get_gagal_photo(id_absensi_gagal))
+def rekap(args):
+    today = get_wita().date()
+    try:
+        y, m = map(int, (args.get("bulan") or f"{today:%Y-%m}").split("-"))
+        mulai = date(y, m, 1)
+    except ValueError:
+        raise ValidationError("Format bulan YYYY-MM", {"bulan": "YYYY-MM"})
+    selesai = min(date(y, m, calendar.monthrange(y, m)[1]), today)
+    if selesai < mulai:
+        raise ValidationError("Bulan belum berjalan", {"bulan": "masa depan"})
+
+    absen, izin, libur = _index(mulai, selesai, args.get("id_pegawai"), ("disetujui",))
+    result = []
+    for peg in query.get_pegawai_aktif(args.get("id_pegawai")):
+        r = {"id_pegawai": peg["id_pegawai"], "full_name": peg["full_name"], "nip": peg["nip"],
+             "jabatan_name": peg["jabatan_name"], "hari_kerja": 0, "hadir": 0, "terlambat": 0,
+             "terlambat_menit": 0, "pulang_cepat": 0, "tanpa_masuk": 0, "tanpa_pulang": 0, "izin": 0,
+             "izin_per_jenis": {}, "alpha": 0, "libur": 0}
+        tgl = mulai
+        while tgl <= selesai:
+            rows = absen.get((peg["id_pegawai"], tgl), {})
+            z = izin(peg["id_pegawai"], tgl)
+            st = _status_hari(peg, tgl, rows, z, libur, today)
+            kerja = tgl not in libur and (peg["jadwal_harian"] or {}).get(HARI[tgl.weekday()])
+            r["hari_kerja"] += 1 if kerja else 0
+            if st == "hadir":
+                r["hadir"] += 1
+                masuk, pulang = rows.get("masuk"), rows.get("pulang")
+                if masuk and masuk["status"] == "terlambat":
+                    r["terlambat"] += 1
+                    r["terlambat_menit"] += masuk["terlambat_menit"]
+                if pulang and pulang["status"] == "pulang_cepat":
+                    r["pulang_cepat"] += 1
+                r["tanpa_masuk"] += 0 if masuk else 1
+                r["tanpa_pulang"] += 0 if pulang or tgl == today else 1
+            elif st == "izin":
+                r["izin"] += 1
+                r["izin_per_jenis"][z["jenis_izin_code"]] = r["izin_per_jenis"].get(z["jenis_izin_code"], 0) + 1
+            elif st in ("alpha", "libur"):
+                r[st] += 1
+            tgl += timedelta(days=1)
+        result.append(r)
+    return {"bulan": f"{mulai:%Y-%m}", "tanggal_mulai": mulai, "tanggal_selesai": selesai, "pegawai": result}
+
+
+def _jam(value):
+    try:
+        return time.fromisoformat(value or "")
+    except ValueError:
+        raise ValidationError("Format jam HH:MM", {"jam": "HH:MM"})
+
+
+def _status_absen(data, jenis):
+    status = data.get("status") or "tepat_waktu"
+    if status not in STATUS_ABSEN or (jenis == "masuk" and status == "pulang_cepat") \
+            or (jenis == "pulang" and status == "terlambat"):
+        raise ValidationError("Status tidak sesuai jenis absen", {"status": "tidak valid"})
+    telat = int(data.get("terlambat_menit") or 0) if status == "terlambat" else 0
+    if telat < 0:
+        raise ValidationError("terlambat_menit tidak boleh negatif", {"terlambat_menit": ">= 0"})
+    return status, telat
+
+
+def _koreksi_row(id_pegawai, tanggal, jenis, jam, data):
+    status, telat = _status_absen(data, jenis)
+    return {"id_pegawai": id_pegawai, "tanggal": tanggal, "jenis": jenis,
+            "waktu_absen": datetime.combine(tanggal, jam, tzinfo=WITA),
+            "status": status, "terlambat_menit": telat}
+
+
+def koreksi(data, id_user):
+    today = get_wita().date()
+    if not query.get_pegawai_aktif(data["id_pegawai"]):
+        raise ValidationError("Pegawai tidak ditemukan / tidak aktif", {"id_pegawai": "tidak valid"})
+    tanggal = _tgl(data.get("tanggal"), "tanggal", None)
+    if not tanggal or tanggal > today:
+        raise ValidationError("Tanggal wajib dan tidak boleh di masa depan", {"tanggal": "tidak valid"})
+    row = _koreksi_row(data["id_pegawai"], tanggal, data["jenis"], _jam(data.get("jam")), data)
+    return get_absensi(query.upsert_koreksi(row, id_user))
+
+
+# ---------------- absensi gagal ----------------
+def list_gagal(args):
+    return query.get_gagal_range(*_range(args), args.get("id_pegawai"), args.get("error_code"))
+
+
+def foto_gagal(id_absensi_gagal):
+    return _file(query.get_gagal_photo(id_absensi_gagal), "Foto tidak ditemukan")
+
+
+# ---------------- perizinan ----------------
+def list_perizinan(args):
+    status = args.get("status") or "diajukan"  # default = antrean yang perlu ditinjau
+    mulai, selesai = (date.min, date.max) if not (args.get("tanggal_mulai") or args.get("tanggal_selesai")) \
+        else _range(args)
+    return query.get_perizinan_list({
+        "status": None if status == "semua" else status,
+        "jenis_pengajuan": args.get("jenis_pengajuan"), "id_pegawai": args.get("id_pegawai"),
+        "mulai": mulai, "selesai": selesai})
+
+
+def _perizinan(id_perizinan):
+    row = query.get_perizinan(id_perizinan)
+    if not row:
+        raise NotFoundError("Pengajuan tidak ditemukan")
+    return row
+
+
+def get_perizinan(id_perizinan):
+    return {k: v for k, v in _perizinan(id_perizinan).items() if k != "lampiran_path"}
+
+
+def lampiran_perizinan(id_perizinan):
+    full = _file(_perizinan(id_perizinan)["lampiran_path"], "Lampiran tidak ada")
+    return full, "application/pdf" if full.endswith(".pdf") else "image/jpeg"
+
+
+def review(id_perizinan, data, id_user, id_pegawai_reviewer):
+    row = _perizinan(id_perizinan)
+    if id_pegawai_reviewer is not None and row["id_pegawai"] == id_pegawai_reviewer:
+        raise ForbiddenError("Tidak boleh meninjau pengajuan sendiri")
+    if row["status"] != "diajukan":
+        raise ValidationError(f"Pengajuan berstatus {row['status']} tidak bisa ditinjau")
+    catatan = (data.get("catatan_peninjau") or "").strip() or None
+    if data["status"] == "ditolak" and not catatan:
+        raise ValidationError("Catatan wajib diisi saat menolak", {"catatan_peninjau": "required"})
+
+    koreksi_row = None
+    if data["status"] == "disetujui" and row["jenis_pengajuan"] == "koreksi":
+        koreksi_row = _koreksi_row(row["id_pegawai"], row["tanggal_mulai"], row["jenis_absen"],
+                                   row["jam_koreksi"], {"status": data.get("status_absen"),
+                                                        "terlambat_menit": data.get("terlambat_menit")})
+    if not query.review_perizinan(id_perizinan, data["status"], catatan, id_user, koreksi_row):
+        raise ValidationError("Pengajuan sudah ditinjau / dibatalkan")  # berubah di antara cek & update
+    return get_perizinan(id_perizinan)
