@@ -96,8 +96,11 @@ Zona waktu lokal dev ≠ VPS. Semua waktu yang ditulis ke DB harus dari `get_wit
 ## Auth & otorisasi
 
 - Satu endpoint login untuk semua akun: `POST /auth/login` dengan `username` + `password`; field `password`
-  dicek sebagai password dulu, jika salah dicek sebagai `kode_pemulihan`. Juga `POST /auth/refresh`
-  (body `{"refresh_token"}` atau header Bearer), `GET /auth/me`.
+  dicek sebagai password dulu, jika salah dicek sebagai `kode_pemulihan`.
+  Field `client` (`admin|absensi`, dikirim otomatis frontend): `admin` butuh permission selain
+  `absensi.self`/`perizinan.self`; `absensi` butuh akun pegawai + `absensi.self`. Gagal → 403 `CLIENT_FORBIDDEN`.
+  Respons `user`: admin → roles & permissions; absensi → data pegawai (nip, jabatan, face_enrolled).
+- Juga `POST /auth/refresh` (body `{"refresh_token"}` atau header Bearer), `GET /auth/me`.
 - `kode_pemulihan`: string acak 6 karakter, disimpan plain (keputusan pemilik; hanya admin yang bisa lihat).
   Bandingkan dengan `hmac.compare_digest`.
 - Logout = hapus token di client. Tidak ada blocklist.
@@ -108,7 +111,7 @@ Zona waktu lokal dev ≠ VPS. Semua waktu yang ditulis ke DB harus dari `get_wit
 - Permission `"*"` (SUPER_ADMIN) lolos semua cek.
 - Pesan gagal kredensial selalu sama ("Username atau kredensial salah") untuk cegah enumerasi username.
 - Kegagalan login user terdaftar dicatat ke `login_failures` (WRONG_PASSWORD — password &
-  kode pemulihan sama-sama salah, USER_INACTIVE, PEGAWAI_INACTIVE, NO_ACTIVE_ROLE, SERVER_ERROR).
+  kode pemulihan sama-sama salah, USER_INACTIVE, PEGAWAI_INACTIVE, NO_ACTIVE_ROLE, CLIENT_FORBIDDEN, SERVER_ERROR).
 - Belum ada pembatasan percobaan login (brute force) — rencana: kunci setelah N gagal dari `login_failures`.
 
 ## Env (`.env`)
@@ -132,7 +135,9 @@ JWT_ACCESS_EXPIRES (menit), JWT_REFRESH_EXPIRES (hari), UPLOAD_DIR (default uplo
 ## Absensi
 
 Ketentuan lengkap ada di docstring `api/modules/absensi/service.py` (sumber kebenaran). Ringkas:
+endpoint dipisah per aplikasi: `/absensi/saya/...` (namespace `ns_saya`, aplikasi ABSEN, `absensi.self`,
+data diri dari token) dan `/absensi/...` (namespace `ns`, aplikasi ADMIN, rekap baca saja).
 jenis dipilih client (`masuk|pulang`), urutan cek akun → jadwal/libur → GPS → wajah, waktu = jam server WITA,
-setiap gagal dicatat ke `absensi_gagal` (source `server`; client lapor lewat `POST /absensi/gagal`).
+setiap gagal dicatat ke `absensi_gagal` (source `server`; client lapor lewat `POST /absensi/saya/gagal`).
 Key `settings` yang dipakai (default di `DEFAULT_SETTINGS`): `ABSEN_MASUK_BUKA_MENIT` (60),
 `GPS_MAX_AKURASI_METER` (50), `FACE_MATCH_THRESHOLD` (0.5).

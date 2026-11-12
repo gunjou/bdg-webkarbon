@@ -248,12 +248,12 @@ def _file(rel):
     return full
 
 
-def foto_path(id_absensi, id_user, permissions):
-    """Pemilik absensi atau pemegang absensi.view_all."""
+def foto_path(id_absensi, id_user=None):
+    """id_user None = admin (sudah dicek absensi.view_all di endpoint); selain itu wajib milik sendiri."""
     row = query.get_by_id(id_absensi)
     if not row:
         raise NotFoundError("Absensi tidak ditemukan")
-    if not ({"*", "absensi.view_all"} & permissions):
+    if id_user is not None:
         ctx = query.get_context(id_user, row["tanggal"])
         if not ctx or ctx["id_pegawai"] != row["id_pegawai"]:
             raise ForbiddenError("Akses tidak diizinkan")

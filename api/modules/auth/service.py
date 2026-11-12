@@ -42,6 +42,25 @@ def _user_payload(user, roles, permissions):
     }
 
 
+# permission milik role PEGAWAI saja; akun yang hanya punya ini tidak boleh masuk frontend admin
+_SELF_PERMISSIONS = {"absensi.self", "perizinan.self"}
+
+
+def _check_client(user, permissions, client):
+    """Kembalikan (error_code, pesan) jika akun tidak boleh masuk aplikasi `client`, atau None."""
+    if client == "admin":
+        if not set(permissions) - _SELF_PERMISSIONS:
+            return "CLIENT_FORBIDDEN", "Akun tidak memiliki akses ke aplikasi admin"
+    elif user["id_pegawai"] is None or not ({"absensi.self", "*"} & set(permissions)):
+        return "CLIENT_FORBIDDEN", "Akun tidak memiliki akses ke aplikasi absensi"
+    return None
+
+
+def _pegawai_payload(user):
+    return {k: user[k] for k in ("id_user", "id_pegawai", "username", "full_name", "nip",
+                                 "jabatan", "photo_path", "face_enrolled")}
+
+
 def _claims(user, roles, permissions):
     return {"id_pegawai": user["id_pegawai"], "roles": roles, "permissions": permissions}
 
@@ -57,7 +76,7 @@ def _verify_credential(user, secret):
     return "WRONG_PASSWORD"  # password & kode pemulihan sama-sama salah
 
 
-def login(username, password):
+def login(username, password, client):
     if not password:
         raise ValidationError("Password wajib diisi", errors={"password": "required"})
 
@@ -73,7 +92,7 @@ def login(username, password):
         raise AuthError(message)
 
     roles, permissions = _load_roles(user["id_user"])
-    problem = _check_account(user, roles)
+    problem = _check_account(user, roles) or _check_client(user, permissions, client)
     if problem:
         code, message = problem
         query.insert_login_failure(user["id_user"], code, message)
@@ -85,7 +104,8 @@ def login(username, password):
     return {
         "access_token": create_access_token(identity=identity, additional_claims=claims),
         "refresh_token": create_refresh_token(identity=identity),
-        "user": _user_payload(user, roles, permissions),
+        "client": client,
+        "user": _user_payload(user, roles, permissions) if client == "admin" else _pegawai_payload(user),
     }
 
 

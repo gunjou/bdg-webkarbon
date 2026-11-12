@@ -55,12 +55,13 @@ register_api_handlers(api)
 from api.modules.auth import ns as auth_ns  # noqa: E402
 from api.modules.users import ns as users_ns  # noqa: E402
 from api.modules.pegawai import ns as pegawai_ns  # noqa: E402
-from api.modules.absensi import ns as absensi_ns  # noqa: E402
+from api.modules.absensi import ns as absensi_ns, ns_saya as absensi_saya_ns  # noqa: E402
 from api.modules.master import NAMESPACES as master_namespaces  # noqa: E402
 
 api.add_namespace(auth_ns, path="/auth")
 api.add_namespace(users_ns, path="/users")
 api.add_namespace(pegawai_ns, path="/pegawai")
 api.add_namespace(absensi_ns, path="/absensi")
+api.add_namespace(absensi_saya_ns, path="/absensi/saya")
 for _ns, _path in master_namespaces:
     api.add_namespace(_ns, path=_path)

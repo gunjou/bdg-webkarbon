@@ -1069,6 +1069,15 @@
     },
     "Login": {
       "properties": {
+        "client": {
+          "description": "Aplikasi asal login. Dikirim otomatis oleh frontend, bukan input user",
+          "enum": [
+            "admin",
+            "absensi"
+          ],
+          "example": "admin",
+          "type": "string"
+        },
         "password": {
           "description": "Password atau kode pemulihan",
           "example": "rahasia",
@@ -1082,6 +1091,7 @@
         }
       },
       "required": [
+        "client",
         "password",
         "username"
       ],
@@ -1092,11 +1102,20 @@
         "access_token": {
           "type": "string"
         },
+        "client": {
+          "enum": [
+            "admin",
+            "absensi"
+          ],
+          "example": "admin",
+          "type": "string"
+        },
         "refresh_token": {
           "type": "string"
         },
         "user": {
-          "$ref": "#/definitions/AuthUser"
+          "description": "client=admin → AuthUser (roles & permissions untuk menu); client=absensi → PegawaiLogin",
+          "type": "object"
         }
       },
       "type": "object"
@@ -1809,17 +1828,118 @@
             }
           }
         },
-        "summary": "Akses: absensi",
+        "summary": "[ADMIN] Akses: absensi",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/gagal": {
+      "get": {
+        "description": "view. Log absen gagal per rentang tanggal (maks 1000 baris).",
+        "operationId": "get_absensi_gagal",
+        "parameters": [
+          {
+            "description": "YYYY-MM-DD, default hari ini",
+            "in": "query",
+            "name": "tanggal_mulai",
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD, default = tanggal_mulai",
+            "in": "query",
+            "name": "tanggal_selesai",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id_pegawai",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiGagalListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "[ADMIN] Akses: absensi_gagal",
+        "tags": [
+          "absensi"
+        ]
+      }
+    },
+    "/absensi/gagal/{id_absensi_gagal}/foto": {
+      "get": {
+        "description": "view. Foto percobaan absen yang wajahnya tidak cocok.",
+        "operationId": "get_absensi_gagal_foto",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "[ADMIN] Akses: absensi_gagal",
         "tags": [
           "absensi"
         ]
       },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_absensi_gagal",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/absensi/saya": {
       "post": {
         "consumes": [
           "multipart/form-data"
         ],
         "description": "self. Absen masuk/pulang: GPS + foto selfie. multipart/form-data.",
-        "operationId": "post_absensi_list",
+        "operationId": "post_absen_saya",
         "parameters": [
           {
             "enum": [
@@ -1896,69 +2016,16 @@
             }
           }
         },
-        "summary": "Akses: absensi",
+        "summary": "[ABSEN] Akses: absensi",
         "tags": [
-          "absensi"
+          "absensi-saya"
         ]
       }
     },
-    "/absensi/gagal": {
-      "get": {
-        "description": "view. Log absen gagal per rentang tanggal (maks 1000 baris).",
-        "operationId": "get_absensi_gagal",
-        "parameters": [
-          {
-            "description": "YYYY-MM-DD, default hari ini",
-            "in": "query",
-            "name": "tanggal_mulai",
-            "type": "string"
-          },
-          {
-            "description": "YYYY-MM-DD, default = tanggal_mulai",
-            "in": "query",
-            "name": "tanggal_selesai",
-            "type": "string"
-          },
-          {
-            "in": "query",
-            "name": "id_pegawai",
-            "type": "integer"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sukses",
-            "schema": {
-              "$ref": "#/definitions/AbsensiGagalListResponse"
-            }
-          },
-          "401": {
-            "description": "Token tidak ada / tidak valid / expired",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Tidak punya akses",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "summary": "Akses: absensi_gagal",
-        "tags": [
-          "absensi"
-        ]
-      },
+    "/absensi/saya/gagal": {
       "post": {
         "description": "self. Laporkan kegagalan dari aplikasi (izin GPS/kamera ditolak, dsb.).",
-        "operationId": "post_absensi_gagal",
+        "operationId": "post_absensi_gagal_saya",
         "parameters": [
           {
             "in": "body",
@@ -2001,57 +2068,13 @@
             }
           }
         },
-        "summary": "Akses: absensi",
+        "summary": "[ABSEN] Akses: absensi",
         "tags": [
-          "absensi"
+          "absensi-saya"
         ]
       }
     },
-    "/absensi/gagal/{id_absensi_gagal}/foto": {
-      "get": {
-        "description": "view. Foto percobaan absen yang wajahnya tidak cocok.",
-        "operationId": "get_absensi_gagal_foto",
-        "produces": [
-          "image/jpeg"
-        ],
-        "responses": {
-          "200": {
-            "description": "File image/jpeg"
-          },
-          "401": {
-            "description": "Token tidak ada / tidak valid / expired",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Tidak punya akses",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Data tidak ditemukan",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "summary": "Akses: absensi_gagal",
-        "tags": [
-          "absensi"
-        ]
-      },
-      "parameters": [
-        {
-          "in": "path",
-          "name": "id_absensi_gagal",
-          "required": true,
-          "type": "integer"
-        }
-      ]
-    },
-    "/absensi/hari-ini": {
+    "/absensi/saya/hari-ini": {
       "get": {
         "description": "self. Status absen hari ini: jadwal, sudah masuk/pulang, lokasi kantor.",
         "operationId": "get_absensi_hari_ini",
@@ -2075,13 +2098,13 @@
             }
           }
         },
-        "summary": "Akses: absensi",
+        "summary": "[ABSEN] Akses: absensi",
         "tags": [
-          "absensi"
+          "absensi-saya"
         ]
       }
     },
-    "/absensi/riwayat": {
+    "/absensi/saya/riwayat": {
       "get": {
         "description": "self. Riwayat absensi sendiri (id_pegawai diabaikan).",
         "operationId": "get_absensi_riwayat",
@@ -2130,11 +2153,55 @@
             }
           }
         },
-        "summary": "Akses: absensi",
+        "summary": "[ABSEN] Akses: absensi",
         "tags": [
-          "absensi"
+          "absensi-saya"
         ]
       }
+    },
+    "/absensi/saya/{id_absensi}/foto": {
+      "get": {
+        "description": "self, hanya milik sendiri. Foto selfie absen (image/jpeg).",
+        "operationId": "get_absensi_foto_saya",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "[ABSEN] Akses: absensi",
+        "tags": [
+          "absensi-saya"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_absensi",
+          "required": true,
+          "type": "integer"
+        }
+      ]
     },
     "/absensi/{id_absensi}": {
       "get": {
@@ -2166,7 +2233,7 @@
             }
           }
         },
-        "summary": "Akses: absensi",
+        "summary": "[ADMIN] Akses: absensi",
         "tags": [
           "absensi"
         ]
@@ -2182,7 +2249,7 @@
     },
     "/absensi/{id_absensi}/foto": {
       "get": {
-        "description": "self) atau absensi.view_all. Foto selfie absen (image/jpeg).",
+        "description": "view_all. Foto selfie absen (image/jpeg).",
         "operationId": "get_absensi_foto",
         "produces": [
           "image/jpeg"
@@ -2210,7 +2277,7 @@
             }
           }
         },
-        "summary": "Akses: pemilik (absensi",
+        "summary": "[ADMIN] Akses: absensi",
         "tags": [
           "absensi"
         ]
@@ -2226,7 +2293,7 @@
     },
     "/auth/login": {
       "post": {
-        "description": "Login; field password menerima password atau kode pemulihan.",
+        "description": "Login; field password menerima password atau kode pemulihan. client: admin|absensi.",
         "operationId": "post_login_resource",
         "parameters": [
           {
@@ -4628,8 +4695,12 @@
       "name": "pegawai"
     },
     {
-      "description": "Absensi wajah + GPS",
+      "description": "[Aplikasi ADMIN] Rekap absensi semua pegawai & log absen gagal",
       "name": "absensi"
+    },
+    {
+      "description": "[Aplikasi ABSEN] Pegawai absen masuk/pulang untuk dirinya sendiri",
+      "name": "absensi-saya"
     },
     {
       "description": "Master Jabatan",

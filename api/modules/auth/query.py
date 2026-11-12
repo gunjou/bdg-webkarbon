@@ -8,9 +8,11 @@ from api.utils.datetime import get_wita
 def get_user_by_username(username):
     sql = text("""
         SELECT u.id_user, u.id_pegawai, u.username, u.email, u.password_hash, u.kode_pemulihan,
-               u.is_active, p.is_active AS pegawai_is_active, p.full_name, p.photo_path
+               u.is_active, p.is_active AS pegawai_is_active, p.full_name, p.photo_path,
+               p.nip, j.name AS jabatan, (p.embedding IS NOT NULL) AS face_enrolled
         FROM users u
         LEFT JOIN pegawai p ON p.id_pegawai = u.id_pegawai
+        LEFT JOIN jabatan j ON j.id_jabatan = p.id_jabatan
         WHERE lower(u.username) = lower(:username)
     """)
     with get_engine().connect() as conn:

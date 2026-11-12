@@ -38,7 +38,7 @@ Cabut role = DELETE baris.
 ### login_failures — gagal login (hanya username terdaftar)
 
 `id_login_failure` BIGINT PK, `id_user` FK (CASCADE), `error_code`, `error_message`, `created_at`.
-error_code: `WRONG_PASSWORD, USER_INACTIVE, PEGAWAI_INACTIVE, NO_ACTIVE_ROLE, SERVER_ERROR`.
+error_code: `WRONG_PASSWORD, USER_INACTIVE, PEGAWAI_INACTIVE, NO_ACTIVE_ROLE, CLIENT_FORBIDDEN, SERVER_ERROR`.
 
 ### settings — parameter sistem
 

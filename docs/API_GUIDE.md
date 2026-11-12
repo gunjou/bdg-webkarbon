@@ -25,7 +25,7 @@ Jika dokumen ini berbeda dengan spec, **spec yang benar**. Aturan bisnis absen b
 
 **Field boleh `null`** (spec Swagger 2.0 tidak bisa menandainya): semua field opsional seperti `email`, `nip`,
 `phone`, `photo_path`, `updated_at`, `updated_by`, `last_login_at`, `id_pegawai`, `full_name` (akun non-pegawai),
-`errors`, `meta`, serta `masuk`/`pulang`/`jadwal` di `GET /absensi/hari-ini`. Selalu tangani `null`.
+`errors`, `meta`, serta `masuk`/`pulang`/`jadwal` di `GET /absensi/saya/hari-ini`. Selalu tangani `null`.
 
 ### Format respons
 
@@ -97,9 +97,9 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 
 | Permission | Menu / fitur | Endpoint |
 |---|---|---|
-| `absensi.self` | Absen & riwayat saya | `/absensi/hari-ini`, `POST /absensi`, `/absensi/riwayat`, `POST /absensi/gagal` |
-| `absensi.view_all` | Rekap absensi | `GET /absensi`, `/absensi/{id}`, `/absensi/{id}/foto` |
-| `absensi_gagal.view` | Log absen gagal | `GET /absensi/gagal`, `/absensi/gagal/{id}/foto` |
+| `absensi.self` | **Aplikasi ABSEN**: absen & riwayat saya | `/absensi/saya/hari-ini`, `POST /absensi/saya`, `/absensi/saya/riwayat`, `/absensi/saya/{id}/foto`, `POST /absensi/saya/gagal` |
+| `absensi.view_all` | **Aplikasi ADMIN**: rekap absensi | `GET /absensi`, `/absensi/{id}`, `/absensi/{id}/foto` |
+| `absensi_gagal.view` | **Aplikasi ADMIN**: log absen gagal | `GET /absensi/gagal`, `/absensi/gagal/{id}/foto` |
 | `pegawai.view` | Daftar pegawai | `GET /pegawai`, `/pegawai/{id}`, `/pegawai/{id}/foto` |
 | `pegawai.manage` | Tambah/ubah/nonaktifkan pegawai, ganti password | `POST/PUT/DELETE /pegawai...`, `PUT /pegawai/{id}/password` |
 | `pegawai.enroll_face` | Ganti foto wajah | `PUT /pegawai/{id}/foto` |
@@ -119,10 +119,14 @@ Aturan khusus yang akan ditolak backend (tampilkan `message`):
 
 ## 4. Alur absen (aplikasi pegawai)
 
+Endpoint absensi dibagi per aplikasi (grup Swagger terpisah):
+- `/absensi/saya/...` (tag `absensi-saya`) → **aplikasi ABSEN**, pegawai menandai hadir; data selalu milik akun di token.
+- `/absensi/...` (tag `absensi`) → **aplikasi ADMIN**, hanya baca/rekap semua pegawai.
+
 ### 4.1 Layar absen
 
 ```
-GET /absensi/hari-ini
+GET /absensi/saya/hari-ini
 ```
 Pakai respons ini untuk menyusun layar, **bukan** jam/tanggal HP:
 
@@ -146,7 +150,7 @@ Tombol yang ditampilkan:
 ### 4.2 Kirim absen
 
 ```
-POST /absensi   (multipart/form-data)
+POST /absensi/saya   (multipart/form-data)
   jenis        masuk | pulang
   latitude     number
   longitude    number
@@ -185,7 +189,7 @@ tertaut ke pegawai aktif).
 Kegagalan yang terjadi **sebelum** request terkirim tidak terlihat server. Laporkan:
 
 ```
-POST /absensi/gagal   (JSON)
+POST /absensi/saya/gagal   (JSON)
 { "stage": "GPS", "error_code": "GPS_PERMISSION_DENIED", "jenis": "masuk",
   "error_message": "User menolak izin lokasi", "detail": { "app_version": "1.0.0" } }
 ```
@@ -197,7 +201,7 @@ POST /absensi/gagal   (JSON)
 ### 4.5 Riwayat & rekap
 
 ```
-GET /absensi/riwayat?tanggal_mulai=2026-11-01&tanggal_selesai=2026-11-30     (milik sendiri)
+GET /absensi/saya/riwayat?tanggal_mulai=2026-11-01&tanggal_selesai=2026-11-30     (milik sendiri)
 GET /absensi?tanggal_mulai=...&tanggal_selesai=...&id_pegawai=7             (absensi.view_all)
 GET /absensi/gagal?tanggal_mulai=...                                         (absensi_gagal.view, maks 1000 baris)
 ```
