@@ -68,8 +68,8 @@ def _check_user_fields(data, is_new):
         errors["username"] = "3-50 karakter"
     if data.get("email") and len(data["email"].strip()) > 150:
         errors["email"] = "max 150"
-    if is_new and len(data.get("password") or "") < 8:
-        errors["password"] = "Minimal 8 karakter"
+    if is_new and len(data.get("password") or "") < 5:
+        errors["password"] = "Minimal 5 karakter"
     if errors:
         raise ValidationError("Data akun tidak valid", errors)
 

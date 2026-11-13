@@ -13,7 +13,7 @@ user_create = ns.model("UserCreate", {
 user_update = ns.model("UserUpdate", {
     "username": fields.String(required=True, min_length=3, max_length=50, example="budi"),
     "email": fields.String(max_length=150, example="budi@desa.id"),
-    "password": fields.String(min_length=8, example="rahasiabaru"),
+    "password": fields.String(min_length=5, example="rahasiabaru"),
 })
 
 user_roles_input = ns.model("UserRoles", {

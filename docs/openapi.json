@@ -1636,7 +1636,7 @@
       "properties": {
         "password": {
           "example": "rahasiabaru",
-          "minLength": 8,
+          "minLength": 5,
           "type": "string"
         }
       },
@@ -2516,7 +2516,7 @@
         },
         "password": {
           "example": "rahasiabaru",
-          "minLength": 8,
+          "minLength": 5,
           "type": "string"
         },
         "username": {
@@ -4827,7 +4827,7 @@
             "type": "string"
           },
           {
-            "description": "Minimal 8 karakter",
+            "description": "Minimal 5 karakter",
             "in": "formData",
             "name": "password",
             "required": true,

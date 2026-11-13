@@ -127,6 +127,6 @@ def prepare_update(id_target, data, actor_permissions):
 def set_password(id_target, password, id_actor, actor_permissions):
     get(id_target)
     _guard_superuser_target(id_target, actor_permissions)
-    if len(password or "") < 8:
-        raise ValidationError("Password minimal 8 karakter", {"password": "Minimal 8 karakter"})
+    if len(password or "") < 5:
+        raise ValidationError("Password minimal 5 karakter", {"password": "Minimal 5 karakter"})
     query.update_password(id_target, generate_password_hash(password), id_actor)

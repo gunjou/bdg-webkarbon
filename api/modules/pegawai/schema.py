@@ -14,7 +14,7 @@ pegawai_create_parser.add_argument("nip", type=str, **_form)
 pegawai_create_parser.add_argument("phone", type=str, **_form)
 pegawai_create_parser.add_argument("username", type=str, required=True, help="Username login", **_form)
 pegawai_create_parser.add_argument("email", type=str, **_form)
-pegawai_create_parser.add_argument("password", type=str, required=True, help="Minimal 8 karakter", **_form)
+pegawai_create_parser.add_argument("password", type=str, required=True, help="Minimal 5 karakter", **_form)
 pegawai_create_parser.add_argument("id_roles", type=int, action="append",
                                    help="Kosong = PEGAWAI. 1 SUPER_ADMIN, 2 ADMIN, 3 SEKDES, 4 KADES, 5 PEGAWAI",
                                    **_form)
@@ -37,7 +37,7 @@ pegawai_update = ns.model("PegawaiUpdate", {
 })
 
 password_input = ns.model("PegawaiPassword", {
-    "password": fields.String(required=True, min_length=8, example="rahasiabaru"),
+    "password": fields.String(required=True, min_length=5, example="rahasiabaru"),
 })
 
 # --- output ---

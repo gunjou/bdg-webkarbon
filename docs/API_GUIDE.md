@@ -190,7 +190,7 @@ Alpha = hari kerja (jadwal pegawai saat ini, bukan libur) yang sudah lewat tanpa
 ## 6. Pegawai (admin)
 
 - `POST /pegawai` = **multipart/form-data**: data pegawai + akun login sekaligus, foto opsional.
-  - Wajib: `full_name`, `id_jabatan`, `username`, `password` (≥ 8).
+  - Wajib: `full_name`, `id_jabatan`, `username`, `password` (≥ 5).
   - Opsional: `id_jadwal_kerja` (default 1), `nip`, `phone`, `email`, `id_roles` (kirim berulang:
     `id_roles=3&id_roles=5`; kosong = PEGAWAI), `foto`.
   - Respons berisi pegawai + user. **Tampilkan `kode_pemulihan` ke admin** lewat `GET /users/{id_user}` bila perlu.
