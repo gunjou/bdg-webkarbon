@@ -8,8 +8,9 @@ Status harian pegawai (urutan menentukan):
   Izin yang masih 'diajukan' tidak membebaskan dari alpha. Jadwal = jadwal pegawai SAAT INI (tidak ada histori).
 
 Koreksi absen (admin langsung, atau persetujuan pengajuan koreksi pegawai):
-  upsert absensi per (pegawai, tanggal, jenis): waktu = tanggal + jam (WITA), status bebas dipilih admin
-  (default tepat_waktu, tidak dihitung dari jadwal). Ditandai is_koreksi karena created_by/updated_by bukan akun
+  upsert absensi per (pegawai, tanggal, jenis): waktu = tanggal + jam (WITA). Status dihitung dari jadwal pegawai
+  SAAT INI dgn aturan sama seperti presensi: masuk lewat jam masuk + toleransi -> terlambat (menit dari jam masuk);
+  pulang sebelum jam pulang -> pulang_cepat. Ditolak jika tanggal hari libur aktif / bukan hari kerja. Ditandai is_koreksi karena created_by/updated_by bukan akun
   pegawai itu sendiri. GPS/foto kosong pada absen yang dibuat lewat koreksi.
 
 Review perizinan: hanya status 'diajukan'; tidak boleh meninjau pengajuan sendiri; ditolak wajib catatan.
@@ -25,7 +26,6 @@ from api.utils.datetime import WITA, get_wita
 from . import query
 
 MAX_RANGE_HARI = 62
-STATUS_ABSEN = ("tepat_waktu", "terlambat", "pulang_cepat")
 
 
 # ---------------- helper ----------------
@@ -97,6 +97,7 @@ def harian(args):
             "jabatan_name": peg["jabatan_name"],
             "status_hari": _status_hari(peg, tgl, rows, z, libur, today),
             "keterangan": libur.get(tgl),
+            "jadwal": (peg["jadwal_harian"] or {}).get(HARI[tgl.weekday()]),
             "masuk": rows.get("masuk"), "pulang": rows.get("pulang"), "izin": z,
         })
     return {"tanggal": tgl, "pegawai": result}
@@ -172,32 +173,33 @@ def _jam(value):
         raise ValidationError("Format jam HH:MM", {"jam": "HH:MM"})
 
 
-def _status_absen(data, jenis):
-    status = data.get("status") or "tepat_waktu"
-    if status not in STATUS_ABSEN or (jenis == "masuk" and status == "pulang_cepat") \
-            or (jenis == "pulang" and status == "terlambat"):
-        raise ValidationError("Status tidak sesuai jenis absen", {"status": "tidak valid"})
-    telat = int(data.get("terlambat_menit") or 0) if status == "terlambat" else 0
-    if telat < 0:
-        raise ValidationError("terlambat_menit tidak boleh negatif", {"terlambat_menit": ">= 0"})
-    return status, telat
-
-
-def _koreksi_row(id_pegawai, tanggal, jenis, jam, data):
-    status, telat = _status_absen(data, jenis)
-    return {"id_pegawai": id_pegawai, "tanggal": tanggal, "jenis": jenis,
+def _koreksi_row(id_pegawai, tanggal, jenis, jam):
+    peg = next(iter(query.get_pegawai_aktif(id_pegawai)), None)
+    if not peg:
+        raise ValidationError("Pegawai tidak ditemukan / tidak aktif", {"id_pegawai": "tidak valid"})
+    libur = query.get_libur(tanggal, tanggal)
+    if tanggal in libur:
+        raise ValidationError(f"Tanggal tersebut hari libur: {libur[tanggal]}", {"tanggal": "hari libur"})
+    hari = (peg["jadwal_harian"] or {}).get(HARI[tanggal.weekday()])
+    if not hari:
+        raise ValidationError("Tanggal tersebut bukan hari kerja menurut jadwal pegawai", {"tanggal": "bukan hari kerja"})
+    jadwal = time.fromisoformat(hari[jenis])
+    telat = (jam.hour * 60 + jam.minute) - (jadwal.hour * 60 + jadwal.minute)
+    if jenis == "masuk":
+        status = "terlambat" if telat > int(peg["toleransi_terlambat_menit"] or 0) else "tepat_waktu"
+    else:
+        status = "pulang_cepat" if jam < jadwal else "tepat_waktu"
+    return {"id_pegawai": id_pegawai, "tanggal": tanggal, "jenis": jenis, "jam_jadwal": jadwal,
             "waktu_absen": datetime.combine(tanggal, jam, tzinfo=WITA),
-            "status": status, "terlambat_menit": telat}
+            "status": status, "terlambat_menit": telat if status == "terlambat" else 0}
 
 
 def koreksi(data, id_user):
     today = get_wita().date()
-    if not query.get_pegawai_aktif(data["id_pegawai"]):
-        raise ValidationError("Pegawai tidak ditemukan / tidak aktif", {"id_pegawai": "tidak valid"})
     tanggal = _tgl(data.get("tanggal"), "tanggal", None)
     if not tanggal or tanggal > today:
         raise ValidationError("Tanggal wajib dan tidak boleh di masa depan", {"tanggal": "tidak valid"})
-    row = _koreksi_row(data["id_pegawai"], tanggal, data["jenis"], _jam(data.get("jam")), data)
+    row = _koreksi_row(data["id_pegawai"], tanggal, data["jenis"], _jam(data.get("jam")))
     return get_absensi(query.upsert_koreksi(row, id_user))
 
 
@@ -249,9 +251,7 @@ def review(id_perizinan, data, id_user, id_pegawai_reviewer):
 
     koreksi_row = None
     if data["status"] == "disetujui" and row["jenis_pengajuan"] == "koreksi":
-        koreksi_row = _koreksi_row(row["id_pegawai"], row["tanggal_mulai"], row["jenis_absen"],
-                                   row["jam_koreksi"], {"status": data.get("status_absen"),
-                                                        "terlambat_menit": data.get("terlambat_menit")})
+        koreksi_row = _koreksi_row(row["id_pegawai"], row["tanggal_mulai"], row["jenis_absen"], row["jam_koreksi"])
     if not query.review_perizinan(id_perizinan, data["status"], catatan, id_user, koreksi_row):
         raise ValidationError("Pengajuan sudah ditinjau / dibatalkan")  # berubah di antara cek & update
     return get_perizinan(id_perizinan)

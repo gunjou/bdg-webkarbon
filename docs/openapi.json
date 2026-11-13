@@ -239,6 +239,14 @@
         "jabatan_name": {
           "type": "string"
         },
+        "jadwal": {
+          "description": "Jadwal pegawai hari itu; null = bukan hari kerja",
+          "example": {
+            "masuk": "07:30",
+            "pulang": "15:30"
+          },
+          "type": "object"
+        },
         "keterangan": {
           "description": "Nama hari libur, jika ada",
           "type": "string"
@@ -333,7 +341,7 @@
           "type": "integer"
         },
         "jam": {
-          "description": "HH:MM (WITA)",
+          "description": "HH:MM (WITA). Status & terlambat dihitung dari jadwal",
           "example": "07:30",
           "type": "string"
         },
@@ -345,25 +353,10 @@
           "example": "masuk",
           "type": "string"
         },
-        "status": {
-          "description": "Default tepat_waktu",
-          "enum": [
-            "tepat_waktu",
-            "terlambat",
-            "pulang_cepat"
-          ],
-          "example": "tepat_waktu",
-          "type": "string"
-        },
         "tanggal": {
           "description": "YYYY-MM-DD, tidak boleh masa depan",
           "example": "2026-11-12",
           "type": "string"
-        },
-        "terlambat_menit": {
-          "description": "Hanya dipakai jika status terlambat",
-          "minimum": 0,
-          "type": "integer"
         }
       },
       "required": [
@@ -1763,21 +1756,6 @@
           ],
           "example": "disetujui",
           "type": "string"
-        },
-        "status_absen": {
-          "description": "Hanya koreksi disetujui; default tepat_waktu",
-          "enum": [
-            "tepat_waktu",
-            "terlambat",
-            "pulang_cepat"
-          ],
-          "example": "tepat_waktu",
-          "type": "string"
-        },
-        "terlambat_menit": {
-          "description": "Hanya koreksi dgn status_absen terlambat",
-          "minimum": 0,
-          "type": "integer"
         }
       },
       "required": [

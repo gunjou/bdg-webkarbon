@@ -39,16 +39,12 @@ koreksi_input = ns.model("AbsensiKoreksiInput", {
     "id_pegawai": fields.Integer(required=True, example=7),
     "tanggal": fields.String(required=True, example="2026-11-12", description="YYYY-MM-DD, tidak boleh masa depan"),
     "jenis": fields.String(required=True, enum=JENIS),
-    "jam": fields.String(required=True, example="07:30", description="HH:MM (WITA)"),
-    "status": fields.String(enum=STATUS_ABSEN, description="Default tepat_waktu"),
-    "terlambat_menit": fields.Integer(min=0, description="Hanya dipakai jika status terlambat"),
+    "jam": fields.String(required=True, example="07:30", description="HH:MM (WITA). Status & terlambat dihitung dari jadwal"),
 })
 
 review_input = ns.model("PerizinanReviewInput", {
     "status": fields.String(required=True, enum=["disetujui", "ditolak"]),
     "catatan_peninjau": fields.String(description="Wajib jika ditolak"),
-    "status_absen": fields.String(enum=STATUS_ABSEN, description="Hanya koreksi disetujui; default tepat_waktu"),
-    "terlambat_menit": fields.Integer(min=0, description="Hanya koreksi dgn status_absen terlambat"),
 })
 
 # ---------------- output ----------------
@@ -97,6 +93,7 @@ harian_out = ns.model("AbsensiHarian", {
         "jabatan_name": fields.String(),
         "status_hari": fields.String(enum=STATUS_HARI),
         "keterangan": fields.String(description="Nama hari libur, jika ada"),
+        "jadwal": fields.Raw(example={"masuk": "07:30", "pulang": "15:30"}, description="Jadwal pegawai hari itu; null = bukan hari kerja"),
         "masuk": fields.Nested(absensi_out, allow_null=True),
         "pulang": fields.Nested(absensi_out, allow_null=True),
         "izin": fields.Nested(izin_ringkas_out, allow_null=True, description="Izin diajukan/disetujui hari itu"),

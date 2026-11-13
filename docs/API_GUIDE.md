@@ -171,15 +171,15 @@ Aturan lengkap: docstring `api/modules/absensi/service.py`.
 
 | Endpoint | Fungsi |
 |---|---|
-| `GET /absensi/harian?tanggal=` | Semua pegawai aktif + `status_hari` (`hadir|izin|libur|bukan_hari_kerja|alpha|belum_absen`), `masuk`, `pulang`, `izin` (diajukan/disetujui). Dashboard "siapa belum hadir". |
+| `GET /absensi/harian?tanggal=` | Semua pegawai aktif + `status_hari` (`hadir|izin|libur|bukan_hari_kerja|alpha|belum_absen`), `masuk`, `pulang`, `izin` (diajukan/disetujui), `jadwal` (`{masuk, pulang}` hari itu, `null` = bukan hari kerja), `keterangan` (nama hari libur). Dashboard "siapa belum hadir". |
 | `GET /absensi/rekap?bulan=YYYY-MM&id_pegawai=` | Rekap per pegawai: `hari_kerja, hadir, terlambat, terlambat_menit, pulang_cepat, tanpa_masuk, tanpa_pulang, izin, izin_per_jenis, alpha, libur`. Bulan berjalan dihitung s/d hari ini. |
 | `GET /absensi?tanggal_mulai&tanggal_selesai&id_pegawai&status` | Daftar absen (default hari ini, maks 62 hari). |
 | `GET /absensi/{id}`, `/absensi/{id}/foto` | Detail & foto selfie (absen hasil koreksi tidak punya foto → `has_photo=false`). |
-| `PUT /absensi/koreksi` (JSON) | Buat/timpa absen: `id_pegawai, tanggal, jenis, jam, status?` (default `tepat_waktu`), `terlambat_menit?`. |
+| `PUT /absensi/koreksi` (JSON) | Buat/timpa absen: `id_pegawai, tanggal, jenis, jam`. `status`, `terlambat_menit` & `jam_jadwal` dihitung dari jadwal pegawai (aturan sama dgn presensi). Hari libur / bukan hari kerja → `422`. |
 | `GET /absensi/gagal?...&error_code=`, `/absensi/gagal/{id}/foto` | Log absen gagal (maks 1000) & foto wajah tidak cocok. |
 | `GET /absensi/perizinan?status&jenis_pengajuan&id_pegawai&tanggal_mulai&tanggal_selesai` | Daftar pengajuan. Default `status=diajukan` (antrean); `status=semua` untuk semua. |
 | `GET /absensi/perizinan/{id}`, `/lampiran` | Detail & lampiran. |
-| `PUT /absensi/perizinan/{id}/review` (JSON) | `status` (`disetujui|ditolak`), `catatan_peninjau` (wajib jika ditolak). Koreksi disetujui → absen tercatat otomatis; `status_absen?` (default `tepat_waktu`), `terlambat_menit?`. Tidak boleh meninjau pengajuan sendiri (403). |
+| `PUT /absensi/perizinan/{id}/review` (JSON) | `status` (`disetujui|ditolak`), `catatan_peninjau` (wajib jika ditolak). Koreksi disetujui → absen tercatat otomatis, status dihitung dari jadwal (hari libur → `422`). Tidak boleh meninjau pengajuan sendiri (403). |
 
 `is_koreksi = true` pada absen = dibuat/diubah oleh akun selain pegawai itu sendiri (tampilkan label "Koreksi").
 Alpha = hari kerja (jadwal pegawai saat ini, bukan libur) yang sudah lewat tanpa absen dan tanpa izin disetujui.

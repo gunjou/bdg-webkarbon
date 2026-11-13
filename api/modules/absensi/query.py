@@ -28,7 +28,7 @@ _ABSENSI_FROM = """
 def get_pegawai_aktif(id_pegawai=None):
     sql = text("""
         SELECT p.id_pegawai, p.full_name, p.nip, j.name AS jabatan_name,
-               jk.jadwal_harian, jk.name AS jadwal_kerja_name
+               jk.jadwal_harian, jk.name AS jadwal_kerja_name, jk.toleransi_terlambat_menit
         FROM pegawai p
         JOIN jabatan j ON j.id_jabatan = p.id_jabatan
         LEFT JOIN jadwal_kerja jk ON jk.id_jadwal_kerja = p.id_jadwal_kerja AND jk.is_active = 1
@@ -81,10 +81,10 @@ def get_izin_range(mulai, selesai, status, id_pegawai=None):
 
 
 _UPSERT_KOREKSI = text("""
-    INSERT INTO absensi (id_pegawai, tanggal, jenis, waktu_absen, terlambat_menit, status, created_at, created_by)
-    VALUES (:id_pegawai, :tanggal, :jenis, :waktu_absen, :terlambat_menit, :status, :now, :id_user)
+    INSERT INTO absensi (id_pegawai, tanggal, jenis, waktu_absen, jam_jadwal, terlambat_menit, status, created_at, created_by)
+    VALUES (:id_pegawai, :tanggal, :jenis, :waktu_absen, :jam_jadwal, :terlambat_menit, :status, :now, :id_user)
     ON CONFLICT ON CONSTRAINT uq_absensi_pegawai_tanggal_jenis DO UPDATE
-    SET waktu_absen = EXCLUDED.waktu_absen, terlambat_menit = EXCLUDED.terlambat_menit,
+    SET waktu_absen = EXCLUDED.waktu_absen, jam_jadwal = EXCLUDED.jam_jadwal, terlambat_menit = EXCLUDED.terlambat_menit,
         status = EXCLUDED.status, updated_at = :now, updated_by = :id_user
     RETURNING id_absensi
 """)
