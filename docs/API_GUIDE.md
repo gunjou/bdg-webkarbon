@@ -102,7 +102,7 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 | `absensi.koreksi` | **Aplikasi ADMIN**: koreksi absen | `PUT /absensi/koreksi` |
 | `absensi_gagal.view` | **Aplikasi ADMIN**: log absen gagal | `GET /absensi/gagal`, `/absensi/gagal/{id}/foto` |
 | `perizinan.view_all` | **Aplikasi ADMIN**: daftar pengajuan | `GET /absensi/perizinan`, `/absensi/perizinan/{id}`, `/absensi/perizinan/{id}/lampiran` |
-| `perizinan.review` | **Aplikasi ADMIN**: setujui/tolak | `PUT /absensi/perizinan/{id}/review` |
+| `perizinan.review` | **Aplikasi ADMIN**: setujui/tolak, tambah izin pegawai | `PUT /absensi/perizinan/{id}/review`, `POST /absensi/perizinan` |
 | `pegawai.view` | Daftar pegawai | `GET /pegawai`, `/pegawai/{id}`, `/pegawai/{id}/foto` |
 | `pegawai.manage` | Tambah/ubah/nonaktifkan pegawai, ganti password | `POST/PUT/DELETE /pegawai...`, `PUT /pegawai/{id}/password` |
 | `pegawai.enroll_face` | Ganti foto wajah | `PUT /pegawai/{id}/foto` |
@@ -179,6 +179,7 @@ Aturan lengkap: docstring `api/modules/absensi/service.py`.
 | `GET /absensi/gagal?...&error_code=`, `/absensi/gagal/{id}/foto` | Log absen gagal (maks 1000) & foto wajah tidak cocok. |
 | `GET /absensi/perizinan?status&jenis_pengajuan&id_pegawai&tanggal_mulai&tanggal_selesai` | Daftar pengajuan. Default `status=diajukan` (antrean); `status=semua` untuk semua. |
 | `GET /absensi/perizinan/{id}`, `/lampiran` | Detail & lampiran. |
+| `POST /absensi/perizinan` (multipart) | Admin menambah izin untuk pegawai: `id_pegawai, id_jenis_izin, tanggal_mulai, tanggal_selesai?, alasan, lampiran?`. Aturan sama dgn pengajuan pegawai (maks 30 hari, tidak bentrok, lampiran jika wajib); langsung `disetujui`, peninjau = admin. Akses `perizinan.review`. |
 | `PUT /absensi/perizinan/{id}/review` (JSON) | `status` (`disetujui|ditolak`), `catatan_peninjau` (wajib jika ditolak). Koreksi disetujui → absen tercatat otomatis, status dihitung dari jadwal (hari libur → `422`). Tidak boleh meninjau pengajuan sendiri (403). |
 
 `is_koreksi = true` pada absen = dibuat/diubah oleh akun selain pegawai itu sendiri (tampilkan label "Koreksi").

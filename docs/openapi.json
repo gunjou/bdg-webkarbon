@@ -516,7 +516,7 @@
     "AbsensiPerizinanResponse": {
       "properties": {
         "code": {
-          "example": 200,
+          "example": 201,
           "type": "integer"
         },
         "data": {
@@ -2870,6 +2870,94 @@
           },
           "403": {
             "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "absensi"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "review. Tambah izin untuk pegawai (langsung disetujui). multipart/form-data.",
+        "operationId": "post_absensi_perizinan_list",
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "id_pegawai",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "formData",
+            "name": "id_jenis_izin",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "description": "YYYY-MM-DD",
+            "in": "formData",
+            "name": "tanggal_mulai",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "YYYY-MM-DD, default = tanggal_mulai",
+            "in": "formData",
+            "name": "tanggal_selesai",
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "alasan",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Opsional (wajib jika jenis izin butuh_lampiran). jpg/png/pdf",
+            "in": "formData",
+            "name": "lampiran",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/AbsensiPerizinanResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }

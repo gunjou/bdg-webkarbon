@@ -157,6 +157,19 @@ def get_perizinan(id_perizinan):
         return conn.execute(sql, {"id": id_perizinan}).mappings().first()
 
 
+def insert_izin_disetujui(data, id_user):
+    """Izin yang dibuat admin: langsung disetujui, peninjau = admin pembuat."""
+    sql = text("""
+        INSERT INTO perizinan (id_pegawai, id_jenis_izin, jenis_pengajuan, tanggal_mulai, tanggal_selesai, alasan,
+                               lampiran_path, status, reviewed_by, reviewed_at, created_at, created_by)
+        VALUES (:id_pegawai, :id_jenis_izin, 'izin', :tanggal_mulai, :tanggal_selesai, :alasan,
+                :lampiran_path, 'disetujui', :id_user, :now, :now, :id_user)
+        RETURNING id_perizinan
+    """)
+    with get_engine().begin() as conn:
+        return conn.execute(sql, {**data, "now": get_wita(), "id_user": id_user}).scalar()
+
+
 def review_perizinan(id_perizinan, status, catatan, id_user, koreksi=None):
     """Satu transaksi: ubah status (hanya jika masih 'diajukan') + catat absen koreksi bila disetujui.
     Kembalikan rowcount perizinan (0 = sudah tidak diajukan, tidak ada yang diubah)."""

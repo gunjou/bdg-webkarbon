@@ -8,7 +8,7 @@ from api.shared.docs import api_doc, file_doc
 from api.shared.response import success
 from api.utils.timing import measure_execution_time
 from . import ns, service
-from .schema import (absensi_out, absensi_parser, gagal_out, gagal_parser, harian_out, harian_parser,
+from .schema import (absensi_out, absensi_parser, gagal_out, gagal_parser, harian_out, harian_parser, izin_admin_parser,
                      koreksi_input, perizinan_out, perizinan_parser, rekap_out, rekap_parser, review_input)
 
 
@@ -111,6 +111,17 @@ class AbsensiPerizinanList(Resource):
     def get(self):
         """Akses: perizinan.view_all. Daftar pengajuan semua pegawai (default status diajukan; status=semua)."""
         return success(service.list_perizinan(perizinan_parser.parse_args()))
+
+    @api_doc(ns, perizinan_out, status=201, errors=(400, 401, 403, 413, 422))
+    @ns.expect(izin_admin_parser)
+    @permission_required("perizinan.review")
+    @measure_execution_time
+    def post(self):
+        """Akses: perizinan.review. Tambah izin untuk pegawai (langsung disetujui). multipart/form-data."""
+        args = izin_admin_parser.parse_args()
+        lampiran = args.pop("lampiran", None)
+        data = service.tambah_izin(args, lampiran.read() if lampiran else None, _id_user())
+        return success(data, "Izin berhasil ditambahkan", 201)
 
 
 @ns.route("/perizinan/<int:id_perizinan>")

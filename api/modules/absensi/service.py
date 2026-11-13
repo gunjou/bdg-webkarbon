@@ -13,6 +13,9 @@ Koreksi absen (admin langsung, atau persetujuan pengajuan koreksi pegawai):
   pulang sebelum jam pulang -> pulang_cepat. Ditolak jika tanggal hari libur aktif / bukan hari kerja. Ditandai is_koreksi karena created_by/updated_by bukan akun
   pegawai itu sendiri. GPS/foto kosong pada absen yang dibuat lewat koreksi.
 
+Tambah izin oleh admin: aturan sama dgn pengajuan pegawai (jenis aktif, maks 30 hari, tidak bentrok, lampiran
+  wajib jika jenis butuh_lampiran), tanpa batas tanggal; langsung 'disetujui' dgn peninjau = admin pembuat.
+
 Review perizinan: hanya status 'diajukan'; tidak boleh meninjau pengajuan sendiri; ditolak wajib catatan.
 """
 import calendar
@@ -21,6 +24,7 @@ from datetime import date, datetime, time, timedelta
 
 from api.core import storage
 from api.modules.master.jadwal_kerja.service import HARI
+from api.modules.presensi import service as presensi  # aturan izin dipakai bersama
 from api.shared.exceptions import ForbiddenError, NotFoundError, ValidationError
 from api.utils.datetime import WITA, get_wita
 from . import query
@@ -237,6 +241,26 @@ def get_perizinan(id_perizinan):
 def lampiran_perizinan(id_perizinan):
     full = _file(_perizinan(id_perizinan)["lampiran_path"], "Lampiran tidak ada")
     return full, "application/pdf" if full.endswith(".pdf") else "image/jpeg"
+
+
+def tambah_izin(data, lampiran, id_user):
+    if not query.get_pegawai_aktif(data["id_pegawai"]):
+        raise ValidationError("Pegawai tidak ditemukan / tidak aktif", {"id_pegawai": "tidak valid"})
+    alasan = (data.get("alasan") or "").strip()
+    if not alasan:
+        raise ValidationError("Alasan wajib diisi", {"alasan": "required"})
+    row, butuh_lampiran = presensi._clean_izin({"id_pegawai": data["id_pegawai"]}, data, None)
+    isi, ext = presensi._lampiran(lampiran)
+    if butuh_lampiran and not isi:
+        raise ValidationError("Jenis izin ini wajib melampirkan bukti", {"lampiran": "required"})
+    path = storage.save_file(isi, f"perizinan/{get_wita():%Y-%m}", ext) if isi else None
+    try:
+        id_perizinan = query.insert_izin_disetujui({**row, "id_pegawai": data["id_pegawai"], "alasan": alasan,
+                                                    "lampiran_path": path}, id_user)
+    except Exception:
+        storage.delete_file(path)
+        raise
+    return get_perizinan(id_perizinan)
 
 
 def review(id_perizinan, data, id_user, id_pegawai_reviewer):

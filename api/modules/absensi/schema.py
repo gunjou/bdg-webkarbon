@@ -1,5 +1,6 @@
 # api/modules/absensi/schema.py
 from flask_restx import fields, reqparse
+from werkzeug.datastructures import FileStorage
 
 from . import ns
 
@@ -34,6 +35,16 @@ perizinan_parser.add_argument("jenis_pengajuan", type=str, choices=["izin", "kor
 perizinan_parser.add_argument("id_pegawai", type=int, location="args")
 perizinan_parser.add_argument("tanggal_mulai", type=str, location="args", help="YYYY-MM-DD; filter irisan tanggal izin")
 perizinan_parser.add_argument("tanggal_selesai", type=str, location="args", help="YYYY-MM-DD")
+
+# admin menambahkan izin untuk pegawai (multipart agar lampiran bisa ikut)
+izin_admin_parser = reqparse.RequestParser(bundle_errors=True)
+izin_admin_parser.add_argument("id_pegawai", type=int, required=True, location="form")
+izin_admin_parser.add_argument("id_jenis_izin", type=int, required=True, location="form")
+izin_admin_parser.add_argument("tanggal_mulai", type=str, required=True, location="form", help="YYYY-MM-DD")
+izin_admin_parser.add_argument("tanggal_selesai", type=str, location="form", help="YYYY-MM-DD, default = tanggal_mulai")
+izin_admin_parser.add_argument("alasan", type=str, required=True, location="form")
+izin_admin_parser.add_argument("lampiran", type=FileStorage, location="files",
+                               help="Opsional (wajib jika jenis izin butuh_lampiran). jpg/png/pdf")
 
 koreksi_input = ns.model("AbsensiKoreksiInput", {
     "id_pegawai": fields.Integer(required=True, example=7),
