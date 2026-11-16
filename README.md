@@ -34,9 +34,14 @@ Jalankan migrasi berurutan secara manual:
 ```bash
 psql -h <host> -U <user> -d <db> -f migrations/001_init.sql
 psql -h <host> -U <user> -d <db> -f migrations/002_kode_pemulihan_dan_seed_roles.sql
+psql -h <host> -U <user> -d <db> -f migrations/003_koreksi_absensi.sql
+psql -h <host> -U <user> -d <db> -f migrations/004_persuratan.sql
+psql -h <host> -U <user> -d <db> -f migrations/005_permission_persuratan.sql
 ```
 
 Skema & daftar role: [SCHEMA.md](SCHEMA.md).
+
+WeasyPrint (PDF surat) butuh library sistem pango: `brew install pango` (macOS) / `apt install libpango-1.0-0 libpangoft2-1.0-0` (Debian/Ubuntu).
 
 ## Menjalankan
 

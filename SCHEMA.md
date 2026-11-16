@@ -128,13 +128,14 @@ Aturan (CHECK):
 | perizinan.view_all                                                         |     ✅      |  ✅   |   ✅   |  ✅   |         |
 | perizinan.review                                                           |     ✅      |       |   ✅   |  ✅   |         |
 | absensi.self, perizinan.self                                               |     ✅      |       |        |       |   ✅    |
+| jenis_surat.manage, surat.view/create/terbitkan/cancel/edit_redaksi, penduduk.view/manage, ref_option.manage (migrasi 005) | ✅ | ✅ | | | |
 
 Nilai `roles.permissions`:
 
 - **SUPER_ADMIN** — `["*"]` (developer; semua permission)
 - **ADMIN** — `user.view, user.manage, user_role.assign, login_failure.view, pegawai.view, pegawai.manage,
 pegawai.enroll_face, jabatan.manage, lokasi_kantor.manage, jadwal_kerja.manage, hari_libur.manage,
-jenis_izin.manage, absensi.view_all, absensi_gagal.view, perizinan.view_all`
+jenis_izin.manage, absensi.view_all, absensi_gagal.view, perizinan.view_all` + persuratan (migrasi 005; ADMIN merangkap operator surat)
 - **SEKDES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review`
 - **KADES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review`
 - **PEGAWAI** — `absensi.self, perizinan.self`
