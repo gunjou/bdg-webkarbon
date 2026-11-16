@@ -1,12 +1,12 @@
-"""Pemisahan endpoint absensi admin vs aplikasi absen. DB di-mock."""
+"""Pemisahan endpoint absensi admin (/absensi) vs aplikasi absen (/presensi). DB di-mock."""
 import unittest
 from unittest.mock import patch
 
 from flask_jwt_extended import create_access_token
 
 from api import app
-from api.modules.absensi import service
-from api.shared.exceptions import ForbiddenError
+from api.modules.presensi import service as presensi
+from api.shared.exceptions import NotFoundError
 
 
 def token(perms):
@@ -27,34 +27,36 @@ class RouteAccessTest(unittest.TestCase):
             self.assertEqual(self.c.get(url, headers=PEGAWAI).status_code, 403, url)
 
     def test_admin_ditolak_endpoint_absen(self):
-        self.assertEqual(self.c.get("/absensi/saya/hari-ini", headers=ADMIN).status_code, 403)
+        for url in ("/presensi/hari-ini", "/presensi/riwayat"):
+            self.assertEqual(self.c.get(url, headers=ADMIN).status_code, 403, url)
 
     def test_route_lama_tidak_ada(self):
-        self.assertIn(self.c.get("/absensi/hari-ini", headers=PEGAWAI).status_code, (404, 405))
+        for url in ("/absensi/hari-ini", "/absensi/saya/hari-ini"):
+            self.assertIn(self.c.get(url, headers=PEGAWAI).status_code, (404, 405), url)
 
     def test_pegawai_hari_ini(self):
-        with patch.object(service, "status_hari_ini", return_value={}) as f:
-            r = self.c.get("/absensi/saya/hari-ini", headers=PEGAWAI)
+        with patch.object(presensi, "hari_ini", return_value={}) as f:
+            r = self.c.get("/presensi/hari-ini", headers=PEGAWAI)
         self.assertEqual(r.status_code, 200)
         f.assert_called_once_with(5)
 
 
 class FotoOwnershipTest(unittest.TestCase):
-    def run_foto(self, id_user, ctx_pegawai):
-        with patch.object(service, "query") as q, patch.object(service, "_file", return_value="x.jpg"):
-            q.get_by_id.return_value = {"id_pegawai": 3, "tanggal": None, "photo_path": "p"}
-            q.get_context.return_value = {"id_pegawai": ctx_pegawai}
-            return service.foto_path(1, id_user)
+    """Foto selfie di aplikasi absen hanya milik sendiri; milik orang lain dijawab 404 (id tidak bisa ditebak)."""
 
-    def test_admin_tanpa_cek_pemilik(self):
-        self.assertEqual(self.run_foto(None, 99), "x.jpg")
+    def run_foto(self, pemilik):
+        with patch.object(presensi, "_context", return_value={"id_pegawai": 3}), \
+             patch.object(presensi.query, "get_by_id", return_value={"id_pegawai": pemilik, "photo_path": "p.jpg"}), \
+             patch.object(presensi.storage, "full_path", return_value="/x/p.jpg"), \
+             patch.object(presensi.os.path, "exists", return_value=True):
+            return presensi.foto_path(5, 1)
 
     def test_pemilik_ok(self):
-        self.assertEqual(self.run_foto(5, 3), "x.jpg")
+        self.assertEqual(self.run_foto(3), "/x/p.jpg")
 
-    def test_bukan_pemilik_ditolak(self):
-        with self.assertRaises(ForbiddenError):
-            self.run_foto(5, 99)
+    def test_bukan_pemilik_404(self):
+        with self.assertRaises(NotFoundError):
+            self.run_foto(99)
 
 
 if __name__ == "__main__":

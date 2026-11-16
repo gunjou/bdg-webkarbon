@@ -22,4 +22,4 @@ JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.getenv("JWT_REFRESH_EXPIRES", 
 
 # === Upload === #
 UPLOAD_DIR = os.path.abspath(os.getenv("UPLOAD_DIR", "uploads"))
-MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", 5))
+MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", 10))  # scan surat & lampiran dari HP sering > 5 MB

@@ -1,4 +1,4 @@
-# Panduan API untuk Frontend — HRIS Desa Karang Bongkot
+# Panduan API untuk Frontend — Sistem Kantor Desa Karang Bongkot
 
 Dokumen ini menjelaskan **cara pakai** API. Daftar endpoint, body, dan bentuk respons yang lengkap ada di:
 
@@ -15,12 +15,12 @@ Jika dokumen ini berbeda dengan spec, **spec yang benar**.
 |---|---|
 | Base URL | diatur per environment di frontend (mis. `VITE_API_URL`), tidak ada di spec |
 | Auth | header `Authorization: Bearer <access_token>` |
-| Body | JSON, kecuali endpoint upload foto (`multipart/form-data`) |
+| Body | JSON, kecuali endpoint upload file (foto, lampiran, logo, scan arsip: `multipart/form-data`) |
 | Waktu | ISO 8601 dengan zona WITA, mis. `2026-11-11T07:25:03+08:00` |
 | Tanggal | `YYYY-MM-DD` · Jam (`jam_jadwal`, jadwal) `HH:MM` |
 | Flag | `is_active`, `butuh_lampiran`, dll. = angka `1`/`0`, **bukan** boolean |
 | Hapus | `DELETE` = **nonaktifkan** (soft delete). Aktifkan lagi: `POST .../{id}/activate` |
-| Pagination | belum ada; list mengembalikan semua data aktif |
+| Pagination | umumnya belum ada (list = semua data aktif). `GET /penduduk` & `GET /surat`: `limit` (default 50, maks 200) + `offset` |
 
 **Field boleh `null`** (spec Swagger 2.0 tidak bisa menandainya): semua field opsional seperti `email`, `nip`,
 `phone`, `photo_path`, `updated_at`, `updated_by`, `last_login_at`, `id_pegawai`, `full_name` (akun non-pegawai),
@@ -109,8 +109,21 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 | `user.view` / `user.manage` | Akun non-pegawai | `/users...` |
 | `user_role.assign` | Ubah role akun | `PUT /users/{id}/roles` |
 | `jabatan.manage`, `lokasi_kantor.manage`, `jadwal_kerja.manage`, `jenis_izin.manage`, `hari_libur.manage` | Master data | `/master/<x>...` |
+| `ref_option.manage` | Master daftar pilihan (agama, pekerjaan, dusun, ...) | `POST/PUT/DELETE /master/ref-options...` |
+| `penduduk.view` / `penduduk.manage` | Menu Penduduk | `GET /penduduk...` / `POST/PUT/DELETE /penduduk...` |
+| `settings.surat_manage` | Pengaturan desa (kop) & penomoran surat | `PUT /settings`, `POST /settings/logo` |
+| `jenis_surat.manage` | Kelola jenis surat (wizard form + redaksi) | `/jenis-surat...` (tulis), `/jenis-surat/placeholder`, `/jenis-surat/preview` |
+| `surat.view` | Daftar & detail surat, PDF, agenda, register | `GET /surat...`, `/surat/{id}/pdf`, `/surat/agenda`, `/surat/register` |
+| `surat.create` | Buat & isi draft, lampiran, surat pengganti | `POST /surat`, `PUT /surat/{id}`, `/surat/{id}/lampiran`, `POST /surat/{id}/pengganti` |
+| `surat.edit_redaksi` | Sesuaikan redaksi per surat | `PUT/DELETE /surat/{id}/redaksi`, field `redaksi` di perbaikan |
+| `surat.terbitkan` | Terbitkan nomor, perbaikan, upload scan arsip | `POST /surat/{id}/terbitkan`, `/perbaiki`, `/arsip` |
+| `surat.cancel` | Batalkan surat | `POST /surat/{id}/batal` |
 
-Role bawaan: `SUPER_ADMIN` (`*`), `ADMIN` (semua kecuali settings & review izin), `SEKDES`/`KADES`
+Data pilihan & pencarian yang dibutuhkan form surat juga terbuka untuk `surat.create`/`surat.view`:
+`GET /master/ref-options`, `GET /penduduk`, `GET /penduduk/{id}`, `GET /settings`, `GET /jenis-surat...`.
+
+Role bawaan: `SUPER_ADMIN` (`*`), `ADMIN` (semua kecuali `settings.manage`, `role.manage` & review izin; termasuk
+seluruh persuratan — tidak ada role OPERATOR terpisah), `SEKDES`/`KADES`
 (lihat pegawai & absensi, review izin), `PEGAWAI` (absen & izin sendiri). Satu akun bisa punya beberapa role;
 permission-nya digabung (mis. Sekdes yang juga absen = `SEKDES` + `PEGAWAI`).
 
@@ -141,7 +154,7 @@ Lokasi sah = lokasi kantor aktif terdekat (semua lokasi aktif berlaku untuk semu
 Kode gagal `422` (sudah tercatat di server; tampilkan `message`):
 `FACE_NOT_ENROLLED`, `HOLIDAY`, `NOT_WORKDAY`, `NO_SCHEDULE`, `OUTSIDE_TIME_WINDOW`, `ALREADY_CHECKED`,
 `NOT_CHECKED_IN`, `GPS_LOW_ACCURACY`, `NO_OFFICE_LOCATION`, `OUTSIDE_RADIUS`, `FACE_NOT_DETECTED`, `FACE_NOT_MATCH`.
-Lain: `400` field kurang, `413` foto > 5 MB, `403` akun tidak tertaut ke pegawai aktif.
+Lain: `400` field kurang, `413` foto > 10 MB, `403` akun tidak tertaut ke pegawai aktif.
 Absen tidak bisa diubah/dihapus; koreksi lewat perizinan di bawah.
 
 **Blokir presensi saat izin:** `GET /presensi/hari-ini` berisi `izin` = izin (bukan koreksi) berstatus
@@ -153,7 +166,7 @@ Absen tidak bisa diubah/dihapus; koreksi lewat perizinan di bawah.
 | Endpoint | Fungsi |
 |---|---|
 | `GET /presensi/jenis-izin` | Pilihan jenis izin aktif; `butuh_lampiran = 1` → lampiran wajib. |
-| `POST /presensi/perizinan` (multipart) | Ajukan. Umum: `jenis_pengajuan` (`izin|koreksi`), `tanggal_mulai`, `alasan`, `lampiran?` (jpg/png/pdf, maks 5 MB; gambar dikompres ≤ 200 KB). **izin**: + `id_jenis_izin`, `tanggal_selesai` (default = mulai). **koreksi**: + `jenis_absen` (`masuk|pulang`), `jam_koreksi` (HH:MM). |
+| `POST /presensi/perizinan` (multipart) | Ajukan. Umum: `jenis_pengajuan` (`izin|koreksi`), `tanggal_mulai`, `alasan`, `lampiran?` (jpg/png/pdf, maks 10 MB; gambar dikompres ≤ 200 KB). **izin**: + `id_jenis_izin`, `tanggal_selesai` (default = mulai). **koreksi**: + `jenis_absen` (`masuk|pulang`), `jam_koreksi` (HH:MM). |
 | `GET /presensi/perizinan?status=&tahun=` | Daftar pengajuan sendiri, terbaru di atas. |
 | `GET /presensi/perizinan/{id}` | Detail, termasuk `catatan_peninjau`, `reviewed_by_name`. |
 | `PUT /presensi/perizinan/{id}/batal` | Batalkan (hanya status `diajukan`). |
@@ -221,21 +234,121 @@ Catatan per master:
 
 ---
 
-## 8. Gambar (foto)
+## 8. Persuratan (aplikasi ADMIN)
 
-Endpoint foto mengembalikan `image/jpeg` dan **butuh header Authorization**, jadi `<img src="...">` langsung
-tidak bisa. Ambil sebagai blob:
+Sistem hanya sampai **penerbitan nomor**. Pengesahan tetap manual: surat dicetak, ditandatangani basah, distempel,
+lalu scan-nya di-upload sebagai arsip. Skema & bentuk data lengkap: `SCHEMA.md` §4.
+
+### 8.1 Data pendukung
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET /master/ref-options?group_code=AGAMA&include_inactive=0` | Pilihan dropdown. Simpan **`code`**, tampilkan `label`. Grup: `AGAMA, PEKERJAAN, STATUS_PERKAWINAN, KEWARGANEGARAAN, DUSUN, PENDIDIKAN, HUBUNGAN_KELUARGA`. |
+| `POST/PUT/DELETE /master/ref-options...`, `POST .../{id}/activate` | Kelola pilihan. `is_system = 1` (bawaan): kode & grup tidak bisa diubah, tidak bisa dinonaktifkan (`422`); label & urutan boleh. |
+| `GET /penduduk?q=&dusun=&include_inactive=&limit=&offset=` | Cari warga. `q` angka = awalan NIK / No. KK; selain itu = awalan nama. |
+| `GET/POST/PUT/DELETE /penduduk...`, `POST /penduduk/{id}/activate` | Kelola warga. Field opsional boleh `null`/`""`. NIK & No. KK 16 digit, NIK unik. RT/RW otomatis 3 digit. Kode pilihan baru harus aktif; kode lama yang tidak diganti tetap diterima walau opsinya sudah nonaktif. |
+| `GET /settings` | `{ "desa.nama": ..., "surat.format_nomor": ..., ... }` (key lihat SCHEMA.md). |
+| `PUT /settings` | Kirim **hanya key yang diubah**. Error per key di `errors["surat.format_nomor"]`, dst. |
+| `GET /settings/logo`, `POST /settings/logo` (multipart `logo`) | Logo kop. Belum upload → logo Kabupaten Lombok Barat bawaan (`image/svg+xml`); sudah → `image/png` (diperkecil ≤ 600 px). |
+| `GET/PUT /master/jabatan...` field `can_sign` | `1` = pejabat boleh menandatangani surat. Tidak dikirim saat PUT = nilai lama tetap. |
+
+### 8.2 Jenis surat (wizard 4 langkah)
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET /jenis-surat?include_inactive=` | Daftar ringkas (tanpa skema & redaksi). |
+| `GET /jenis-surat/{id}` | Lengkap: `skema_form`, `template_isi`, `persyaratan`, `versi`. |
+| `POST /jenis-surat/placeholder` `{skema_form}` | Isi panel placeholder editor dari skema yang **belum disimpan** (langkah 3): `[{token, label, group}]`. |
+| `POST /jenis-surat/preview` `{name, skema_form, template_isi}` | PDF data contoh + watermark CONTOH (langkah 4). |
+| `POST /jenis-surat`, `PUT /jenis-surat/{id}` | Simpan. `template_isi` kosong = redaksi standar desa. `versi` naik bila skema/redaksi berubah. |
+| `POST /jenis-surat/{id}/duplikat` `{code, name}` | Salin skema, redaksi & persyaratan ke jenis baru (versi 1). |
+| `DELETE /jenis-surat/{id}`, `POST .../activate` | Nonaktif / aktif. |
+
+Langkah wizard: (1) info dasar `code, name, kode_klasifikasi, persyaratan, sort_order` → (2) susun `skema_form`
+→ (3) redaksi → (4) preview & simpan.
+
+**Editor redaksi (TipTap)**: tampilkan placeholder sebagai *chip* yang tidak bisa diketik; saat simpan, chip
+diubah jadi teks `token` apa adanya (mis. `{{ biodata(pemohon) }}`). Tag yang bertahan: `p b strong i em u br table
+tbody tr td th ul ol li span`; style hanya `text-align, font-weight, font-style, text-decoration, width,
+text-indent`. Blok `{% %}` ditolak. Error validasi: `errors.template_isi` ("Tidak dikenal: nama_ibu", "Baris 1: ...").
+Error skema per path, mis. `errors["skema_form.sections[1].fields[0].key"]` → tandai field yang sesuai.
+
+### 8.3 Alur surat
+
+```
+POST /surat ─► draft ──PUT /surat/{id} (isi, penandatangan)──► POST /terbitkan ─► diterbitkan
+                │                                                                 │  POST /perbaiki (nomor tetap)
+                │                                                                 │  POST /arsip  ─► terkunci
+                └────────── POST /batal {alasan} ───────────────┬──────────────────┘
+                                                                ▼
+                                                           dibatalkan ── POST /pengganti ─► draft baru
+```
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET /surat?status=&id_jenis_surat=&tahun=&q=&limit=&offset=` | Daftar terbaru. `q` angka = awalan NIK pemohon, selain itu awalan nama. `terkunci` = scan arsip sudah ada. |
+| `POST /surat` `{id_jenis_surat, data?}` | Buat draft (jenis surat harus aktif). |
+| `GET /surat/{id}` | Detail: `skema_form` (render form dari sini, **bukan** dari jenis surat), `data`, `redaksi`, `lampiran`, `riwayat`, ... |
+| `PUT /surat/{id}` `{data, id_penandatangan}` | Simpan draft. `data` dikirim **lengkap** (menimpa). Hanya format yang dicek; field wajib dicek saat terbit. |
+| `GET /surat/penandatangan` | Pilihan penandatangan + `atas_nama` (1 = dicetak "a.n Kepala Desa"). |
+| `PUT /surat/{id}/redaksi` `{redaksi}` / `DELETE /surat/{id}/redaksi` | Sesuaikan redaksi surat ini (`redaksi_diubah = 1`) / kembalikan ke template standar. Hanya draft. |
+| `POST /surat/{id}/lampiran` (multipart `nama`, `file`) | Lampiran pdf/jpg/png sesuai `persyaratan`. `GET/DELETE /surat/{id}/lampiran/{id_lampiran}`. |
+| `GET /surat/{id}/pdf` | PDF: draft = watermark DRAF (belum bernomor); diterbitkan = PDF tersimpan (cetak ini); dibatalkan = watermark DIBATALKAN. (`/preview` = render ulang, tanpa PDF tersimpan.) |
+| `POST /surat/{id}/terbitkan` | Ambil nomor & tanggal (hari ini). `422` bila isian belum lengkap (`errors` per field) atau penandatangan belum dipilih. |
+| `POST /surat/{id}/perbaiki` `{catatan, data?, id_penandatangan?, redaksi?}` | Cetak ulang dengan nomor & tanggal sama, selama belum diarsip. `redaksi` butuh `surat.edit_redaksi` (`403`). |
+| `POST /surat/{id}/arsip` (multipart `file`), `GET /surat/{id}/arsip` | Upload / unduh scan bertanda tangan. Setelah upload, perbaikan ditolak. |
+| `POST /surat/{id}/batal` `{alasan}` | Batal. Nomor yang sudah terbit tetap tercatat & hangus (tidak dipakai lagi). |
+| `POST /surat/{id}/pengganti` | Draft baru dari surat bernomor yang dibatalkan (isian & penandatangan disalin, lampiran tidak). Nomor baru didapat saat diterbitkan. |
+
+**Bentuk `data`** (sesuai `skema_form` surat): field section `fields` di level atas (`data.keperluan`); section
+`penduduk` / `daftar` / `teks_bebas` di `data[<key section>]`. Orang:
+`{id_penduduk?, nama, nik, no_kk, tempat_lahir, tanggal_lahir, jenis_kelamin, agama, pekerjaan,
+status_perkawinan, kewarganegaraan, dusun, rt, rw, alamat}`.
+
+- Pilih dari pencarian `GET /penduduk` → salin field warga ke objek orang + `id_penduduk`. Operator tetap boleh
+  mengoreksi isian (tersimpan sebagai snapshot di surat, tabel penduduk tidak berubah).
+- Isi manual → `id_penduduk: null`. Warga manual **tidak** masuk ke tabel penduduk.
+- `select` dengan `options_group` → kirim `code`; `rupiah` → angka; `date` → `YYYY-MM-DD`; `daftar` → array baris.
+- Error isian: `errors["pemohon.nik"]`, `errors["keperluan"]`, `errors["batas[0].arah"]`.
+
+Tombol per status: **draft** → Simpan, Preview, Terbitkan, Batal; **diterbitkan** & `terkunci = false` → Cetak
+(`/pdf`), Perbaiki, Upload scan, Batal; **diterbitkan** & `terkunci = true` → Cetak, Lihat scan, Batal;
+**dibatalkan** → Lihat PDF, Buat pengganti (bila bernomor & belum punya pengganti).
+
+### 8.4 Buku agenda & register
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET /surat/agenda?tahun=` | Buku Agenda Surat Keluar: semua surat bernomor setahun (termasuk dibatalkan), urut tanggal. |
+| `GET /surat/register?id_jenis_surat=&tahun=` | Buku Register per jenis: + `kolom` (field `register: true`) dan `rows[].kolom[<key>]`. |
+
+Tiap baris: `no, nomor_surat, tanggal_surat, judul, nama_pemohon, nik_pemohon, status, penandatangan, diarsip,
+keterangan` (mis. "DIBATALKAN – Salah nama; Diganti dengan 148.1/3/KRB/2026"). Ekspor PDF/Excel belum ada:
+cetak dari tampilan tabel.
+
+---
+
+## 9. Gambar, PDF & file
+
+Endpoint file (foto `image/jpeg`, logo, PDF surat, lampiran, scan arsip) **butuh header Authorization**, jadi
+`<img src="...">` / `<iframe src="...">` langsung tidak bisa. Ambil sebagai blob:
 
 ```ts
 const res = await api.get(`/pegawai/${id}/foto`, { responseType: "blob" });
 const url = URL.createObjectURL(res.data);   // pakai di <img src={url}>, revoke saat unmount
 ```
 
-`404` = foto belum ada. Jangan pakai `photo_path` dari respons sebagai URL — itu path internal server.
+```ts
+const res = await api.get(`/surat/${id}/pdf`, { responseType: "blob" });
+window.open(URL.createObjectURL(res.data));  // atau <iframe>; nama file ada di header Content-Disposition
+```
+
+`404` = file belum ada. Jangan pakai `photo_path` dari respons sebagai URL — itu path internal server (path file
+surat memang tidak dikirim). Error pada endpoint blob tetap JSON: baca dengan `JSON.parse(await res.data.text())`.
 
 ---
 
-## 9. Ringkasan status HTTP
+## 10. Ringkasan status HTTP
 
 | Status | `code` umum | Arti |
 |---|---|---|
@@ -244,13 +357,13 @@ const url = URL.createObjectURL(res.data);   // pakai di <img src={url}>, revoke
 | 401 | `TOKEN_EXPIRED`, `TOKEN_MISSING`, `INVALID_TOKEN`, `UNAUTHORIZED` | lihat §2 |
 | 403 | `FORBIDDEN` | tidak punya permission / aturan akses |
 | 404 | `NOT_FOUND` | data atau endpoint tidak ada |
-| 413 | `REQUEST_ENTITY_TOO_LARGE` | file > 5 MB |
+| 413 | `REQUEST_ENTITY_TOO_LARGE` | file > 10 MB |
 | 422 | `VALIDATION_ERROR` atau kode bisnis (§4.3) | data valid secara format tapi ditolak aturan |
 | 500 | `INTERNAL_ERROR` | error server; detail hanya di log backend |
 
 ---
 
-## 10. Saat backend berubah
+## 11. Saat backend berubah
 
 1. Backend: `venv/bin/python scripts/export_openapi.py` → commit `docs/openapi.json` (+ update dokumen ini bila
    alur/aturan berubah).

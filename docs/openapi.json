@@ -669,6 +669,85 @@
       },
       "type": "object"
     },
+    "AgendaBaris": {
+      "properties": {
+        "alasan_batal": {
+          "type": "string"
+        },
+        "diarsip": {
+          "description": "scan bertanda tangan sudah di-upload",
+          "type": "boolean"
+        },
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_pengganti": {
+          "type": "integer"
+        },
+        "id_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_surat_diganti": {
+          "type": "integer"
+        },
+        "jenis_surat_code": {
+          "example": "SKBM",
+          "type": "string"
+        },
+        "judul": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "keterangan": {
+          "example": "DIBATALKAN – Salah jenis surat; Diganti dengan 148.1/101/KRB/2026",
+          "type": "string"
+        },
+        "nama_pemohon": {
+          "example": "GUGUN JOFANDI",
+          "type": "string"
+        },
+        "nik_pemohon": {
+          "type": "string"
+        },
+        "no": {
+          "example": 1,
+          "type": "integer"
+        },
+        "nomor_diganti": {
+          "type": "string"
+        },
+        "nomor_pengganti": {
+          "type": "string"
+        },
+        "nomor_surat": {
+          "example": "148.1/100/KRB/2026",
+          "type": "string"
+        },
+        "nomor_urut": {
+          "example": 100,
+          "type": "integer"
+        },
+        "penandatangan": {
+          "example": "Kaharudin",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "diterbitkan",
+            "dibatalkan"
+          ],
+          "example": "diterbitkan",
+          "type": "string"
+        },
+        "tanggal_surat": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "AuthUser": {
       "properties": {
         "email": {
@@ -723,6 +802,103 @@
         },
         "data": {
           "$ref": "#/definitions/AuthUser"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "BukuAgenda": {
+      "properties": {
+        "rows": {
+          "items": {
+            "$ref": "#/definitions/AgendaBaris"
+          },
+          "type": "array"
+        },
+        "tahun": {
+          "example": 2026,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "BukuAgendaResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/BukuAgenda"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "BukuRegister": {
+      "properties": {
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "jenis_surat_code": {
+          "example": "SKBM",
+          "type": "string"
+        },
+        "jenis_surat_name": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "kolom": {
+          "description": "field \"register\": true di skema",
+          "items": {
+            "$ref": "#/definitions/RegisterKolom"
+          },
+          "type": "array"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/definitions/RegisterBaris"
+          },
+          "type": "array"
+        },
+        "tahun": {
+          "example": 2026,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "BukuRegisterResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/BukuRegister"
         },
         "message": {
           "example": "Success",
@@ -915,6 +1091,11 @@
     },
     "Jabatan": {
       "properties": {
+        "can_sign": {
+          "description": "1 = boleh menandatangani surat",
+          "example": 0,
+          "type": "integer"
+        },
         "created_at": {
           "format": "date-time",
           "type": "string"
@@ -951,6 +1132,14 @@
     },
     "JabatanInput": {
       "properties": {
+        "can_sign": {
+          "default": 0,
+          "description": "1 = boleh menandatangani surat",
+          "example": 0,
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
         "name": {
           "example": "Kaur Keuangan",
           "maxLength": 100,
@@ -1302,6 +1491,361 @@
         },
         "data": {
           "$ref": "#/definitions/JenisIzin"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "JenisSurat": {
+      "properties": {
+        "code": {
+          "example": "SKBM",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "kode_klasifikasi": {
+          "example": "148.1",
+          "type": "string"
+        },
+        "name": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "persyaratan": {
+          "items": {
+            "$ref": "#/definitions/Persyaratan"
+          },
+          "type": "array"
+        },
+        "skema_form": {
+          "example": {
+            "sections": [
+              {
+                "key": "pemohon",
+                "label": "Data Pemohon",
+                "tampilkan": [
+                  "nama",
+                  "ttl",
+                  "jenis_kelamin",
+                  "agama",
+                  "status_perkawinan",
+                  "pekerjaan",
+                  "kewarganegaraan",
+                  "alamat"
+                ],
+                "type": "penduduk"
+              },
+              {
+                "fields": [
+                  {
+                    "key": "keperluan",
+                    "label": "Keperluan",
+                    "register": true,
+                    "required": true,
+                    "type": "text"
+                  }
+                ],
+                "key": "lainnya",
+                "label": "Keperluan",
+                "type": "fields"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "sort_order": {
+          "example": 1,
+          "type": "integer"
+        },
+        "template_isi": {
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        },
+        "versi": {
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "JenisSuratDuplikatInput": {
+      "properties": {
+        "code": {
+          "example": "SKBM2",
+          "maxLength": 30,
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "example": "Salinan Surat Keterangan Belum Menikah",
+          "maxLength": 150,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "name"
+      ],
+      "type": "object"
+    },
+    "JenisSuratInput": {
+      "properties": {
+        "code": {
+          "description": "Huruf/angka/_ ; disimpan HURUF BESAR; tidak bisa diubah bila sudah ada surat",
+          "example": "SKBM",
+          "maxLength": 30,
+          "minLength": 1,
+          "type": "string"
+        },
+        "kode_klasifikasi": {
+          "example": "148.1",
+          "maxLength": 30,
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "example": "Surat Keterangan Belum Menikah",
+          "maxLength": 150,
+          "minLength": 1,
+          "type": "string"
+        },
+        "persyaratan": {
+          "items": {
+            "$ref": "#/definitions/Persyaratan"
+          },
+          "type": "array"
+        },
+        "skema_form": {
+          "description": "{sections:[...]}. type: penduduk (tampilkan[]) | fields (fields[]) | daftar (columns[]) | teks_bebas. Field: key, label, type text|textarea|number|date|rupiah|select, required, register, options_group (code grup ref_options) atau options [..] untuk select. Section penduduk pertama = pemohon utama.",
+          "example": {
+            "sections": [
+              {
+                "key": "pemohon",
+                "label": "Data Pemohon",
+                "tampilkan": [
+                  "nama",
+                  "ttl",
+                  "jenis_kelamin",
+                  "agama",
+                  "status_perkawinan",
+                  "pekerjaan",
+                  "kewarganegaraan",
+                  "alamat"
+                ],
+                "type": "penduduk"
+              },
+              {
+                "fields": [
+                  {
+                    "key": "keperluan",
+                    "label": "Keperluan",
+                    "register": true,
+                    "required": true,
+                    "type": "text"
+                  }
+                ],
+                "key": "lainnya",
+                "label": "Keperluan",
+                "type": "fields"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "sort_order": {
+          "default": 0,
+          "example": 1,
+          "type": "integer"
+        },
+        "template_isi": {
+          "description": "HTML + {{ placeholder }}; kosong = redaksi standar",
+          "example": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "kode_klasifikasi",
+        "name",
+        "skema_form"
+      ],
+      "type": "object"
+    },
+    "JenisSuratPreviewInput": {
+      "properties": {
+        "name": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "skema_form": {
+          "example": {
+            "sections": [
+              {
+                "key": "pemohon",
+                "label": "Data Pemohon",
+                "tampilkan": [
+                  "nama",
+                  "ttl",
+                  "jenis_kelamin",
+                  "agama",
+                  "status_perkawinan",
+                  "pekerjaan",
+                  "kewarganegaraan",
+                  "alamat"
+                ],
+                "type": "penduduk"
+              },
+              {
+                "fields": [
+                  {
+                    "key": "keperluan",
+                    "label": "Keperluan",
+                    "register": true,
+                    "required": true,
+                    "type": "text"
+                  }
+                ],
+                "key": "lainnya",
+                "label": "Keperluan",
+                "type": "fields"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "template_isi": {
+          "description": "kosong = redaksi standar",
+          "example": "",
+          "type": "string"
+        }
+      },
+      "required": [
+        "skema_form"
+      ],
+      "type": "object"
+    },
+    "JenisSuratResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/JenisSurat"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "JenisSuratRingkas": {
+      "properties": {
+        "code": {
+          "example": "SKBM",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "kode_klasifikasi": {
+          "example": "148.1",
+          "type": "string"
+        },
+        "name": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "persyaratan": {
+          "items": {
+            "$ref": "#/definitions/Persyaratan"
+          },
+          "type": "array"
+        },
+        "sort_order": {
+          "example": 1,
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        },
+        "versi": {
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "JenisSuratRingkasListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/JenisSuratRingkas"
+          },
+          "type": "array"
         },
         "message": {
           "example": "Success",
@@ -1743,6 +2287,294 @@
       ],
       "type": "object"
     },
+    "Penandatangan": {
+      "properties": {
+        "atas_nama": {
+          "description": "1 = dicetak 'a.n Kepala Desa'",
+          "example": 1,
+          "type": "integer"
+        },
+        "full_name": {
+          "example": "Kaharudin",
+          "type": "string"
+        },
+        "id_jabatan": {
+          "example": 2,
+          "type": "integer"
+        },
+        "id_pegawai": {
+          "example": 1,
+          "type": "integer"
+        },
+        "jabatan": {
+          "example": "Sekretaris Desa",
+          "type": "string"
+        },
+        "nip": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PenandatanganListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Penandatangan"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Penduduk": {
+      "properties": {
+        "agama": {
+          "example": "ISLAM",
+          "type": "string"
+        },
+        "alamat": {
+          "example": "Jl. Raya Labuapi",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "dusun": {
+          "example": "KARANG_BONGKOT",
+          "type": "string"
+        },
+        "full_name": {
+          "example": "Gugun Gunawan",
+          "type": "string"
+        },
+        "id_penduduk": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "jenis_kelamin": {
+          "example": "L",
+          "type": "string"
+        },
+        "kewarganegaraan": {
+          "example": "WNI",
+          "type": "string"
+        },
+        "nik": {
+          "example": "5201010101010001",
+          "type": "string"
+        },
+        "no_kk": {
+          "example": "5201010101010002",
+          "type": "string"
+        },
+        "pekerjaan": {
+          "example": "WIRASWASTA",
+          "type": "string"
+        },
+        "rt": {
+          "example": "002",
+          "type": "string"
+        },
+        "rw": {
+          "example": "001",
+          "type": "string"
+        },
+        "status_perkawinan": {
+          "example": "BELUM_KAWIN",
+          "type": "string"
+        },
+        "tanggal_lahir": {
+          "example": "1998-11-03",
+          "format": "date",
+          "type": "string"
+        },
+        "tempat_lahir": {
+          "example": "Karang Bongkot",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "PendudukInput": {
+      "properties": {
+        "agama": {
+          "description": "code AGAMA",
+          "example": "ISLAM",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "alamat": {
+          "description": "detail opsional",
+          "example": "Jl. Raya Labuapi",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "dusun": {
+          "description": "code DUSUN",
+          "example": "KARANG_BONGKOT",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "full_name": {
+          "example": "Gugun Gunawan",
+          "maxLength": 150,
+          "minLength": 1,
+          "type": "string"
+        },
+        "jenis_kelamin": {
+          "enum": [
+            "L",
+            "P"
+          ],
+          "example": "L",
+          "type": "string"
+        },
+        "kewarganegaraan": {
+          "description": "code KEWARGANEGARAAN, default WNI",
+          "example": "WNI",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "nik": {
+          "description": "16 digit, opsional, unik",
+          "example": "5201010101010001",
+          "maxLength": 16,
+          "minLength": 16,
+          "pattern": "^[0-9]{16}$",
+          "type": "string"
+        },
+        "no_kk": {
+          "description": "16 digit, opsional",
+          "example": "5201010101010002",
+          "maxLength": 16,
+          "minLength": 16,
+          "pattern": "^[0-9]{16}$",
+          "type": "string"
+        },
+        "pekerjaan": {
+          "description": "code PEKERJAAN",
+          "example": "WIRASWASTA",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "rt": {
+          "example": "002",
+          "maxLength": 3,
+          "pattern": "^[0-9]{1,3}$",
+          "type": "string"
+        },
+        "rw": {
+          "example": "001",
+          "maxLength": 3,
+          "pattern": "^[0-9]{1,3}$",
+          "type": "string"
+        },
+        "status_perkawinan": {
+          "description": "code STATUS_PERKAWINAN",
+          "example": "BELUM_KAWIN",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "tanggal_lahir": {
+          "description": "Format YYYY-MM-DD",
+          "example": "1998-11-03",
+          "type": "string"
+        },
+        "tempat_lahir": {
+          "example": "Karang Bongkot",
+          "maxLength": 100,
+          "type": "string"
+        }
+      },
+      "required": [
+        "full_name"
+      ],
+      "type": "object"
+    },
+    "PendudukListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Penduduk"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PendudukResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Penduduk"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "PerizinanReviewInput": {
       "properties": {
         "catatan_peninjau": {
@@ -1761,6 +2593,112 @@
       "required": [
         "status"
       ],
+      "type": "object"
+    },
+    "Persyaratan": {
+      "properties": {
+        "nama": {
+          "example": "KTP",
+          "type": "string"
+        },
+        "wajib": {
+          "description": "1 = wajib dilampirkan",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "nama"
+      ],
+      "type": "object"
+    },
+    "Placeholder": {
+      "properties": {
+        "group": {
+          "description": "Nama section / 'Data Desa' / 'Surat'",
+          "example": "Keperluan",
+          "type": "string"
+        },
+        "label": {
+          "example": "Keperluan",
+          "type": "string"
+        },
+        "token": {
+          "example": "{{ keperluan }}",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PlaceholderInput": {
+      "properties": {
+        "skema_form": {
+          "example": {
+            "sections": [
+              {
+                "key": "pemohon",
+                "label": "Data Pemohon",
+                "tampilkan": [
+                  "nama",
+                  "ttl",
+                  "jenis_kelamin",
+                  "agama",
+                  "status_perkawinan",
+                  "pekerjaan",
+                  "kewarganegaraan",
+                  "alamat"
+                ],
+                "type": "penduduk"
+              },
+              {
+                "fields": [
+                  {
+                    "key": "keperluan",
+                    "label": "Keperluan",
+                    "register": true,
+                    "required": true,
+                    "type": "text"
+                  }
+                ],
+                "key": "lainnya",
+                "label": "Keperluan",
+                "type": "fields"
+              }
+            ]
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "skema_form"
+      ],
+      "type": "object"
+    },
+    "PlaceholderListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Placeholder"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "Presensi": {
@@ -2271,6 +3209,143 @@
       },
       "type": "object"
     },
+    "RefOption": {
+      "properties": {
+        "code": {
+          "example": "ISLAM",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "group_code": {
+          "example": "AGAMA",
+          "type": "string"
+        },
+        "id_ref_option": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "is_system": {
+          "description": "1 = opsi bawaan: kode tetap & tidak bisa dinonaktifkan",
+          "example": 1,
+          "type": "integer"
+        },
+        "label": {
+          "example": "Islam",
+          "type": "string"
+        },
+        "sort_order": {
+          "example": 1,
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "RefOptionInput": {
+      "properties": {
+        "code": {
+          "description": "Disimpan HURUF BESAR; tidak bisa diubah untuk opsi bawaan",
+          "example": "ISLAM",
+          "maxLength": 50,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_]+$",
+          "type": "string"
+        },
+        "group_code": {
+          "description": "Disimpan HURUF BESAR; tidak bisa diubah untuk opsi bawaan",
+          "example": "AGAMA",
+          "maxLength": 50,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_]+$",
+          "type": "string"
+        },
+        "label": {
+          "example": "Islam",
+          "maxLength": 150,
+          "minLength": 1,
+          "type": "string"
+        },
+        "sort_order": {
+          "default": 0,
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "code",
+        "group_code",
+        "label"
+      ],
+      "type": "object"
+    },
+    "RefOptionListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/RefOption"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "RefOptionResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/RefOption"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "Refresh": {
       "properties": {
         "refresh_token": {
@@ -2315,6 +3390,109 @@
       },
       "type": "object"
     },
+    "RegisterBaris": {
+      "properties": {
+        "alasan_batal": {
+          "type": "string"
+        },
+        "diarsip": {
+          "description": "scan bertanda tangan sudah di-upload",
+          "type": "boolean"
+        },
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_pengganti": {
+          "type": "integer"
+        },
+        "id_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_surat_diganti": {
+          "type": "integer"
+        },
+        "jenis_surat_code": {
+          "example": "SKBM",
+          "type": "string"
+        },
+        "judul": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "keterangan": {
+          "example": "DIBATALKAN – Salah jenis surat; Diganti dengan 148.1/101/KRB/2026",
+          "type": "string"
+        },
+        "kolom": {
+          "description": "{key kolom: nilai}",
+          "example": {
+            "keperluan": "pengambilan rumah"
+          },
+          "type": "object"
+        },
+        "nama_pemohon": {
+          "example": "GUGUN JOFANDI",
+          "type": "string"
+        },
+        "nik_pemohon": {
+          "type": "string"
+        },
+        "no": {
+          "example": 1,
+          "type": "integer"
+        },
+        "nomor_diganti": {
+          "type": "string"
+        },
+        "nomor_pengganti": {
+          "type": "string"
+        },
+        "nomor_surat": {
+          "example": "148.1/100/KRB/2026",
+          "type": "string"
+        },
+        "nomor_urut": {
+          "example": 100,
+          "type": "integer"
+        },
+        "penandatangan": {
+          "example": "Kaharudin",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "diterbitkan",
+            "dibatalkan"
+          ],
+          "example": "diterbitkan",
+          "type": "string"
+        },
+        "tanggal_surat": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RegisterKolom": {
+      "properties": {
+        "key": {
+          "example": "keperluan",
+          "type": "string"
+        },
+        "label": {
+          "example": "Keperluan",
+          "type": "string"
+        },
+        "type": {
+          "example": "text",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "RoleRef": {
       "properties": {
         "code": {
@@ -2330,6 +3508,563 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "Settings": {
+      "properties": {
+        "desa.alamat": {
+          "example": "Jl. Raya Labuapi No. 1, Kode Pos 83361",
+          "type": "string"
+        },
+        "desa.email": {
+          "example": "desa@karangbongkot.id",
+          "type": "string"
+        },
+        "desa.kabupaten": {
+          "example": "Lombok Barat",
+          "type": "string"
+        },
+        "desa.kecamatan": {
+          "example": "Labuapi",
+          "type": "string"
+        },
+        "desa.logo_path": {
+          "description": "Diubah lewat POST /settings/logo",
+          "example": "settings/abc.png",
+          "type": "string"
+        },
+        "desa.nama": {
+          "example": "Karang Bongkot",
+          "type": "string"
+        },
+        "desa.website": {
+          "example": "karangbongkot.id",
+          "type": "string"
+        },
+        "surat.cakupan_nomor": {
+          "enum": [
+            "GLOBAL",
+            "PER_JENIS"
+          ],
+          "example": "GLOBAL",
+          "type": "string"
+        },
+        "surat.format_nomor": {
+          "description": "Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib",
+          "example": "{klasifikasi}/{urut}/{kode_desa}/{tahun}",
+          "type": "string"
+        },
+        "surat.kode_desa": {
+          "example": "KRB",
+          "type": "string"
+        },
+        "surat.ukuran_kertas": {
+          "enum": [
+            "F4",
+            "A4"
+          ],
+          "example": "F4",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SettingsInput": {
+      "properties": {
+        "desa.alamat": {
+          "example": "Jl. Raya Labuapi No. 1, Kode Pos 83361",
+          "type": "string"
+        },
+        "desa.email": {
+          "example": "desa@karangbongkot.id",
+          "type": "string"
+        },
+        "desa.kabupaten": {
+          "example": "Lombok Barat",
+          "type": "string"
+        },
+        "desa.kecamatan": {
+          "example": "Labuapi",
+          "type": "string"
+        },
+        "desa.nama": {
+          "example": "Karang Bongkot",
+          "type": "string"
+        },
+        "desa.website": {
+          "example": "karangbongkot.id",
+          "type": "string"
+        },
+        "surat.cakupan_nomor": {
+          "enum": [
+            "GLOBAL",
+            "PER_JENIS"
+          ],
+          "example": "GLOBAL",
+          "type": "string"
+        },
+        "surat.format_nomor": {
+          "description": "Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib",
+          "example": "{klasifikasi}/{urut}/{kode_desa}/{tahun}",
+          "type": "string"
+        },
+        "surat.kode_desa": {
+          "example": "KRB",
+          "type": "string"
+        },
+        "surat.ukuran_kertas": {
+          "enum": [
+            "F4",
+            "A4"
+          ],
+          "example": "F4",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SettingsResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Settings"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Surat": {
+      "properties": {
+        "alasan_batal": {
+          "type": "string"
+        },
+        "atas_nama": {
+          "example": 1,
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "data": {
+          "example": {
+            "keperluan": "pengambilan rumah",
+            "pemohon": {
+              "agama": "ISLAM",
+              "id_penduduk": null,
+              "jenis_kelamin": "L",
+              "kewarganegaraan": "WNI",
+              "nama": "GUGUN JOFANDI",
+              "nik": "5201010311980001",
+              "rt": "002",
+              "status_perkawinan": "BELUM_KAWIN",
+              "tanggal_lahir": "1998-11-03",
+              "tempat_lahir": "Perampuan"
+            }
+          },
+          "type": "object"
+        },
+        "data_penandatangan": {
+          "description": "snapshot saat terbit",
+          "type": "object"
+        },
+        "diterbitkan_oleh": {
+          "type": "integer"
+        },
+        "diterbitkan_pada": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_penandatangan": {
+          "type": "integer"
+        },
+        "id_penduduk": {
+          "type": "integer"
+        },
+        "id_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_surat_diganti": {
+          "type": "integer"
+        },
+        "jenis_surat_code": {
+          "example": "SKBM",
+          "type": "string"
+        },
+        "jenis_surat_name": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "judul": {
+          "description": "salinan judul saat draft dibuat",
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "lampiran": {
+          "items": {
+            "$ref": "#/definitions/SuratLampiran"
+          },
+          "type": "array"
+        },
+        "nama_pemohon": {
+          "example": "GUGUN JOFANDI",
+          "type": "string"
+        },
+        "nik_pemohon": {
+          "type": "string"
+        },
+        "nomor_surat": {
+          "example": "148.1/100/KRB/2026",
+          "type": "string"
+        },
+        "nomor_urut": {
+          "type": "integer"
+        },
+        "redaksi": {
+          "type": "string"
+        },
+        "redaksi_diubah": {
+          "example": 0,
+          "type": "integer"
+        },
+        "riwayat": {
+          "description": "[{aksi, oleh, pada, catatan}]",
+          "type": "object"
+        },
+        "skema_form": {
+          "type": "object"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "diterbitkan",
+            "dibatalkan"
+          ],
+          "example": "draft",
+          "type": "string"
+        },
+        "tanggal_surat": {
+          "format": "date",
+          "type": "string"
+        },
+        "terkunci": {
+          "description": "true = scan arsip sudah di-upload",
+          "example": false,
+          "type": "boolean"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        },
+        "versi_template": {
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "SuratBatalInput": {
+      "properties": {
+        "alasan": {
+          "example": "Salah jenis surat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alasan"
+      ],
+      "type": "object"
+    },
+    "SuratCreate": {
+      "properties": {
+        "data": {
+          "description": "Isian sesuai skema_form surat: field `fields` di level atas ({keperluan: ...}); section penduduk/daftar/teks_bebas di data[<key section>]. Orang: {id_penduduk?, nama, nik, no_kk, tempat_lahir, tanggal_lahir, jenis_kelamin L/P, agama, pekerjaan, status_perkawinan, kewarganegaraan, dusun, rt, rw, alamat}. Opsional saat membuat draft.",
+          "example": {
+            "keperluan": "pengambilan rumah",
+            "pemohon": {
+              "agama": "ISLAM",
+              "id_penduduk": null,
+              "jenis_kelamin": "L",
+              "kewarganegaraan": "WNI",
+              "nama": "GUGUN JOFANDI",
+              "nik": "5201010311980001",
+              "rt": "002",
+              "status_perkawinan": "BELUM_KAWIN",
+              "tanggal_lahir": "1998-11-03",
+              "tempat_lahir": "Perampuan"
+            }
+          },
+          "type": "object"
+        },
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id_jenis_surat"
+      ],
+      "type": "object"
+    },
+    "SuratLampiran": {
+      "properties": {
+        "id": {
+          "example": "3f2a...",
+          "type": "string"
+        },
+        "mimetype": {
+          "example": "application/pdf",
+          "type": "string"
+        },
+        "nama": {
+          "example": "KTP",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SuratPerbaikiInput": {
+      "properties": {
+        "catatan": {
+          "example": "Salah tulis tempat lahir",
+          "type": "string"
+        },
+        "data": {
+          "description": "Isian lengkap baru; tidak dikirim = isian lama",
+          "example": {
+            "keperluan": "pengambilan rumah",
+            "pemohon": {
+              "agama": "ISLAM",
+              "id_penduduk": null,
+              "jenis_kelamin": "L",
+              "kewarganegaraan": "WNI",
+              "nama": "GUGUN JOFANDI",
+              "nik": "5201010311980001",
+              "rt": "002",
+              "status_perkawinan": "BELUM_KAWIN",
+              "tanggal_lahir": "1998-11-03",
+              "tempat_lahir": "Perampuan"
+            }
+          },
+          "type": "object"
+        },
+        "id_penandatangan": {
+          "description": "tidak dikirim = penandatangan lama",
+          "type": "integer"
+        },
+        "redaksi": {
+          "description": "butuh surat.edit_redaksi; tidak dikirim = redaksi lama",
+          "type": "string"
+        }
+      },
+      "required": [
+        "catatan"
+      ],
+      "type": "object"
+    },
+    "SuratRedaksiInput": {
+      "properties": {
+        "redaksi": {
+          "description": "HTML + {{ placeholder }} sesuai skema surat ini",
+          "type": "string"
+        }
+      },
+      "required": [
+        "redaksi"
+      ],
+      "type": "object"
+    },
+    "SuratResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Surat"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SuratRingkas": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_jenis_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_penandatangan": {
+          "type": "integer"
+        },
+        "id_penduduk": {
+          "type": "integer"
+        },
+        "id_surat": {
+          "example": 1,
+          "type": "integer"
+        },
+        "id_surat_diganti": {
+          "type": "integer"
+        },
+        "jenis_surat_code": {
+          "example": "SKBM",
+          "type": "string"
+        },
+        "jenis_surat_name": {
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "judul": {
+          "description": "salinan judul saat draft dibuat",
+          "example": "Surat Keterangan Belum Menikah",
+          "type": "string"
+        },
+        "nama_pemohon": {
+          "example": "GUGUN JOFANDI",
+          "type": "string"
+        },
+        "nik_pemohon": {
+          "type": "string"
+        },
+        "nomor_surat": {
+          "example": "148.1/100/KRB/2026",
+          "type": "string"
+        },
+        "nomor_urut": {
+          "type": "integer"
+        },
+        "redaksi_diubah": {
+          "example": 0,
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "diterbitkan",
+            "dibatalkan"
+          ],
+          "example": "draft",
+          "type": "string"
+        },
+        "tanggal_surat": {
+          "format": "date",
+          "type": "string"
+        },
+        "terkunci": {
+          "description": "true = scan arsip sudah di-upload",
+          "example": false,
+          "type": "boolean"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "SuratRingkasListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/SuratRingkas"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SuratUpdate": {
+      "properties": {
+        "data": {
+          "description": "Isian sesuai skema_form surat: field `fields` di level atas ({keperluan: ...}); section penduduk/daftar/teks_bebas di data[<key section>]. Orang: {id_penduduk?, nama, nik, no_kk, tempat_lahir, tanggal_lahir, jenis_kelamin L/P, agama, pekerjaan, status_perkawinan, kewarganegaraan, dusun, rt, rw, alamat}. Dikirim lengkap (menimpa).",
+          "example": {
+            "keperluan": "pengambilan rumah",
+            "pemohon": {
+              "agama": "ISLAM",
+              "id_penduduk": null,
+              "jenis_kelamin": "L",
+              "kewarganegaraan": "WNI",
+              "nama": "GUGUN JOFANDI",
+              "nik": "5201010311980001",
+              "rt": "002",
+              "status_perkawinan": "BELUM_KAWIN",
+              "tanggal_lahir": "1998-11-03",
+              "tempat_lahir": "Perampuan"
+            }
+          },
+          "type": "object"
+        },
+        "id_penandatangan": {
+          "description": "id_pegawai dari GET /surat/penandatangan; null = belum",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "data"
+      ],
       "type": "object"
     },
     "User": {
@@ -3387,6 +5122,446 @@
         "summary": "Akses: refresh token",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/jenis-surat": {
+      "get": {
+        "description": "manage / surat.view / surat.create. Daftar jenis surat (tanpa skema & redaksi).",
+        "operationId": "get_jenis_surat_list",
+        "parameters": [
+          {
+            "default": 0,
+            "enum": [
+              0,
+              1
+            ],
+            "in": "query",
+            "name": "include_inactive",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisSuratRingkasListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah jenis surat; template_isi kosong = redaksi standar.",
+        "operationId": "post_jenis_surat_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JenisSuratInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisSuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      }
+    },
+    "/jenis-surat/placeholder": {
+      "post": {
+        "description": "manage. Daftar placeholder untuk panel editor dari skema_form (boleh belum disimpan).",
+        "operationId": "post_jenis_surat_placeholder",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PlaceholderInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PlaceholderListResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      }
+    },
+    "/jenis-surat/preview": {
+      "post": {
+        "description": "manage. Preview PDF (langkah 4 wizard) dengan data contoh, watermark CONTOH.",
+        "operationId": "post_jenis_surat_preview",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JenisSuratPreviewInput"
+            }
+          }
+        ],
+        "produces": [
+          "application/pdf"
+        ],
+        "responses": {
+          "200": {
+            "description": "File application/pdf"
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      }
+    },
+    "/jenis-surat/{id_jenis_surat}": {
+      "delete": {
+        "description": "manage. Nonaktifkan jenis surat.",
+        "operationId": "delete_jenis_surat_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      },
+      "get": {
+        "description": "manage / surat.view / surat.create. Detail jenis surat (dengan skema & redaksi).",
+        "operationId": "get_jenis_surat_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisSuratResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jenis_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah jenis surat; versi naik bila skema/redaksi berubah (berlaku untuk surat baru).",
+        "operationId": "put_jenis_surat_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JenisSuratInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisSuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      }
+    },
+    "/jenis-surat/{id_jenis_surat}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jenis_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali jenis surat.",
+        "operationId": "post_jenis_surat_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisSuratResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
+        ]
+      }
+    },
+    "/jenis-surat/{id_jenis_surat}/duplikat": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_jenis_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Salin skema, redaksi & persyaratan ke jenis surat baru (versi 1).",
+        "operationId": "post_jenis_surat_duplikat",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JenisSuratDuplikatInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/JenisSuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: jenis_surat",
+        "tags": [
+          "jenis-surat"
         ]
       }
     },
@@ -4748,6 +6923,294 @@
         ]
       }
     },
+    "/master/ref-options": {
+      "get": {
+        "description": "manage / penduduk.* / surat.view / surat.create. Daftar opsi, filter group_code.",
+        "operationId": "get_ref_option_list",
+        "parameters": [
+          {
+            "description": "mis. AGAMA; kosong = semua grup",
+            "in": "query",
+            "name": "group_code",
+            "type": "string"
+          },
+          {
+            "default": 0,
+            "enum": [
+              0,
+              1
+            ],
+            "in": "query",
+            "name": "include_inactive",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/RefOptionListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: ref_option",
+        "tags": [
+          "master/ref-options"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah opsi.",
+        "operationId": "post_ref_option_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RefOptionInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/RefOptionResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: ref_option",
+        "tags": [
+          "master/ref-options"
+        ]
+      }
+    },
+    "/master/ref-options/{id_ref_option}": {
+      "delete": {
+        "description": "manage. Nonaktifkan opsi (opsi bawaan ditolak).",
+        "operationId": "delete_ref_option_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: ref_option",
+        "tags": [
+          "master/ref-options"
+        ]
+      },
+      "get": {
+        "description": "manage. Detail opsi.",
+        "operationId": "get_ref_option_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/RefOptionResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: ref_option",
+        "tags": [
+          "master/ref-options"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_ref_option",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah opsi (opsi bawaan: hanya label & urutan).",
+        "operationId": "put_ref_option_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RefOptionInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/RefOptionResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: ref_option",
+        "tags": [
+          "master/ref-options"
+        ]
+      }
+    },
+    "/master/ref-options/{id_ref_option}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_ref_option",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali opsi.",
+        "operationId": "post_ref_option_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/RefOptionResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: ref_option",
+        "tags": [
+          "master/ref-options"
+        ]
+      }
+    },
     "/pegawai": {
       "get": {
         "description": "view. Daftar pegawai aktif beserta akun user.",
@@ -5249,6 +7712,307 @@
         "summary": "Akses: pegawai",
         "tags": [
           "pegawai"
+        ]
+      }
+    },
+    "/penduduk": {
+      "get": {
+        "description": "view / penduduk.manage / surat.create. Cari penduduk (NIK/KK/awalan nama), maks 200 baris.",
+        "operationId": "get_penduduk_list",
+        "parameters": [
+          {
+            "description": "Angka = awalan NIK / No. KK; selain itu = awalan nama",
+            "in": "query",
+            "name": "q",
+            "type": "string"
+          },
+          {
+            "description": "code DUSUN",
+            "in": "query",
+            "name": "dusun",
+            "type": "string"
+          },
+          {
+            "default": 0,
+            "enum": [
+              0,
+              1
+            ],
+            "in": "query",
+            "name": "include_inactive",
+            "type": "integer"
+          },
+          {
+            "default": 50,
+            "description": "maks 200",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PendudukListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: penduduk",
+        "tags": [
+          "penduduk"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah penduduk.",
+        "operationId": "post_penduduk_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PendudukInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PendudukResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: penduduk",
+        "tags": [
+          "penduduk"
+        ]
+      }
+    },
+    "/penduduk/{id_penduduk}": {
+      "delete": {
+        "description": "manage. Nonaktifkan penduduk (pindah/meninggal).",
+        "operationId": "delete_penduduk_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: penduduk",
+        "tags": [
+          "penduduk"
+        ]
+      },
+      "get": {
+        "description": "view / penduduk.manage / surat.create. Detail penduduk (untuk isi otomatis form surat).",
+        "operationId": "get_penduduk_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PendudukResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: penduduk",
+        "tags": [
+          "penduduk"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_penduduk",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah penduduk.",
+        "operationId": "put_penduduk_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PendudukInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PendudukResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: penduduk",
+        "tags": [
+          "penduduk"
+        ]
+      }
+    },
+    "/penduduk/{id_penduduk}/activate": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_penduduk",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "manage. Aktifkan kembali penduduk.",
+        "operationId": "post_penduduk_activate",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PendudukResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: penduduk",
+        "tags": [
+          "penduduk"
         ]
       }
     },
@@ -5854,6 +8618,1255 @@
         }
       ]
     },
+    "/settings": {
+      "get": {
+        "description": "surat_manage / surat.view / surat.create / jenis_surat.manage. Pengaturan desa & surat.",
+        "operationId": "get_settings",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SettingsResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: settings",
+        "tags": [
+          "settings"
+        ]
+      },
+      "put": {
+        "description": "surat_manage. Ubah sebagian/semua pengaturan (kirim hanya key yang diubah).",
+        "operationId": "put_settings",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SettingsInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SettingsResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/settings/logo": {
+      "get": {
+        "description": "Logo kop: upload (image/png) atau logo kabupaten bawaan (image/svg+xml).",
+        "operationId": "get_settings_logo",
+        "produces": [
+          "image/png"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/png"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: sama dengan GET /settings",
+        "tags": [
+          "settings"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "surat_manage. Upload logo desa (png/jpg, disimpan sebagai PNG maks 600px). multipart/form-data.",
+        "operationId": "post_settings_logo",
+        "parameters": [
+          {
+            "description": "Logo desa (png/jpg)",
+            "in": "formData",
+            "name": "logo",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SettingsResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/surat": {
+      "get": {
+        "description": "view / surat.create. Daftar surat terbaru, filter status/jenis/tahun/q, maks 200.",
+        "operationId": "get_surat_list",
+        "parameters": [
+          {
+            "enum": [
+              "draft",
+              "diterbitkan",
+              "dibatalkan"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "id_jenis_surat",
+            "type": "integer"
+          },
+          {
+            "description": "tahun tanggal surat (draft: tahun dibuat)",
+            "in": "query",
+            "name": "tahun",
+            "type": "integer"
+          },
+          {
+            "description": "Angka = awalan NIK pemohon; selain itu = awalan nama",
+            "in": "query",
+            "name": "q",
+            "type": "string"
+          },
+          {
+            "default": 50,
+            "description": "maks 200",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratRingkasListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "post": {
+        "description": "create. Buat draft (salin skema & redaksi jenis surat aktif).",
+        "operationId": "post_surat_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SuratCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/agenda": {
+      "get": {
+        "description": "view / surat.create. Buku Agenda Surat Keluar setahun (surat bernomor, termasuk batal).",
+        "operationId": "get_surat_agenda",
+        "parameters": [
+          {
+            "description": "default tahun ini",
+            "in": "query",
+            "name": "tahun",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BukuAgendaResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/penandatangan": {
+      "get": {
+        "description": "view / surat.create. Pilihan penandatangan (pegawai aktif, jabatan can_sign = 1).",
+        "operationId": "get_surat_penandatangan",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PenandatanganListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/register": {
+      "get": {
+        "description": "view / surat.create. Buku Register per jenis surat setahun + kolom field register.",
+        "operationId": "get_surat_register",
+        "parameters": [
+          {
+            "description": "default tahun ini",
+            "in": "query",
+            "name": "tahun",
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "id_jenis_surat",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BukuRegisterResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}": {
+      "get": {
+        "description": "view / surat.create. Detail surat.",
+        "operationId": "get_surat_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "create. Simpan isian & penandatangan draft (format dicek; kelengkapan dicek saat terbit).",
+        "operationId": "put_surat_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SuratUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}/arsip": {
+      "get": {
+        "description": "view / surat.create. Unduh scan arsip.",
+        "operationId": "get_surat_arsip",
+        "produces": [
+          "application/pdf"
+        ],
+        "responses": {
+          "200": {
+            "description": "File application/pdf"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "terbitkan. Upload scan surat bertanda tangan & berstempel; surat terkunci dari perbaikan.",
+        "operationId": "post_surat_arsip",
+        "parameters": [
+          {
+            "description": "Scan surat bertanda tangan & berstempel (PDF/JPG/PNG)",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}/batal": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "cancel. Batalkan surat (alasan wajib). Nomor yang sudah terbit tetap melekat & hangus.",
+        "operationId": "post_surat_batal",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SuratBatalInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}/lampiran": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "create. Upload lampiran (PDF/JPG/PNG). multipart/form-data.",
+        "operationId": "post_surat_lampiran_list",
+        "parameters": [
+          {
+            "description": "mis. KTP",
+            "in": "formData",
+            "name": "nama",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "PDF/JPG/PNG",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}/lampiran/{id_lampiran}": {
+      "delete": {
+        "description": "create. Hapus lampiran.",
+        "operationId": "delete_surat_lampiran_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "get": {
+        "description": "view / surat.create. Unduh lampiran (pdf/jpg/png).",
+        "operationId": "get_surat_lampiran_detail",
+        "produces": [
+          "application/pdf"
+        ],
+        "responses": {
+          "200": {
+            "description": "File application/pdf"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        },
+        {
+          "in": "path",
+          "name": "id_lampiran",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/surat/{id_surat}/pdf": {
+      "get": {
+        "description": "view / surat.create. PDF surat: diterbitkan = PDF tersimpan (untuk dicetak);\ndraft = watermark DRAF; dibatalkan = watermark DIBATALKAN.",
+        "operationId": "get_surat_pdf",
+        "produces": [
+          "application/pdf"
+        ],
+        "responses": {
+          "200": {
+            "description": "File application/pdf"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/surat/{id_surat}/pengganti": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "create. Buat draft pengganti dari surat bernomor yang dibatalkan (isian disalin).",
+        "operationId": "post_surat_pengganti",
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}/perbaiki": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "terbitkan (+ surat.edit_redaksi bila redaksi diubah). Perbaikan & cetak ulang dengan\nnomor yang sama, selama scan arsip belum di-upload.",
+        "operationId": "post_surat_perbaiki",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SuratPerbaikiInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}/preview": {
+      "get": {
+        "description": "view / surat.create. Preview PDF (draft: watermark DRAF, belum bernomor).",
+        "operationId": "get_surat_preview",
+        "produces": [
+          "application/pdf"
+        ],
+        "responses": {
+          "200": {
+            "description": "File application/pdf"
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/surat/{id_surat}/redaksi": {
+      "delete": {
+        "description": "edit_redaksi. Kembalikan ke template standar jenis surat (draft).",
+        "operationId": "delete_surat_redaksi",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "edit_redaksi. Sesuaikan redaksi surat ini saja (draft).",
+        "operationId": "put_surat_redaksi",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SuratRedaksiInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
+    "/surat/{id_surat}/terbitkan": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_surat",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "post": {
+        "description": "terbitkan. Terbitkan nomor (isian lengkap & penandatangan wajib); tanggal surat = hari ini.",
+        "operationId": "post_surat_terbitkan",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/SuratResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: surat",
+        "tags": [
+          "surat"
+        ]
+      }
+    },
     "/users": {
       "get": {
         "description": "view. Daftar user aktif.",
@@ -6280,6 +10293,22 @@
       "name": "absensi"
     },
     {
+      "description": "Data induk warga (sumber pencarian pemohon surat)",
+      "name": "penduduk"
+    },
+    {
+      "description": "Pengaturan desa (kop surat) & persuratan",
+      "name": "settings"
+    },
+    {
+      "description": "Cetakan surat: skema form + redaksi standar",
+      "name": "jenis-surat"
+    },
+    {
+      "description": "Surat keluar: draft, isian, lampiran, penandatangan, redaksi, preview",
+      "name": "surat"
+    },
+    {
       "description": "Master Jabatan",
       "name": "master/jabatan"
     },
@@ -6298,6 +10327,10 @@
     {
       "description": "Master Hari Libur",
       "name": "master/hari-libur"
+    },
+    {
+      "description": "Daftar pilihan (agama, pekerjaan, dusun, ...) per group_code",
+      "name": "master/ref-options"
     }
   ]
 }

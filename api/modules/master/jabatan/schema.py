@@ -7,11 +7,13 @@ from . import ns
 jabatan_input = ns.model("JabatanInput", {
     "name": fields.String(required=True, min_length=1, max_length=100, example="Kaur Keuangan"),
     "sort_order": fields.Integer(default=0, example=1, description="Urutan tampil (kecil = atas)"),
+    "can_sign": fields.Integer(default=0, min=0, max=1, example=0, description="1 = boleh menandatangani surat"),
 })
 
 jabatan_out = ns.model("Jabatan", {
     "id_jabatan": fields.Integer(example=1),
     "name": fields.String(example="Kaur Keuangan"),
     "sort_order": fields.Integer(example=1),
+    "can_sign": fields.Integer(example=0, description="1 = boleh menandatangani surat"),
     **audit_fields(),
 })

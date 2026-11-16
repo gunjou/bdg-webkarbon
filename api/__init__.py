@@ -57,6 +57,10 @@ from api.modules.users import ns as users_ns  # noqa: E402
 from api.modules.pegawai import ns as pegawai_ns  # noqa: E402
 from api.modules.presensi import ns as presensi_ns  # noqa: E402
 from api.modules.absensi import ns as absensi_ns  # noqa: E402
+from api.modules.penduduk import ns as penduduk_ns  # noqa: E402
+from api.modules.settings import ns as settings_ns  # noqa: E402
+from api.modules.jenis_surat import ns as jenis_surat_ns  # noqa: E402
+from api.modules.surat import ns as surat_ns  # noqa: E402
 from api.modules.master import NAMESPACES as master_namespaces  # noqa: E402
 
 api.add_namespace(auth_ns, path="/auth")
@@ -64,5 +68,9 @@ api.add_namespace(users_ns, path="/users")
 api.add_namespace(pegawai_ns, path="/pegawai")
 api.add_namespace(presensi_ns, path="/presensi")
 api.add_namespace(absensi_ns, path="/absensi")
+api.add_namespace(penduduk_ns, path="/penduduk")
+api.add_namespace(settings_ns, path="/settings")
+api.add_namespace(jenis_surat_ns, path="/jenis-surat")
+api.add_namespace(surat_ns, path="/surat")
 for _ns, _path in master_namespaces:
     api.add_namespace(_ns, path=_path)

@@ -11,7 +11,7 @@ def _clean(data, id_jabatan=None):
     if dup:
         hint = "" if dup["is_active"] == 1 else " (nonaktif, aktifkan kembali saja)"
         raise ValidationError("Nama jabatan sudah dipakai" + hint, {"name": "Sudah dipakai"})
-    return {"name": name, "sort_order": data.get("sort_order") or 0}
+    return {"name": name, "sort_order": data.get("sort_order") or 0, "can_sign": 1 if data.get("can_sign") == 1 else 0}
 
 
 def list_all():
@@ -30,7 +30,9 @@ def create(data, id_user):
 
 
 def update(id_jabatan, data, id_user):
-    get(id_jabatan)
+    current = get(id_jabatan)
+    if "can_sign" not in data:  # client lama tidak mengirim can_sign -> jangan ter-reset
+        data = {**data, "can_sign": current["can_sign"]}
     query.update(id_jabatan, _clean(data, id_jabatan), id_user)
     return get(id_jabatan)
 

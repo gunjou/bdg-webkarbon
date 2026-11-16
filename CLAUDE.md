@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-HRIS backend Desa Karang Bongkot: login (users & roles) + absensi berbasis wajah & GPS.
+Backend sistem kantor Desa Karang Bongkot: login (users & roles) + absensi berbasis wajah & GPS + persuratan
+(penduduk, cetakan surat, penerbitan nomor, PDF, buku agenda & register).
 Flask + flask-restx + flask-jwt-extended + SQLAlchemy Core (raw SQL via `text()`), PostgreSQL. Python 3.10.
 
 Skema tabel & role: lihat [SCHEMA.md](SCHEMA.md). Sumber kebenaran skema: `migrations/*.sql`.
@@ -30,14 +31,20 @@ api/
 │   ├── serializer.py  serialize_value()
 │   ├── timing.py      measure_execution_time
 │   ├── face.py        process_face_photo (1 wajah → jpeg + embedding 128), face_distance
-│   └── geo.py         haversine_m
+│   ├── geo.py         haversine_m
+│   └── template.py    Jinja SandboxedEnvironment (make_env), sanitize_html (nh3), tgl_indo, terbilang
+├── assets/            logo-kabupaten.svg (logo kop default) + fonts/ (Liberation Serif untuk PDF)
 └── modules/           satu folder per modul bisnis (modular monolith)
     ├── auth/          login, refresh, me
     ├── users/         akun & role; juga validasi user untuk pegawai (prepare_new/prepare_update)
     ├── pegawai/       pegawai + akun user + foto wajah (selalu 1 pegawai = 1 user)
     ├── absensi/       aplikasi ADMIN: harian, rekap, log gagal, koreksi absen, review perizinan
     ├── presensi/      aplikasi ABSEN: absen wajah + GPS, riwayat, lapor gagal, perizinan & koreksi milik sendiri
-    └── master/        sub-modul: jabatan, lokasi_kantor, jadwal_kerja, jenis_izin, hari_libur
+    ├── master/        sub-modul: jabatan (+ can_sign), lokasi_kantor, jadwal_kerja, jenis_izin, hari_libur, ref_options
+    ├── penduduk/      data induk warga (sumber pencarian pemohon surat)
+    ├── settings/      pengaturan desa & surat (REGISTRY key + default), logo kop
+    ├── jenis_surat/   cetakan surat; + form.py (validasi isian surat) & render.py (HTML/PDF surat)
+    └── surat/         draft → terbit → perbaikan/arsip/batal/pengganti, agenda & register
 ```
 
 Patokan letak kode: butuh env/DB/app → `core/`; aturan bersama antar modul → `shared/`;
@@ -57,6 +64,10 @@ Arah import satu jalur: `endpoint → service → query`.
   Pengecualian yang disengaja: `pegawai/query.py` menulis tabel `users`/`user_roles` dalam SATU transaksi
   bersama pegawai (validasinya tetap lewat `users.service`). Jika kolom `users` berubah, ubah keduanya.
 - `core/`, `shared/`, `utils/` TIDAK boleh import dari `modules/`.
+- Pengecualian file: `jenis_surat/form.py` & `jenis_surat/render.py` (fungsi murni, tanpa DB) dipakai lewat
+  `jenis_surat.service` (`validate_data`, `render_pdf`, `labels`); modul lain tetap memanggil service-nya.
+- Transaksi lintas langkah (penerbitan surat): `query.begin()` + fungsi query yang menerima `conn`
+  (`lock` = `SELECT ... FOR UPDATE`). Logika tetap di service; SQL tetap di query.
 - Modul induk dengan sub-modul (mis. `modules/master/jabatan/`): tiap sub-modul berisi 5 file yang sama +
   namespace sendiri; daftarkan di `NAMESPACES` pada `modules/master/__init__.py` (path `/master/<sub>`).
 - Daftarkan namespace di bagian `MODULES` paling bawah `api/__init__.py`:
@@ -119,7 +130,7 @@ Zona waktu lokal dev ≠ VPS. Semua waktu yang ditulis ke DB harus dari `get_wit
 
 Template: `.env.example`. Hanya dibaca di `api/core/config.py`; env baru → tambah di config.py DAN `.env.example`.
 `DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, JWT_SECRET_KEY (wajib, ≥32 byte),
-JWT_ACCESS_EXPIRES (menit), JWT_REFRESH_EXPIRES (hari), UPLOAD_DIR (default uploads), MAX_UPLOAD_MB (default 5)`.
+JWT_ACCESS_EXPIRES (menit), JWT_REFRESH_EXPIRES (hari), UPLOAD_DIR (default uploads), MAX_UPLOAD_MB (default 10)`.
 
 ## Setup & dependency
 
@@ -127,6 +138,10 @@ JWT_ACCESS_EXPIRES (menit), JWT_REFRESH_EXPIRES (hari), UPLOAD_DIR (default uplo
 - `dlib` (dipakai `face-recognition`) di-compile saat install: butuh `cmake` + compiler C++
   (Ubuntu: `apt install cmake build-essential`). `psycopg2` butuh `libpq-dev`.
 - Paket baru → tambah ke `requirements.txt` dengan versi terkunci (`==`).
+- PDF (WeasyPrint) butuh pango: Ubuntu `apt install libpango-1.0-0 libpangoft2-1.0-0`, macOS `brew install pango`
+  + `export DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` (venv tidak mencari library Homebrew).
+  `weasyprint` diimpor lambat di `render.to_pdf`, jadi app tetap jalan tanpa pango.
+- Test: `venv/bin/python -m unittest discover -s tests` (DB & render di-mock).
 
 ## Lain-lain
 
@@ -148,3 +163,28 @@ Ketentuan di docstring `api/modules/absensi/service.py`. Tabel `absensi` TIDAK l
 koreksi (admin `absensi.koreksi` atau review koreksi disetujui) meng-upsert per (pegawai, tanggal, jenis) dan mengisi
 `created_by`/`updated_by`. `is_koreksi` = pembuat/pengubah terakhir bukan akun pegawai itu (presensi mengisi
 `created_by` = akun pegawai). `absensi_gagal` tetap append-only.
+
+## Persuratan
+
+Ketentuan lengkap di docstring `api/modules/surat/service.py` & `api/modules/jenis_surat/service.py`; skema &
+bentuk `skema_form` / `surat.data` di SCHEMA.md §4. Yang wajib dijaga saat mengubah kode:
+
+- **Snapshot**: draft menyalin `judul`, `skema_form`, `template_isi` (→ `redaksi`) & `versi`; render SELALU memakai
+  salinan di `surat`, bukan template terkini. Penandatangan di-snapshot ke `data_penandatangan` saat terbit/perbaikan.
+- **Template user = tidak dipercaya**: selalu `make_env()` (sandbox) + `sanitize_html()`; hanya `{{ }}`.
+  Layout kop/tanda tangan = template kode (`render.LAYOUT`, Jinja biasa). Nilai isian di-escape; HTML hanya dari
+  helper (`biodata`, `tabel`) & teks_bebas yang sudah disanitasi.
+- **WeasyPrint hanya boleh memuat** `data:` URI dan file di `api/assets/fonts/` (`render._fetcher`, path di-resolve
+  untuk tolak `../`). Jangan longgarkan: redaksi berasal dari user (SSRF / baca file).
+- **Nomor**: `terbitkan_nomor(conn, id_surat, tahun)` dipanggil di dalam transaksi `terbitkan` (nanti juga dari
+  langkah "sahkan"). Counter `ON CONFLICT ... + 1`, ikut rollback bila render/simpan gagal; file PDF baru dihapus
+  di `except`. Nomor yang sudah terbit tidak pernah dipakai ulang (batal = hangus).
+- **Status guard**: ubah isian/redaksi hanya `draft` (juga di `WHERE status = 'draft'`); perbaikan hanya
+  `diterbitkan` & `arsip_path IS NULL`; arsip mengunci surat.
+- **Validasi isian** (`jenis_surat/form.py`): format saat simpan draft, kelengkapan (`strict=True`) saat terbit &
+  perbaikan. Pemohon utama = section penduduk pertama → `nama_pemohon`, `nik_pemohon`, `id_penduduk`.
+- **File**: `uploads/surat/lampiran|pdf|arsip/`; jenis file dicek dari isi (magic bytes). Path tidak dikirim ke
+  client (`endpoint._strip`); unduh lewat endpoint yang dicek permission-nya.
+- **Pengaturan**: key desa/surat hanya yang ada di `settings.service.REGISTRY` (default di kode).
+- Rencana (JANGAN dibuat tanpa diminta): pengesahan di sistem (`diajukan/ditolak/disahkan`, QR, `surat.sign`),
+  impor penduduk, ekspor PDF agenda/register.

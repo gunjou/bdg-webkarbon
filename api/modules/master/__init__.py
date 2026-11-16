@@ -6,6 +6,7 @@ from .jabatan import ns as jabatan_ns
 from .jadwal_kerja import ns as jadwal_kerja_ns
 from .jenis_izin import ns as jenis_izin_ns
 from .lokasi_kantor import ns as lokasi_kantor_ns
+from .ref_options import ns as ref_options_ns
 
 NAMESPACES = [
     (jabatan_ns, "/master/jabatan"),
@@ -13,4 +14,5 @@ NAMESPACES = [
     (jadwal_kerja_ns, "/master/jadwal-kerja"),
     (jenis_izin_ns, "/master/jenis-izin"),
     (hari_libur_ns, "/master/hari-libur"),
+    (ref_options_ns, "/master/ref-options"),
 ]

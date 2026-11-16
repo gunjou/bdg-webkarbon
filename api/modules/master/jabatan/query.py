@@ -36,8 +36,8 @@ def count_active_pegawai(id_jabatan):
 
 def insert(data, id_user):
     sql = text("""
-        INSERT INTO jabatan (name, sort_order, created_at, created_by)
-        VALUES (:name, :sort_order, :now, :id_user)
+        INSERT INTO jabatan (name, sort_order, can_sign, created_at, created_by)
+        VALUES (:name, :sort_order, :can_sign, :now, :id_user)
         RETURNING id_jabatan
     """)
     with get_engine().begin() as conn:
@@ -46,7 +46,7 @@ def insert(data, id_user):
 
 def update(id_jabatan, data, id_user):
     sql = text("""
-        UPDATE jabatan SET name = :name, sort_order = :sort_order, updated_at = :now, updated_by = :id_user
+        UPDATE jabatan SET name = :name, sort_order = :sort_order, can_sign = :can_sign, updated_at = :now, updated_by = :id_user
         WHERE id_jabatan = :id_jabatan
     """)
     with get_engine().begin() as conn:
