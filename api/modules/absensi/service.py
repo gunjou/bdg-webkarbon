@@ -10,7 +10,7 @@ Status harian pegawai (urutan menentukan):
 Koreksi absen (admin langsung, atau persetujuan pengajuan koreksi pegawai):
   upsert absensi per (pegawai, tanggal, jenis): waktu = tanggal + jam (WITA). Status dihitung dari jadwal pegawai
   SAAT INI dgn aturan sama seperti presensi: masuk lewat jam masuk + toleransi -> terlambat (menit dari jam masuk);
-  pulang sebelum jam pulang -> pulang_cepat. Ditolak jika tanggal hari libur aktif / bukan hari kerja. Ditandai is_koreksi karena created_by/updated_by bukan akun
+  pulang sebelum jam pulang -> pulang_cepat. Hari libur aktif / bukan hari kerja: tetap boleh, status tepat_waktu, jam_jadwal NULL (dihitung hadir). Ditandai is_koreksi karena created_by/updated_by bukan akun
   pegawai itu sendiri. GPS/foto kosong pada absen yang dibuat lewat koreksi.
 
 Tambah izin oleh admin: aturan sama dgn pengajuan pegawai (jenis aktif, maks 30 hari, tidak bentrok, lampiran
@@ -181,12 +181,11 @@ def _koreksi_row(id_pegawai, tanggal, jenis, jam):
     peg = next(iter(query.get_pegawai_aktif(id_pegawai)), None)
     if not peg:
         raise ValidationError("Pegawai tidak ditemukan / tidak aktif", {"id_pegawai": "tidak valid"})
-    libur = query.get_libur(tanggal, tanggal)
-    if tanggal in libur:
-        raise ValidationError(f"Tanggal tersebut hari libur: {libur[tanggal]}", {"tanggal": "hari libur"})
+    waktu = datetime.combine(tanggal, jam, tzinfo=WITA)
     hari = (peg["jadwal_harian"] or {}).get(HARI[tanggal.weekday()])
-    if not hari:
-        raise ValidationError("Tanggal tersebut bukan hari kerja menurut jadwal pegawai", {"tanggal": "bukan hari kerja"})
+    if tanggal in query.get_libur(tanggal, tanggal) or not hari:  # libur / bukan hari kerja: tetap boleh, tanpa jadwal
+        return {"id_pegawai": id_pegawai, "tanggal": tanggal, "jenis": jenis, "jam_jadwal": None,
+                "waktu_absen": waktu, "status": "tepat_waktu", "terlambat_menit": 0}
     jadwal = time.fromisoformat(hari[jenis])
     telat = (jam.hour * 60 + jam.minute) - (jadwal.hour * 60 + jadwal.minute)
     if jenis == "masuk":
@@ -194,7 +193,7 @@ def _koreksi_row(id_pegawai, tanggal, jenis, jam):
     else:
         status = "pulang_cepat" if jam < jadwal else "tepat_waktu"
     return {"id_pegawai": id_pegawai, "tanggal": tanggal, "jenis": jenis, "jam_jadwal": jadwal,
-            "waktu_absen": datetime.combine(tanggal, jam, tzinfo=WITA),
+            "waktu_absen": waktu,
             "status": status, "terlambat_menit": telat if status == "terlambat" else 0}
 
 

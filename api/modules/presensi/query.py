@@ -52,7 +52,7 @@ def get_range(id_pegawai, mulai, selesai):
     sql = text(f"""
         SELECT {_ABSENSI_COLS}
         FROM absensi a
-        JOIN lokasi_kantor lk ON lk.id_lokasi_kantor = a.id_lokasi_kantor
+        LEFT JOIN lokasi_kantor lk ON lk.id_lokasi_kantor = a.id_lokasi_kantor
         WHERE a.id_pegawai = :id_pegawai AND a.tanggal BETWEEN :mulai AND :selesai
         ORDER BY a.tanggal DESC, a.jenis
     """)
@@ -65,7 +65,7 @@ def get_by_id(id_absensi):
     sql = text(f"""
         SELECT {_ABSENSI_COLS}, a.photo_path
         FROM absensi a
-        JOIN lokasi_kantor lk ON lk.id_lokasi_kantor = a.id_lokasi_kantor
+        LEFT JOIN lokasi_kantor lk ON lk.id_lokasi_kantor = a.id_lokasi_kantor
         WHERE a.id_absensi = :id_absensi
     """)
     with get_engine().connect() as conn:

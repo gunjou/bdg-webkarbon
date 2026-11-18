@@ -23,6 +23,7 @@ Perizinan (pegawai, milik sendiri):
 - Tidak ada ubah; batal hanya saat status 'diajukan'. Review (setuju/tolak) bukan di modul ini.
 - hari_ini.izin = izin diajukan/disetujui yang mencakup hari ini (frontend memblokir presensi).
 """
+import math
 import os
 from datetime import date, time, timedelta
 
@@ -126,10 +127,14 @@ def _cek_jadwal(ctx, jenis, now, done, cfg):
 
 
 def _cek_lokasi(ctx, jenis, lat, lon, akurasi, cfg):
-    gps = {"jenis": jenis, "latitude": lat, "longitude": lon, "akurasi_gps": akurasi}
-    if akurasi is None or akurasi < 0 or akurasi > float(cfg["GPS_MAX_AKURASI_METER"]):
+    # nilai mentah (bisa NaN/inf/raksasa) dicatat sebagai teks: kolom NUMERIC absensi_gagal tidak muat
+    mentah = {"jenis": jenis, "detail": {"latitude": str(lat), "longitude": str(lon), "akurasi_gps": str(akurasi)}}
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180):  # juga menolak NaN/inf (perbandingan NaN selalu False)
+        _fail(ctx, "GPS", "GPS_INVALID", "Koordinat GPS tidak valid", **mentah)
+    if not math.isfinite(akurasi) or not 0 <= akurasi <= float(cfg["GPS_MAX_AKURASI_METER"]):
         _fail(ctx, "GPS", "GPS_LOW_ACCURACY",
-              f"Akurasi GPS kurang baik (maks {cfg['GPS_MAX_AKURASI_METER']} m), coba di area terbuka", **gps)
+              f"Akurasi GPS kurang baik (maks {cfg['GPS_MAX_AKURASI_METER']} m), coba di area terbuka", **mentah)
+    gps = {"jenis": jenis, "latitude": lat, "longitude": lon, "akurasi_gps": akurasi}
     lokasi = query.get_lokasi_aktif()
     if not lokasi:
         _fail(ctx, "LOCATION", "NO_OFFICE_LOCATION", "Lokasi kantor belum diatur", **gps)
@@ -254,7 +259,7 @@ def foto_path(id_user, id_absensi):
     row = query.get_by_id(id_absensi)
     if not row or row["id_pegawai"] != ctx["id_pegawai"]:
         raise NotFoundError("Absensi tidak ditemukan")
-    full = storage.full_path(row["photo_path"])
+    full = row["photo_path"] and storage.full_path(row["photo_path"])  # koreksi: tanpa foto
     if not full or not os.path.exists(full):
         raise NotFoundError("Foto tidak ditemukan")
     return full
