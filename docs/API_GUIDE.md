@@ -122,13 +122,14 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 Data pilihan & pencarian yang dibutuhkan form surat juga terbuka untuk `surat.create`/`surat.view`:
 `GET /master/ref-options`, `GET /penduduk`, `GET /penduduk/{id}`, `GET /settings`, `GET /jenis-surat...`.
 
-Role bawaan: `SUPER_ADMIN` (`*`), `ADMIN` (semua kecuali `settings.manage`, `role.manage` & review izin; termasuk
+Role bawaan: `SUPER_ADMIN` (`*`), `ADMIN` (semua kecuali review izin & absen sendiri; termasuk
 seluruh persuratan — tidak ada role OPERATOR terpisah), `SEKDES`/`KADES`
 (lihat pegawai & absensi, review izin), `PEGAWAI` (absen & izin sendiri). Satu akun bisa punya beberapa role;
 permission-nya digabung (mis. Sekdes yang juga absen = `SEKDES` + `PEGAWAI`).
 
 Aturan khusus yang akan ditolak backend (tampilkan `message`):
 - ADMIN tidak bisa memberi role SUPER_ADMIN atau mengubah akun SUPER_ADMIN → `403`.
+- `GET /users/{id}` akun SUPER_ADMIN: `kode_pemulihan` = `null` bila peminta bukan SUPER_ADMIN.
 - Tidak bisa menonaktifkan akun sendiri → `422`.
 
 ---

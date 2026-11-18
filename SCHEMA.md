@@ -257,7 +257,6 @@ dihasilkan dari `surat` yang bernomor (`GET /surat/agenda`, `GET /surat/register
 
 | Permission                                                                 | SUPER_ADMIN | ADMIN | SEKDES | KADES | PEGAWAI |
 | -------------------------------------------------------------------------- | :---------: | :---: | :----: | :---: | :-----: |
-| settings.manage, role.manage                                               |     ✅      |       |        |       |         |
 | user.view, user.manage, user_role.assign                                   |     ✅      |  ✅   |        |       |         |
 | login_failure.view                                                         |     ✅      |  ✅   |        |       |         |
 | pegawai.view                                                               |     ✅      |  ✅   |   ✅   |  ✅   |         |
@@ -286,6 +285,9 @@ surat.cancel, surat.edit_redaksi, settings.surat_manage` (tidak ada role OPERATO
 - **SEKDES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review, absensi.koreksi`
 - **KADES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review, absensi.koreksi`
 - **PEGAWAI** — `absensi.self, perizinan.self`
+
+Khusus SUPER_ADMIN (dicek di `users/service.py`, bukan lewat permission): memberi role ber-permission `*`,
+mengubah/menonaktifkan/mengganti role & password akun SUPER_ADMIN, dan melihat kode pemulihan akun SUPER_ADMIN.
 
 Arti: ADMIN mengurus data & akun tapi tidak meninjau perizinan (pengurus data ≠ pemberi persetujuan).
 SEKDES = penyetuju harian & pemantau rekap. KADES = pemantau & peninjau perizinan milik Sekdes.
