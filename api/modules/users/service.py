@@ -44,6 +44,15 @@ def get(id_user):
     return row
 
 
+def get_for(id_user, actor_permissions):
+    """Detail untuk actor. kode_pemulihan = kredensial login: akun SUPER_ADMIN hanya boleh dilihat SUPER_ADMIN
+    (tanpa ini ADMIN bisa login sebagai SUPER_ADMIN, melewati _guard_superuser_target)."""
+    row = dict(get(id_user))
+    if "*" not in actor_permissions and "*" in query.get_permissions(id_user):
+        row["kode_pemulihan"] = None
+    return row
+
+
 def list_roles(actor_permissions):
     """Role aktif yang boleh diberikan actor (aturan sama dengan _validate_roles: role "*" hanya oleh SUPER_ADMIN)."""
     boleh_super = "*" in actor_permissions

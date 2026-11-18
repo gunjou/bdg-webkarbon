@@ -10088,7 +10088,7 @@
         ]
       },
       "get": {
-        "description": "view. Detail user (termasuk kode_pemulihan).",
+        "description": "view. Detail user (termasuk kode_pemulihan; null untuk akun SUPER_ADMIN bila peminta bukan SUPER_ADMIN).",
         "operationId": "get_user_detail",
         "responses": {
           "200": {

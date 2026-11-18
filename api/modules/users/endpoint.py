@@ -52,8 +52,8 @@ class UserDetail(Resource):
     @permission_required("user.view")
     @measure_execution_time
     def get(self, id_user):
-        """Akses: user.view. Detail user (termasuk kode_pemulihan)."""
-        return success(service.get(id_user))
+        """Akses: user.view. Detail user (termasuk kode_pemulihan; null untuk akun SUPER_ADMIN bila peminta bukan SUPER_ADMIN)."""
+        return success(service.get_for(id_user, _actor()[1]))
 
     @api_doc(ns, user_detail_out, errors=(400, 401, 403, 404, 422))
     @ns.expect(user_update, validate=True)

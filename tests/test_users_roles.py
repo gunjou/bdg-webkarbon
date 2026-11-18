@@ -37,5 +37,20 @@ class UserSchemaTest(unittest.TestCase):
         q.assert_called_once_with(1)
 
 
+
+@patch("api.modules.users.service.query.get_by_id", return_value={"id_user": 1, "kode_pemulihan": "ABC123"})
+class KodePemulihanTest(unittest.TestCase):
+    def test_admin_tidak_lihat_kode_super_admin(self, _):
+        with patch("api.modules.users.service.query.get_permissions", return_value=["*"]):
+            self.assertIsNone(service.get_for(1, {"user.view"})["kode_pemulihan"])
+
+    def test_super_admin_lihat_kode_super_admin(self, _):
+        with patch("api.modules.users.service.query.get_permissions", return_value=["*"]):
+            self.assertEqual(service.get_for(1, {"*"})["kode_pemulihan"], "ABC123")
+
+    def test_admin_lihat_kode_akun_biasa(self, _):
+        with patch("api.modules.users.service.query.get_permissions", return_value=["absensi.self"]):
+            self.assertEqual(service.get_for(1, {"user.view"})["kode_pemulihan"], "ABC123")
+
 if __name__ == "__main__":
     unittest.main()
