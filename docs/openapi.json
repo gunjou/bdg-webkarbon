@@ -2069,6 +2069,142 @@
       },
       "type": "object"
     },
+    "Notifikasi": {
+      "properties": {
+        "perizinan": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/NotifikasiBagianIzin"
+            }
+          ],
+          "description": "null = tanpa akses perizinan.view_all"
+        },
+        "surat": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/NotifikasiBagianSurat"
+            }
+          ],
+          "description": "null = tanpa akses surat.view/surat.create"
+        }
+      },
+      "type": "object"
+    },
+    "NotifikasiBagianIzin": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/definitions/NotifikasiPerizinan"
+          },
+          "type": "array"
+        },
+        "jumlah": {
+          "example": 3,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "NotifikasiBagianSurat": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/definitions/NotifikasiSurat"
+          },
+          "type": "array"
+        },
+        "jumlah": {
+          "example": 2,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "NotifikasiPerizinan": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "id_perizinan": {
+          "type": "integer"
+        },
+        "jenis_absen": {
+          "description": "masuk|pulang, untuk koreksi",
+          "type": "string"
+        },
+        "jenis_izin_name": {
+          "description": "null untuk koreksi",
+          "type": "string"
+        },
+        "jenis_pengajuan": {
+          "enum": [
+            "izin",
+            "koreksi"
+          ],
+          "example": "izin",
+          "type": "string"
+        },
+        "tanggal_mulai": {
+          "format": "date",
+          "type": "string"
+        },
+        "tanggal_selesai": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "NotifikasiResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Notifikasi"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "NotifikasiSurat": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "id_surat": {
+          "type": "integer"
+        },
+        "judul": {
+          "type": "string"
+        },
+        "nama_pemohon": {
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "Pegawai": {
       "properties": {
         "created_at": {
@@ -7268,6 +7404,36 @@
         ]
       }
     },
+    "/notifikasi": {
+      "get": {
+        "description": "view_all / surat.view / surat.create. Jumlah & 5 terbaru: pengajuan izin/koreksi menunggu\n(tanpa milik sendiri) dan draft surat. Bagian tanpa akses = null. Untuk badge lonceng & surat di header.",
+        "operationId": "get_notifikasi",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/NotifikasiResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: perizinan",
+        "tags": [
+          "notifikasi"
+        ]
+      }
+    },
     "/pegawai": {
       "get": {
         "description": "view. Daftar pegawai aktif beserta akun user.",
@@ -10406,6 +10572,10 @@
     {
       "description": "Surat keluar: draft, isian, lampiran, penandatangan, redaksi, preview",
       "name": "surat"
+    },
+    {
+      "description": "Ringkasan hal yang menunggu tindakan (lonceng & surat di header admin)",
+      "name": "notifikasi"
     },
     {
       "description": "Master Jabatan",

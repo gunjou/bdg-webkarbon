@@ -112,6 +112,7 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 | `ref_option.manage` | Master daftar pilihan (agama, pekerjaan, dusun, ...) | `POST/PUT/DELETE /master/ref-options...` |
 | `penduduk.view` / `penduduk.manage` | Menu Penduduk | `GET /penduduk...` / `POST/PUT/DELETE /penduduk...` |
 | `settings.surat_manage` | Pengaturan desa (kop) & penomoran surat | `PUT /settings`, `POST /settings/logo` |
+| `perizinan.view_all` / `surat.view` / `surat.create` | Badge notifikasi di header | `GET /notifikasi` → `{perizinan: {jumlah, items[5]} \| null, surat: {jumlah, items[5]} \| null}`. `perizinan` = pengajuan izin/koreksi `diajukan` **tanpa milik akun sendiri**; `surat` = draft. `null` = tanpa akses (sembunyikan tombolnya). Ringan (COUNT), aman dipanggil berkala. |
 | `jenis_surat.manage` | Kelola jenis surat (wizard form + redaksi) | `/jenis-surat...` (tulis), `/jenis-surat/placeholder`, `/jenis-surat/preview` |
 | `surat.view` | Daftar & detail surat, PDF, agenda, register | `GET /surat...`, `/surat/{id}/pdf`, `/surat/agenda`, `/surat/register` |
 | `surat.create` | Buat & isi draft, lampiran, surat pengganti | `POST /surat`, `PUT /surat/{id}`, `/surat/{id}/lampiran`, `POST /surat/{id}/pengganti` |
