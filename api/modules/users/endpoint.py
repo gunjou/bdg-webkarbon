@@ -8,7 +8,7 @@ from api.shared.docs import api_doc
 from api.shared.response import success
 from api.utils.timing import measure_execution_time
 from . import ns, service
-from .schema import role_ref, user_create, user_detail_out, user_out, user_roles_input, user_update
+from .schema import list_parser, role_ref, user_create, user_detail_out, user_out, user_roles_input, user_update
 
 
 def _actor():
@@ -18,11 +18,12 @@ def _actor():
 @ns.route("")
 class UserList(Resource):
     @api_doc(ns, user_out, many=True)
+    @ns.expect(list_parser)
     @permission_required("user.view")
     @measure_execution_time
     def get(self):
-        """Akses: user.view. Daftar user aktif."""
-        return success(service.list_all())
+        """Akses: user.view. Daftar akun (pegawai & non-pegawai); include_inactive=1 ikut yang nonaktif."""
+        return success(service.list_all(list_parser.parse_args()["include_inactive"]))
 
     @api_doc(ns, user_detail_out, status=201, errors=(400, 401, 403, 422))
     @ns.expect(user_create, validate=True)

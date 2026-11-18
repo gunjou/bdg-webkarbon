@@ -106,7 +106,7 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 | `pegawai.view` | Daftar pegawai | `GET /pegawai`, `/pegawai/{id}`, `/pegawai/{id}/foto` |
 | `pegawai.manage` | Tambah/ubah/nonaktifkan pegawai, ganti password | `POST/PUT/DELETE /pegawai...`, `PUT /pegawai/{id}/password` |
 | `pegawai.enroll_face` | Ganti foto wajah | `PUT /pegawai/{id}/foto` |
-| `user.view` / `user.manage` | Akun non-pegawai | `/users...` |
+| `user.view` / `user.manage` | Akun & role semua pengguna (pegawai & non-pegawai). Buat/ubah/nonaktif via `/users` hanya untuk akun non-pegawai; data akun pegawai lewat `/pegawai` | `GET /users?include_inactive=` (`id_pegawai`/`full_name` null = non-pegawai), `POST /users` `{username, email?, password, id_roles}` |
 | `user_role.assign` | Ubah role akun | `PUT /users/{id}/roles`; pilihan role: `GET /users/roles` (juga untuk `user.manage` / `pegawai.manage`; role SUPER_ADMIN hanya tampil untuk SUPER_ADMIN) |
 | `jabatan.manage`, `lokasi_kantor.manage`, `jadwal_kerja.manage`, `jenis_izin.manage`, `hari_libur.manage` | Master data | `/master/<x>...` |
 | `ref_option.manage` | Master daftar pilihan (agama, pekerjaan, dusun, ...) | `POST/PUT/DELETE /master/ref-options...` |

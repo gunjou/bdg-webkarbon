@@ -4106,6 +4106,14 @@
         "email": {
           "type": "string"
         },
+        "full_name": {
+          "description": "nama pegawai; null untuk akun non-pegawai",
+          "type": "string"
+        },
+        "id_pegawai": {
+          "description": "null = akun non-pegawai",
+          "type": "integer"
+        },
         "id_user": {
           "example": 2,
           "type": "integer"
@@ -4142,6 +4150,16 @@
           "maxLength": 150,
           "type": "string"
         },
+        "id_roles": {
+          "example": [
+            2
+          ],
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
         "password": {
           "example": "rahasia123",
           "minLength": 5,
@@ -4155,6 +4173,7 @@
         }
       },
       "required": [
+        "id_roles",
         "password",
         "username"
       ],
@@ -4168,6 +4187,14 @@
         },
         "email": {
           "type": "string"
+        },
+        "full_name": {
+          "description": "nama pegawai; null untuk akun non-pegawai",
+          "type": "string"
+        },
+        "id_pegawai": {
+          "description": "null = akun non-pegawai",
+          "type": "integer"
         },
         "id_user": {
           "example": 2,
@@ -9899,8 +9926,20 @@
     },
     "/users": {
       "get": {
-        "description": "view. Daftar user aktif.",
+        "description": "view. Daftar akun (pegawai & non-pegawai); include_inactive=1 ikut yang nonaktif.",
         "operationId": "get_user_list",
+        "parameters": [
+          {
+            "default": 0,
+            "enum": [
+              0,
+              1
+            ],
+            "in": "query",
+            "name": "include_inactive",
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Sukses",

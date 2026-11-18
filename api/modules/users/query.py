@@ -6,7 +6,7 @@ from api.utils.datetime import get_wita
 
 # password_hash tidak pernah di-SELECT
 _SELECT = """
-    SELECT u.id_user, u.username, u.email,
+    SELECT u.id_user, u.id_pegawai, p.full_name, u.username, u.email,
            u.last_login_at, u.is_active, u.created_at, u.updated_at,
            COALESCE((
                SELECT json_agg(json_build_object('id_role', r.id_role, 'code', r.code, 'name', r.name)
@@ -14,12 +14,13 @@ _SELECT = """
                FROM user_roles ur JOIN roles r ON r.id_role = ur.id_role
                WHERE ur.id_user = u.id_user
            ), '[]') AS roles
-    FROM users u
+    FROM users u LEFT JOIN pegawai p ON p.id_pegawai = u.id_pegawai
 """
 
 
-def get_all():
-    sql = text(_SELECT + " WHERE u.is_active = 1 ORDER BY u.id_user")
+def get_all(include_inactive=0):
+    where = "" if include_inactive else " WHERE u.is_active = 1"
+    sql = text(_SELECT + where + " ORDER BY u.is_active DESC, u.id_user")
     with get_engine().connect() as conn:
         return conn.execute(sql).mappings().all()
 

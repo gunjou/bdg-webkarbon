@@ -1,12 +1,16 @@
 # api/modules/users/schema.py
-from flask_restx import fields
+from flask_restx import fields, reqparse
 
 from . import ns
+
+list_parser = reqparse.RequestParser()
+list_parser.add_argument("include_inactive", type=int, location="args", default=0, choices=(0, 1))
 
 user_create = ns.model("UserCreate", {
     "username": fields.String(required=True, min_length=3, max_length=50, example="budi"),
     "email": fields.String(max_length=150, example="budi@desa.id"),
     "password": fields.String(required=True, min_length=5, example="rahasia123"),
+    "id_roles": fields.List(fields.Integer, required=True, min_items=1, example=[2]),
 })
 
 # password opsional: diisi = ganti password
@@ -29,6 +33,8 @@ role_ref = ns.model("RoleRef", {
 
 user_out = ns.model("User", {
     "id_user": fields.Integer(example=2),
+    "id_pegawai": fields.Integer(description="null = akun non-pegawai"),
+    "full_name": fields.String(description="nama pegawai; null untuk akun non-pegawai"),
     "username": fields.String(example="budi"),
     "email": fields.String(),
     "last_login_at": fields.DateTime(),

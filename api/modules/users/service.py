@@ -33,8 +33,8 @@ def _clean(data, id_target=None):
     return clean
 
 
-def list_all():
-    return query.get_all()
+def list_all(include_inactive=0):
+    return query.get_all(include_inactive)
 
 
 def get(id_user):

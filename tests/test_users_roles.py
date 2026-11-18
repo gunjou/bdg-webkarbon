@@ -22,5 +22,20 @@ class ListRolesTest(unittest.TestCase):
         self.assertEqual(set(service.list_roles({"*"})[0]), {"id_role", "code", "name"})
 
 
+
+class UserSchemaTest(unittest.TestCase):
+    def test_create_wajib_id_roles(self):
+        # dulu id_roles tidak ada di model → service KeyError (500); sekarang divalidasi di request
+        from api.modules.users.schema import user_create
+        with self.assertRaises(Exception):
+            user_create.validate({"username": "budi", "password": "rahasia"})
+        user_create.validate({"username": "budi", "password": "rahasia", "id_roles": [2]})
+
+    def test_list_meneruskan_include_inactive(self):
+        with patch("api.modules.users.service.query.get_all", return_value=[]) as q:
+            service.list_all(1)
+        q.assert_called_once_with(1)
+
+
 if __name__ == "__main__":
     unittest.main()
