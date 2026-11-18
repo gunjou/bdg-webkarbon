@@ -264,13 +264,15 @@ dihasilkan dari `surat` yang bernomor (`GET /surat/agenda`, `GET /surat/register
 | jabatan / lokasi_kantor / jadwal_kerja / hari_libur / jenis_izin `.manage` |     ✅      |  ✅   |        |       |         |
 | absensi.view_all                                                           |     ✅      |  ✅   |   ✅   |  ✅   |         |
 | absensi.koreksi (migrasi 003)                                              |     ✅      |  ✅   |   ✅   |  ✅   |         |
-| absensi_gagal.view                                                         |     ✅      |  ✅   |        |       |         |
+| absensi_gagal.view (SEKDES/KADES: migrasi 010)                             |     ✅      |  ✅   |   ✅   |  ✅   |         |
 | perizinan.view_all                                                         |     ✅      |  ✅   |   ✅   |  ✅   |         |
 | perizinan.review                                                           |     ✅      |       |   ✅   |  ✅   |         |
 | absensi.self, perizinan.self                                               |     ✅      |       |        |       |   ✅    |
-| ref_option.manage, penduduk.view, penduduk.manage (migrasi 005)            |     ✅      |  ✅   |        |       |         |
+| penduduk.view (SEKDES/KADES: migrasi 010)                                  |     ✅      |  ✅   |   ✅   |  ✅   |         |
+| ref_option.manage, penduduk.manage (migrasi 005)                           |     ✅      |  ✅   |        |       |         |
 | jenis_surat.manage (migrasi 005)                                           |     ✅      |  ✅   |        |       |         |
-| surat.view, surat.create, surat.terbitkan, surat.cancel (migrasi 005)      |     ✅      |  ✅   |        |       |         |
+| surat.view (SEKDES/KADES: migrasi 010)                                     |     ✅      |  ✅   |   ✅   |  ✅   |         |
+| surat.create, surat.terbitkan, surat.cancel (migrasi 005)                  |     ✅      |  ✅   |        |       |         |
 | surat.edit_redaksi (migrasi 005)                                           |     ✅      |  ✅   |        |       |         |
 | settings.surat_manage — pengaturan desa & surat (migrasi 007)              |     ✅      |  ✅   |        |       |         |
 
@@ -282,8 +284,10 @@ pegawai.enroll_face, jabatan.manage, lokasi_kantor.manage, jadwal_kerja.manage, 
 jenis_izin.manage, absensi.view_all, absensi_gagal.view, perizinan.view_all, absensi.koreksi` + persuratan:
 `ref_option.manage, penduduk.view, penduduk.manage, jenis_surat.manage, surat.view, surat.create, surat.terbitkan,
 surat.cancel, surat.edit_redaksi, settings.surat_manage` (tidak ada role OPERATOR: ADMIN merangkap operator surat)
-- **SEKDES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review, absensi.koreksi`
-- **KADES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review, absensi.koreksi`
+- **SEKDES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review, absensi.koreksi,
+absensi_gagal.view, penduduk.view, surat.view` (lihat semua, tanpa master/pengaturan/akun)
+- **KADES** — `pegawai.view, absensi.view_all, perizinan.view_all, perizinan.review, absensi.koreksi,
+absensi_gagal.view, penduduk.view, surat.view` (lihat semua, tanpa master/pengaturan/akun)
 - **PEGAWAI** — `absensi.self, perizinan.self`
 
 Khusus SUPER_ADMIN (dicek di `users/service.py`, bukan lewat permission): memberi role ber-permission `*`,

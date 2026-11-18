@@ -125,7 +125,7 @@ Data pilihan & pencarian yang dibutuhkan form surat juga terbuka untuk `surat.cr
 
 Role bawaan: `SUPER_ADMIN` (`*`), `ADMIN` (semua kecuali review izin & absen sendiri; termasuk
 seluruh persuratan — tidak ada role OPERATOR terpisah), `SEKDES`/`KADES`
-(lihat pegawai & absensi, review izin), `PEGAWAI` (absen & izin sendiri). Satu akun bisa punya beberapa role;
+(lihat pegawai, absensi, log gagal, penduduk & surat; review izin; koreksi absen — tanpa master, pengaturan & akun), `PEGAWAI` (absen & izin sendiri). Satu akun bisa punya beberapa role;
 permission-nya digabung (mis. Sekdes yang juga absen = `SEKDES` + `PEGAWAI`).
 
 Aturan khusus yang akan ditolak backend (tampilkan `message`):
