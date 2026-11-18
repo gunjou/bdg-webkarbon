@@ -107,7 +107,7 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 | `pegawai.manage` | Tambah/ubah/nonaktifkan pegawai, ganti password | `POST/PUT/DELETE /pegawai...`, `PUT /pegawai/{id}/password` |
 | `pegawai.enroll_face` | Ganti foto wajah | `PUT /pegawai/{id}/foto` |
 | `user.view` / `user.manage` | Akun non-pegawai | `/users...` |
-| `user_role.assign` | Ubah role akun | `PUT /users/{id}/roles` |
+| `user_role.assign` | Ubah role akun | `PUT /users/{id}/roles`; pilihan role: `GET /users/roles` (juga untuk `user.manage` / `pegawai.manage`; role SUPER_ADMIN hanya tampil untuk SUPER_ADMIN) |
 | `jabatan.manage`, `lokasi_kantor.manage`, `jadwal_kerja.manage`, `jenis_izin.manage`, `hari_libur.manage` | Master data | `/master/<x>...` |
 | `ref_option.manage` | Master daftar pilihan (agama, pekerjaan, dusun, ...) | `POST/PUT/DELETE /master/ref-options...` |
 | `penduduk.view` / `penduduk.manage` | Menu Penduduk | `GET /penduduk...` / `POST/PUT/DELETE /penduduk...` |
@@ -115,7 +115,7 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 | `jenis_surat.manage` | Kelola jenis surat (wizard form + redaksi) | `/jenis-surat...` (tulis), `/jenis-surat/placeholder`, `/jenis-surat/preview` |
 | `surat.view` | Daftar & detail surat, PDF, agenda, register | `GET /surat...`, `/surat/{id}/pdf`, `/surat/agenda`, `/surat/register` |
 | `surat.create` | Buat & isi draft, lampiran, surat pengganti | `POST /surat`, `PUT /surat/{id}`, `/surat/{id}/lampiran`, `POST /surat/{id}/pengganti` |
-| `surat.edit_redaksi` | Sesuaikan redaksi per surat | `PUT/DELETE /surat/{id}/redaksi`, field `redaksi` di perbaikan |
+| `surat.edit_redaksi` | Sesuaikan redaksi per surat | `PUT/DELETE /surat/{id}/redaksi`, field `redaksi` di perbaikan, `POST /jenis-surat/placeholder` (panel editor) |
 | `surat.terbitkan` | Terbitkan nomor, perbaikan, upload scan arsip | `POST /surat/{id}/terbitkan`, `/perbaiki`, `/arsip` |
 | `surat.cancel` | Batalkan surat | `POST /surat/{id}/batal` |
 
@@ -174,7 +174,7 @@ Absen tidak bisa diubah/dihapus; koreksi lewat perizinan di bawah.
 
 Aturan (`422` jika dilanggar): izin maks 30 hari & tidak beririsan dengan izin lain yang diajukan/disetujui;
 koreksi hanya hari ini s/d 7 hari ke belakang, absen jenis itu belum tercatat, dan belum ada koreksi aktif yang sama.
-Tidak ada ubah pengajuan: batalkan lalu ajukan ulang. Setuju/tolak dilakukan admin (modul terpisah, belum ada).
+Tidak ada ubah pengajuan: batalkan lalu ajukan ulang. Setuju/tolak dilakukan admin lewat `PUT /absensi/perizinan/{id}/review` (§5).
 
 ---
 
@@ -289,7 +289,7 @@ POST /surat ─► draft ──PUT /surat/{id} (isi, penandatangan)──► POS
 | `GET /surat?status=&id_jenis_surat=&tahun=&q=&limit=&offset=` | Daftar terbaru. `q` angka = awalan NIK pemohon, selain itu awalan nama. `terkunci` = scan arsip sudah ada. |
 | `POST /surat` `{id_jenis_surat, data?}` | Buat draft (jenis surat harus aktif). |
 | `GET /surat/{id}` | Detail: `skema_form` (render form dari sini, **bukan** dari jenis surat), `data`, `redaksi`, `lampiran`, `riwayat`, ... |
-| `PUT /surat/{id}` `{data, id_penandatangan}` | Simpan draft. `data` dikirim **lengkap** (menimpa). Hanya format yang dicek; field wajib dicek saat terbit. |
+| `PUT /surat/{id}` `{data, id_penandatangan}` | Simpan draft. `data` dikirim **lengkap** (menimpa). `id_penandatangan` `null` / tidak dikirim = belum dipilih (menghapus pilihan lama). Hanya format yang dicek; field wajib dicek saat terbit. |
 | `GET /surat/penandatangan` | Pilihan penandatangan + `atas_nama` (1 = dicetak "a.n Kepala Desa"). |
 | `PUT /surat/{id}/redaksi` `{redaksi}` / `DELETE /surat/{id}/redaksi` | Sesuaikan redaksi surat ini (`redaksi_diubah = 1`) / kembalikan ke template standar. Hanya draft. |
 | `POST /surat/{id}/lampiran` (multipart `nama`, `file`) | Lampiran pdf/jpg/png sesuai `persyaratan`. `GET/DELETE /surat/{id}/lampiran/{id_lampiran}`. |

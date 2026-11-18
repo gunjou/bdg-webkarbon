@@ -44,6 +44,13 @@ def get(id_user):
     return row
 
 
+def list_roles(actor_permissions):
+    """Role aktif yang boleh diberikan actor (aturan sama dengan _validate_roles: role "*" hanya oleh SUPER_ADMIN)."""
+    boleh_super = "*" in actor_permissions
+    return [{"id_role": r["id_role"], "code": r["code"], "name": r["name"]}
+            for r in query.list_roles() if boleh_super or "*" not in r["permissions"]]
+
+
 def _validate_roles(id_roles, actor_permissions):
     id_roles = set(id_roles)
     if not id_roles:

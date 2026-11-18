@@ -8,7 +8,7 @@ from api.shared.docs import api_doc
 from api.shared.response import success
 from api.utils.timing import measure_execution_time
 from . import ns, service
-from .schema import user_create, user_detail_out, user_out, user_roles_input, user_update
+from .schema import role_ref, user_create, user_detail_out, user_out, user_roles_input, user_update
 
 
 def _actor():
@@ -32,6 +32,17 @@ class UserList(Resource):
         """Akses: user.manage. Tambah user + role (kode_pemulihan dibuat otomatis)."""
         data = service.create(request.get_json(), *_actor())
         return success(data, "User berhasil ditambahkan", 201)
+
+
+@ns.route("/roles")
+class RoleList(Resource):
+    @api_doc(ns, role_ref, many=True)
+    @permission_required(["user_role.assign", "user.manage", "pegawai.manage"])
+    @measure_execution_time
+    def get(self):
+        """Akses: user_role.assign / user.manage / pegawai.manage. Pilihan role aktif yang boleh diberikan akun ini
+        (role SUPER_ADMIN hanya tampil untuk SUPER_ADMIN)."""
+        return success(service.list_roles(_actor()[1]))
 
 
 @ns.route("/<int:id_user>")

@@ -3510,6 +3510,33 @@
       },
       "type": "object"
     },
+    "RoleRefListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/RoleRef"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "Settings": {
       "properties": {
         "desa.alamat": {
@@ -4057,9 +4084,12 @@
           "type": "object"
         },
         "id_penandatangan": {
-          "description": "id_pegawai dari GET /surat/penandatangan; null = belum",
+          "description": "id_pegawai dari GET /surat/penandatangan; null / tidak dikirim = belum dipilih",
           "example": 1,
-          "type": "integer"
+          "type": [
+            "integer",
+            "null"
+          ]
         }
       },
       "required": [
@@ -5219,7 +5249,7 @@
     },
     "/jenis-surat/placeholder": {
       "post": {
-        "description": "manage. Daftar placeholder untuk panel editor dari skema_form (boleh belum disimpan).",
+        "description": "manage / surat.edit_redaksi (editor redaksi per surat). Daftar placeholder untuk panel editor dari skema_form (boleh belum disimpan).",
         "operationId": "post_jenis_surat_placeholder",
         "parameters": [
           {
@@ -9942,6 +9972,36 @@
           }
         },
         "summary": "Akses: user",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/roles": {
+      "get": {
+        "description": "assign / user.manage / pegawai.manage. Pilihan role aktif yang boleh diberikan akun ini\n(role SUPER_ADMIN hanya tampil untuk SUPER_ADMIN).",
+        "operationId": "get_role_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/RoleRefListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: user_role",
         "tags": [
           "users"
         ]

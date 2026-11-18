@@ -44,10 +44,10 @@ class JenisSuratList(Resource):
 class JenisSuratPlaceholder(Resource):
     @api_doc(ns, placeholder_out, many=True, errors=(400, 401, 403, 422))
     @ns.expect(placeholder_input, validate=True)
-    @permission_required(MANAGE)
+    @permission_required([MANAGE, "surat.edit_redaksi"])
     @measure_execution_time
     def post(self):
-        """Akses: jenis_surat.manage. Daftar placeholder untuk panel editor dari skema_form (boleh belum disimpan)."""
+        """Akses: jenis_surat.manage / surat.edit_redaksi (editor redaksi per surat). Daftar placeholder untuk panel editor dari skema_form (boleh belum disimpan)."""
         return success(service.get_placeholders(request.get_json().get("skema_form")))
 
 

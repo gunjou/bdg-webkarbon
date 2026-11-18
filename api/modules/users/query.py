@@ -55,6 +55,12 @@ def get_permissions(id_user):
         return {p for row in conn.execute(sql, {"id_user": id_user}).scalars() for p in row}
 
 
+def list_roles():
+    sql = text("SELECT id_role, code, name, permissions FROM roles WHERE is_active = 1 ORDER BY id_role")
+    with get_engine().connect() as conn:
+        return conn.execute(sql).mappings().all()
+
+
 def get_roles_by_ids(id_roles):
     sql = text("SELECT id_role, code, permissions FROM roles WHERE id_role = ANY(:ids) AND is_active = 1")
     with get_engine().connect() as conn:

@@ -28,9 +28,14 @@ surat_create = ns.model("SuratCreate", {
     "data": fields.Raw(example=DATA_EXAMPLE, description=DATA_DESC + " Opsional saat membuat draft."),
 })
 
+class NullableInteger(fields.Integer):
+    """Integer yang boleh null (validasi restx default menolak None)."""
+    __schema_type__ = ["integer", "null"]
+
+
 surat_update = ns.model("SuratUpdate", {
     "data": fields.Raw(required=True, example=DATA_EXAMPLE, description=DATA_DESC + " Dikirim lengkap (menimpa)."),
-    "id_penandatangan": fields.Integer(example=1, description="id_pegawai dari GET /surat/penandatangan; null = belum"),
+    "id_penandatangan": NullableInteger(example=1, description="id_pegawai dari GET /surat/penandatangan; null / tidak dikirim = belum dipilih"),
 })
 
 redaksi_input = ns.model("SuratRedaksiInput", {
