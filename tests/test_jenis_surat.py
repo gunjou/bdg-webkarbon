@@ -35,6 +35,12 @@ class SkemaTest(unittest.TestCase):
     def test_tanpa_penduduk(self):
         self.assertErr({"sections": [SKEMA["sections"][1]]}, "skema_form.sections")
 
+    def test_dinas_boleh_tanpa_penduduk(self):
+        s = service.validate_skema({"layout": "dinas", "sections": [SKEMA["sections"][1]]})
+        self.assertEqual(s["layout"], "dinas")
+        self.assertEqual(service.pemohon(s, {"kepada": "Camat"}), (None, {"nama": "Camat"}))
+        self.assertErr({"layout": "x", "sections": SKEMA["sections"]}, "skema_form.layout")
+
     def test_select_tanpa_opsi_dan_key_cadangan(self):
         s = {"sections": [SKEMA["sections"][0], {"key": "x", "label": "X", "type": "fields", "fields": [
             {"key": "desa", "label": "A", "type": "text"}, {"key": "b", "label": "B", "type": "select"}]}]}
@@ -98,6 +104,28 @@ class RenderHtmlTest(unittest.TestCase):
                                   penandatangan={"nama": "Budi", "jabatan": "Sekretaris Desa", "atas_nama": 1},
                                   watermark="DRAF")
         for teks in ("&lt;b&gt;Gugun&lt;/b&gt;", "Mataram, 3 November 1998", "Rp 50.000.000",
-                     "lima puluh juta rupiah", "Dasan Kebon", "<td>Utara</td>", "a.n. Kepala Desa Karang Bongkot",
+                     "lima puluh juta rupiah", "Dasan Kebon", "<td>Utara</td>", "a.n. KEPALA DESA KARANG BONGKOT",
                      "Sekretaris Desa", "16 November 2026", "215mm 330mm", "DRAF"):
             self.assertIn(teks, html)
+
+
+class SeedTest(unittest.TestCase):
+    def test_seed_valid_dan_dinas_render(self):
+        import sys
+        from pathlib import Path
+        from api.modules.jenis_surat import render
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+        from seed_jenis_surat import JENIS
+        settings = {"desa.nama": "Karang Bongkot", "desa.kecamatan": "Labuapi", "desa.kabupaten": "Lombok Barat"}
+        for code, name, _, skema, redaksi, _ in JENIS:
+            sk = service.validate_skema(skema)
+            data = {**service.sample_data(sk), "kepada": "Camat", "tembusan": "Arsip\nBPD"}
+            html = render.render_html(judul=name, redaksi=service.clean_template(redaksi, sk), skema=sk, data=data,
+                                      labels={}, settings=settings, penandatangan={"nama": "Budi", "jabatan": "Kepala Desa"})
+            self.assertIn("KEPALA DESA KARANG BONGKOT", html, code)
+            if sk["layout"] == "dinas":
+                self.assertIn("Yth. Camat", html)
+                self.assertIn("<li>BPD</li>", html)
+                self.assertNotIn('class="judul"', html)
+            else:
+                self.assertIn("Budi", html.split('class="ttd"')[0], code)  # {{ ttd.nama }} di redaksi

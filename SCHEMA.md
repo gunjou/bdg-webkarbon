@@ -173,6 +173,9 @@ Hanya diisi dari menu Penduduk. Pemohon surat yang diisi manual **tidak** masuk 
 
 Seed 008: `SKBM` (Surat Keterangan Belum Menikah, 148.1) dari contoh surat asli desa.
 
+`skema_form.layout` — `keterangan` (default) | `dinas` (surat biasa/undangan; field `sifat, lampiran, perihal, kepada,
+di_tempat, tembusan` dicetak di kepala surat; section penduduk opsional). Detail: docstring `jenis_surat/render.py`.
+
 `skema_form` — 4 tipe section; key section & field unik di seluruh skema (huruf kecil/angka/`_`):
 
 ```json

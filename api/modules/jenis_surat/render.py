@@ -8,7 +8,14 @@ Bentuk `data` (surat.data):
   - section fields     : data[field_key] = nilai (date 'YYYY-MM-DD', rupiah angka, select = code/opsi)
   - section daftar     : data[key] = [{kolom: nilai}, ...]
   - section teks_bebas : data[key] = HTML (dibersihkan saat render)
-Key yang tidak ada di data dirender kosong."""
+Key yang tidak ada di data dirender kosong.
+
+Bentuk cetak = skema["layout"]:
+  - keterangan (default): judul bergaris bawah + NOMOR di tengah, lalu isi.
+  - dinas (surat biasa / undangan): blok Nomor/Sifat/Lampiran/Perihal di kiri, tanggal + Kepada Yth. di kanan,
+    tanpa judul; diisi dari field ber-key tetap: sifat, lampiran, perihal, kepada, di_tempat, tembusan (textarea,
+    satu tujuan per baris). Field yang tidak ada di skema dicetak kosong / tidak dicetak.
+Redaksi juga bisa memakai penandatangan: {{ ttd.nama }}, {{ ttd.jabatan }}, {{ ttd.nip }}."""
 import base64
 from pathlib import Path
 from urllib.parse import unquote, urlparse
@@ -121,11 +128,20 @@ def _tabel(daftar):
     return Markup(f'<table class="daftar"><tr>{head}</tr>{body}</table>')
 
 
-def render_isi(redaksi, skema, data, labels, desa):
+TITIK = "...................................."
+
+
+def _ttd(penandatangan):
+    p = penandatangan or {}
+    return {"nama": p.get("nama") or TITIK, "jabatan": p.get("jabatan") or TITIK, "nip": p.get("nip") or ""}
+
+
+def render_isi(redaksi, skema, data, labels, desa, penandatangan=None, ctx=None):
     """Redaksi -> HTML isi. Template user selalu lewat sandbox."""
     semua = {c: l for g in labels.values() for c, l in g.items()}
     env = make_env({"biodata": _biodata, "tabel": _tabel, "label": lambda kode: semua.get(kode, kode or "")})
-    return Markup(env.from_string(redaksi).render(build_context(skema, data, labels, desa)))
+    ctx = ctx or build_context(skema, data, labels, desa)
+    return Markup(env.from_string(redaksi).render({**ctx, "ttd": _ttd(penandatangan)}))
 
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
@@ -159,6 +175,16 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 .judul span { display: inline-block; border-bottom: 1px solid #000; padding-bottom: 2px; line-height: 1.2; }
 .nomor { text-align: center; margin: 0 0 18px; }
 .isi p { text-align: justify; text-indent: 12mm; margin: 0 0 10px; }
+/* tabel di redaksi (mis. Nama/Jabatan penandatangan, rincian undangan) = tanpa garis, seperti biodata */
+.isi table { border-collapse: collapse; margin: 0 0 10px 12mm; }
+.isi table td { padding: 0 4px; vertical-align: top; }
+.dinas { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+.dinas td { vertical-align: top; padding: 0; }
+.dinas .kiri td { padding: 0 4px 0 0; }
+.dinas .kepada { padding-left: 10mm; }
+.isi.dinas-isi { margin-left: 12mm; }
+.tembusan { margin-top: 24px; page-break-inside: avoid; }
+.tembusan ol { margin: 0; padding-left: 6mm; }
 .biodata { margin: 4px 0 12px 12mm; border-collapse: collapse; }
 .biodata td { padding: 0 4px; vertical-align: top; }
 .biodata .bl { width: 46mm; } .biodata .bt { width: 4mm; }
@@ -184,16 +210,37 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
   <td class="logo kanan"><img src="{{ logo }}"></td>
 </tr></table>
 <div class="kop-garis"></div>
+{% set tgl = desa.nama ~ ", " ~ (tanggal or "....................") %}
+{% if layout == "dinas" %}
+<table class="dinas"><tr>
+  <td style="width: 55%"><table class="kiri">
+    <tr><td style="width: 22mm">Nomor</td><td>:</td><td>{{ nomor or "......................" }}</td></tr>
+    <tr><td>Sifat</td><td>:</td><td>{{ f.sifat }}</td></tr>
+    <tr><td>Lampiran</td><td>:</td><td>{{ f.lampiran or "-" }}</td></tr>
+    <tr><td>Perihal</td><td>:</td><td>{{ f.perihal }}</td></tr>
+  </table></td>
+  <td>
+    <div>{{ tgl }}</div><br>
+    <div class="kepada">Kepada</div>
+    <div>Yth. {{ f.kepada or "......................" }}</div>
+    <div class="kepada">di&ndash;</div>
+    <div class="kepada" style="padding-left: 18mm">{{ f.di_tempat or "Tempat" }}</div>
+  </td>
+</tr></table>
+<div class="isi dinas-isi">{{ isi }}</div>
+{% else %}
 <p class="judul"><span>{{ judul }}</span></p>
-<p class="nomor">Nomor : {{ nomor or "......................................" }}</p>
+<p class="nomor">NOMOR : {{ nomor or "......................................" }}</p>
 <div class="isi">{{ isi }}</div>
+{% endif %}
 <div class="ttd">
-  <div>{{ desa.nama }}, {{ tanggal or "...................." }}</div>
-  {% if ttd.atas_nama %}<div>a.n. Kepala Desa {{ desa.nama }}</div><div>{{ ttd.jabatan }}</div>
-  {% else %}<div>Kepala Desa {{ desa.nama }}</div>{% endif %}
+  {% if layout != "dinas" %}<div>{{ tgl }}</div>{% endif %}
+  {% if ttd.atas_nama %}<div>a.n. KEPALA DESA {{ desa.nama | upper }}</div><div>{{ ttd.jabatan }}</div>
+  {% else %}<div>KEPALA DESA {{ desa.nama | upper }}</div>{% endif %}
   <div class="nama">{{ ttd.nama or "...................................." }}</div>
   {% if ttd.nip %}<div>NIP. {{ ttd.nip }}</div>{% endif %}
 </div>
+{% if tembusan %}<div class="tembusan">Tembusan:<ol>{% for t in tembusan %}<li>{{ t }}</li>{% endfor %}</ol></div>{% endif %}
 </body></html>""")
 
 
@@ -214,10 +261,14 @@ def render_html(*, judul, redaksi, skema, data, labels, settings, logo=None, log
     """logo = bytes PNG logo desa upload atau None (pakai logo desa bawaan); logo_kiri sama, bawaan logo kabupaten; penandatangan = {nama, jabatan, nip, atas_nama};
     tanggal = date/ISO; watermark mis. 'DRAF' / 'DIBATALKAN'."""
     desa = {k: settings.get(f"desa.{k}") or "" for k in ("nama", "kecamatan", "kabupaten", "alamat", "email", "website")}
+    ctx = build_context(skema, data, labels, desa)
+    layout = "dinas" if skema.get("layout") == "dinas" else "keterangan"
+    tembusan = [t.strip() for t in str(ctx.get("tembusan") or "").splitlines() if t.strip()] if layout == "dinas" else []
     return LAYOUT.render(
+        layout=layout, f=ctx, tembusan=tembusan,
         kertas=KERTAS.get(settings.get("surat.ukuran_kertas"), KERTAS["F4"]),
         font_face=Markup(FONT_FACE), desa=desa, judul=judul, nomor=nomor, tanggal=tgl_indo(tanggal), ttd=penandatangan or {},
-        watermark=watermark, isi=render_isi(redaksi, skema, data, labels, desa), logo=logo_uri(logo), logo_kab=logo_kiri_uri(logo_kiri),
+        watermark=watermark, isi=render_isi(redaksi, skema, data, labels, desa, penandatangan, ctx), logo=logo_uri(logo), logo_kab=logo_kiri_uri(logo_kiri),
     )
 
 

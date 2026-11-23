@@ -1,9 +1,11 @@
 # api/modules/jenis_surat/service.py
 """Jenis surat = cetakan: skema_form (form dinamis) + template_isi (redaksi HTML + placeholder Jinja).
 
-skema_form  : {"sections": [...]}, 4 tipe section:
+skema_form  : {"layout": "keterangan"|"dinas", "sections": [...]}. layout = bentuk cetak (lihat render.py); dinas =
+  surat biasa/undangan, field ber-key sifat/lampiran/perihal/kepada/di_tempat/tembusan dicetak di blok kepala surat.
+  4 tipe section:
   - penduduk   : biodata 1 orang; `tampilkan` = field biodata yang dicetak. Section penduduk PERTAMA = pemohon utama
-                 (wajib ada minimal satu, karena surat.nama_pemohon wajib).
+                 (wajib untuk layout keterangan; layout dinas boleh tanpa, nama_pemohon = field `kepada`).
   - fields     : isian biasa (`fields`), type text|textarea|number|date|rupiah|select.
   - daftar     : tabel isian berulang (`columns`, type sama dengan fields kecuali textarea).
   - teks_bebas : paragraf yang ditulis operator.
@@ -35,14 +37,17 @@ BIODATA = {
     "kewarganegaraan": "Kewarganegaraan", "alamat": "Alamat",
 }
 HELPERS = ("biodata", "tabel", "label", "tgl_indo", "terbilang")
+LAYOUTS = ("keterangan", "dinas")
+TTD_KEYS = {"nama": "Nama Penandatangan", "jabatan": "Jabatan Penandatangan", "nip": "NIP Penandatangan"}
 DESA_KEYS = {"nama": "Nama Desa", "kecamatan": "Kecamatan", "kabupaten": "Kabupaten", "alamat": "Alamat Desa"}
-RESERVED = {"desa", "surat", *HELPERS, "range", "dict", "lipsum", "cycler", "joiner", "namespace", "loop", "self",
+RESERVED = {"desa", "surat", "ttd", *HELPERS, "range", "dict", "lipsum", "cycler", "joiner", "namespace", "loop", "self",
             "and", "or", "not", "in", "is", "if", "else", "true", "false", "none", "for", "import"}
 KEY_RE = re.compile(r"[a-z][a-z0-9_]{0,49}")
 CODE_RE = re.compile(r"[A-Z0-9_]{1,30}")
 KLASIFIKASI_RE = re.compile(r"[0-9A-Za-z.\-]{1,30}")
 
 # redaksi standar mengikuti surat asli desa
+PEMBUKA_DINAS = "<p>Dengan hormat,</p>"
 PEMBUKA = ("<p>Yang bertandatangan dibawah ini Kepala Desa {{ desa.nama }}, Kecamatan {{ desa.kecamatan }}, "
            "Kabupaten {{ desa.kabupaten }}, menerangkan dengan sebenarnya bahwa:</p>")
 PENUTUP = ("<p>Demikian Surat Keterangan ini kami buat dengan sebenarnya untuk dapat dipergunakan "
@@ -114,6 +119,9 @@ def validate_skema(skema):
     sections = skema.get("sections") if isinstance(skema, dict) else None
     if not isinstance(sections, list) or not sections:
         raise ValidationError("Skema form minimal punya 1 section", {"skema_form.sections": "Minimal 1"})
+    layout = skema.get("layout") or "keterangan"
+    if layout not in LAYOUTS:
+        errors["skema_form.layout"] = "Pilihan: " + ", ".join(LAYOUTS)
     seen, out = set(), []
     for i, s in enumerate(sections):
         path = f"skema_form.sections[{i}]"
@@ -137,11 +145,11 @@ def validate_skema(skema):
         else:
             errors[f"{path}.type"] = "Pilihan: " + ", ".join(SECTION_TYPES)
         out.append(sec)
-    if not any(s["type"] == "penduduk" for s in out):
+    if layout != "dinas" and not any(s["type"] == "penduduk" for s in out):
         errors["skema_form.sections"] = "Wajib ada minimal 1 section penduduk (pemohon utama)"
     if errors:
         raise ValidationError("Skema form tidak valid", errors)
-    return {"sections": out}
+    return {"layout": layout, "sections": out}
 
 
 # ---------------------------------------------------------------- placeholder & template
@@ -149,6 +157,7 @@ def validate_skema(skema):
 def placeholders(skema):
     """Daftar placeholder untuk panel editor. skema harus sudah valid."""
     out = [{"token": f"{{{{ desa.{k} }}}}", "label": v, "group": "Data Desa"} for k, v in DESA_KEYS.items()]
+    out += [{"token": f"{{{{ ttd.{k} }}}}", "label": v, "group": "Penandatangan"} for k, v in TTD_KEYS.items()]
     for s in skema["sections"]:
         g, k = s["label"], s["key"]
         if s["type"] == "penduduk":
@@ -171,7 +180,7 @@ def placeholders(skema):
 
 
 def variable_names(skema):
-    names = {"desa", *HELPERS}
+    names = {"desa", "ttd", *HELPERS}
     for s in skema["sections"]:
         if s["type"] == "fields":
             names.update(f["key"] for f in s["fields"])
@@ -181,7 +190,9 @@ def variable_names(skema):
 
 
 def default_template(skema):
-    pemohon = next(s["key"] for s in skema["sections"] if s["type"] == "penduduk")
+    pemohon = next((s["key"] for s in skema["sections"] if s["type"] == "penduduk"), None)
+    if not pemohon:
+        return f"{PEMBUKA_DINAS}<p>...</p>"
     return f"{PEMBUKA}{{{{ biodata({pemohon}) }}}}{PENUTUP}"
 
 

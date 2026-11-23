@@ -269,6 +269,13 @@ lalu scan-nya di-upload sebagai arsip. Skema & bentuk data lengkap: `SCHEMA.md` 
 Langkah wizard: (1) info dasar `code, name, kode_klasifikasi, persyaratan, sort_order` → (2) susun `skema_form`
 → (3) redaksi → (4) preview & simpan.
 
+`skema_form.layout` = bentuk cetak: `keterangan` (default; judul + NOMOR di tengah, wajib ada section penduduk) atau
+`dinas` (surat biasa/undangan; tanpa judul, kepala surat Nomor/Sifat/Lampiran/Perihal + tanggal & Kepada Yth.,
+Tembusan di bawah tanda tangan). Layout dinas membaca field ber-key tetap `sifat, lampiran, perihal, kepada,
+di_tempat, tembusan` (textarea, satu tujuan per baris); boleh tanpa section penduduk (`nama_pemohon` = `kepada`).
+Placeholder penandatangan di redaksi: `{{ ttd.nama }}`, `{{ ttd.jabatan }}`, `{{ ttd.nip }}` (grup "Penandatangan";
+titik-titik selama draft belum memilih penandatangan).
+
 **Editor redaksi (TipTap)**: tampilkan placeholder sebagai *chip* yang tidak bisa diketik; saat simpan, chip
 diubah jadi teks `token` apa adanya (mis. `{{ biodata(pemohon) }}`). Tag yang bertahan: `p b strong i em u br table
 tbody tr td th ul ol li span`; style hanya `text-align, font-weight, font-style, text-decoration, width,

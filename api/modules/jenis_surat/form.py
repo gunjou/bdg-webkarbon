@@ -137,6 +137,9 @@ def validate_data(skema, data, check_codes, strict=False):
 
 
 def pemohon(skema, data):
-    """(section key, data orang) pemohon utama = section penduduk pertama."""
-    k = next(s["key"] for s in skema["sections"] if s["type"] == "penduduk")
+    """(section key, data orang) pemohon utama = section penduduk pertama.
+    Tanpa section penduduk (surat dinas): (None, {"nama": tujuan surat (field `kepada`)})."""
+    k = next((s["key"] for s in skema["sections"] if s["type"] == "penduduk"), None)
+    if k is None:
+        return None, {"nama": str(data.get("kepada") or "")[:150]}
     return k, data.get(k) or {}
