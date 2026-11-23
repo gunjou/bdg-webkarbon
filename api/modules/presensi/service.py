@@ -6,7 +6,7 @@ Ketentuan presensi pegawai (semua waktu = jam server WITA, bukan jam HP):
 2. Jadwal  : bukan hari libur aktif, dan hari ini hari kerja di jadwal_harian.
    - masuk  : dibuka ABSEN_MASUK_BUKA_MENIT sebelum jam masuk, ditutup saat jam pulang.
               Lewat jam masuk + toleransi -> 'terlambat', terlambat_menit dihitung dari jam masuk.
-   - pulang : boleh jika sudah absen masuk, atau (lupa masuk) jam pulang sudah lewat. Sampai akhir hari.
+   - pulang : hanya jika sudah absen masuk hari ini (lupa masuk -> ajukan koreksi lewat perizinan). Sampai akhir hari.
               Sebelum jam pulang -> 'pulang_cepat'.
    - Masing-masing hanya 1x per hari.
 3. GPS     : akurasi <= GPS_MAX_AKURASI_METER, dan di dalam radius lokasi kantor aktif TERDEKAT
@@ -120,8 +120,9 @@ def _cek_jadwal(ctx, jenis, now, done, cfg):
         return {"jam_jadwal": masuk.time(), "terlambat_menit": 0, "status": "tepat_waktu"}
 
     # pulang
-    if "masuk" not in done and now < pulang:
-        _fail(ctx, "SCHEDULE", "NOT_CHECKED_IN", "Belum absen masuk", jenis=jenis)
+    if "masuk" not in done:
+        _fail(ctx, "SCHEDULE", "NOT_CHECKED_IN",
+              "Belum absen masuk hari ini, ajukan koreksi absen masuk lewat menu Izin", jenis=jenis)
     status = "pulang_cepat" if now < pulang else "tepat_waktu"
     return {"jam_jadwal": pulang.time(), "terlambat_menit": 0, "status": status}
 

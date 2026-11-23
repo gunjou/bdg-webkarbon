@@ -27,7 +27,10 @@ class PresensiTest(unittest.TestCase):
                 self.jadwal(jam)
         with self.assertRaises(AppError):
             self.jadwal((10, 0), "pulang")  # belum masuk
-        self.assertEqual(self.jadwal((16, 0), "pulang")["status"], "tepat_waktu")  # lupa masuk
+        with self.assertRaises(AppError):
+            self.jadwal((16, 0), "pulang")  # lupa masuk: tetap ditolak walau jam pulang sudah lewat
+        self.assertEqual(self.jadwal((16, 0), "pulang", done=["masuk"])["status"], "tepat_waktu")
+        self.assertEqual(self.jadwal((10, 0), "pulang", done=["masuk"])["status"], "pulang_cepat")
 
     @patch.object(service.query, "get_lokasi_aktif", return_value=LOK)
     def test_gps_nan_ditolak(self, *_):

@@ -154,7 +154,8 @@ Semua endpoint butuh `absensi.self`; data selalu milik akun di token. Aturan len
 
 Tombol: `masuk == null` → **Absen Masuk**; `masuk != null && pulang == null` → **Absen Pulang**
 (sebelum `jadwal.pulang` beri konfirmasi pulang cepat); `masuk == null` dan sudah lewat `jadwal.pulang` →
-**Absen Pulang** (lupa masuk, koreksi lewat perizinan); keduanya terisi → selesai.
+**tanpa tombol**, tampilkan "Belum absen masuk, ajukan koreksi lewat Izin" (server menolak pulang tanpa masuk:
+`NOT_CHECKED_IN`); keduanya terisi → selesai.
 Lokasi sah = lokasi kantor aktif terdekat (semua lokasi aktif berlaku untuk semua pegawai).
 
 Kode gagal `422` (sudah tercatat di server; tampilkan `message`):
