@@ -131,7 +131,7 @@ Zona waktu lokal dev ≠ VPS. Semua waktu yang ditulis ke DB harus dari `get_wit
 
 Template: `.env.example`. Hanya dibaca di `api/core/config.py`; env baru → tambah di config.py DAN `.env.example`.
 `DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, JWT_SECRET_KEY (wajib, ≥32 byte),
-JWT_ACCESS_EXPIRES (menit), JWT_REFRESH_EXPIRES (hari), UPLOAD_DIR (default uploads), MAX_UPLOAD_MB (default 10)`.
+JWT_ACCESS_EXPIRES (menit), JWT_REFRESH_EXPIRES (hari), JWT_MOBILE_EXPIRES (hari, access token client=mobile), UPLOAD_DIR (default uploads), MAX_UPLOAD_MB (default 10)`.
 
 ## Setup & dependency
 

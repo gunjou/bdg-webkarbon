@@ -17,7 +17,7 @@ class LoginResource(Resource):
     @ns.doc(security=[])
     @measure_execution_time
     def post(self):
-        """Akses: publik. Login; field password menerima password atau kode pemulihan. client: admin|absensi."""
+        """Akses: publik. Login; field password menerima password atau kode pemulihan. client: admin|absensi|mobile."""
         body = request.get_json()
         data = service.login(body["username"].strip(), body["password"], body["client"])
         return success(data, "Login berhasil")

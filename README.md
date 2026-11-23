@@ -84,6 +84,7 @@ Swagger UI: `http://<server>/docs`
 | `JWT_SECRET_KEY`                                          | wajib, minimal 32 byte            |
 | `JWT_ACCESS_EXPIRES`                                      | menit (default 60)                |
 | `JWT_REFRESH_EXPIRES`                                     | hari (default 7)                  |
+| `JWT_MOBILE_EXPIRES`                                      | hari, token client mobile (default 365) |
 | `UPLOAD_DIR`                                              | folder upload (default `uploads`) |
 | `MAX_UPLOAD_MB`                                           | batas upload (default 10)         |
 

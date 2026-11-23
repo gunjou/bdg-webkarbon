@@ -8,7 +8,7 @@ login_model = ns.model("Login", {
     "username": fields.String(required=True, min_length=1, example="budi"),
     "password": fields.String(required=True, min_length=1, example="rahasia",
                               description="Password atau kode pemulihan"),
-    "client": fields.String(required=True, enum=["admin", "absensi"], example="admin",
+    "client": fields.String(required=True, enum=["admin", "absensi", "mobile"], example="admin",
                             description="Aplikasi asal login. Dikirim otomatis oleh frontend, bukan input user"),
 })
 
@@ -42,9 +42,10 @@ pegawai_login_out = ns.model("PegawaiLogin", {
 login_out = ns.model("LoginResult", {
     "access_token": fields.String(),
     "refresh_token": fields.String(),
-    "client": fields.String(enum=["admin", "absensi"]),
+    "client": fields.String(enum=["admin", "absensi", "mobile"]),
     "user": fields.Raw(description="client=admin → AuthUser (roles & permissions untuk menu); "
-                                   "client=absensi → PegawaiLogin"),
+                                   "client=absensi|mobile → PegawaiLogin. "
+                                   "client=mobile: access token berlaku JWT_MOBILE_EXPIRES hari (default 365)"),
 })
 
 refresh_out = ns.model("RefreshResult", {

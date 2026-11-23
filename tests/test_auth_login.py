@@ -1,4 +1,4 @@
-"""Uji login per client (admin|absensi). DB di-mock: jalankan `venv/bin/python -m unittest tests.test_auth_login`."""
+"""Uji login per client (admin|absensi|mobile). DB di-mock: jalankan `venv/bin/python -m unittest tests.test_auth_login`."""
 import unittest
 from unittest.mock import patch
 
@@ -39,6 +39,16 @@ class LoginClientTest(unittest.TestCase):
         self.assertEqual(out["client"], "absensi")
         self.assertEqual(set(out["user"]), {"id_user", "id_pegawai", "username", "full_name", "nip",
                                             "jabatan", "photo_path", "face_enrolled"})
+
+    def test_mobile_like_absensi_with_long_token(self):
+        from flask_jwt_extended import decode_token
+        out = self.login(PEGAWAI, [R_PEGAWAI], "mobile")
+        self.assertEqual(out["client"], "mobile")
+        self.assertIn("face_enrolled", out["user"])
+        with app.app_context():
+            tok = decode_token(out["access_token"])
+        self.assertGreater(tok["exp"] - tok["iat"], 300 * 86400)
+        self.assert_forbidden(ADMIN_NON_PEGAWAI, [R_ADMIN], "mobile")
 
     def test_admin_ok_returns_roles_permissions(self):
         out = self.login(PEGAWAI, [R_ADMIN, R_PEGAWAI], "admin")

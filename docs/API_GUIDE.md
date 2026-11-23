@@ -47,7 +47,7 @@ Gagal (semua error, termasuk token & validasi):
 ## 2. Login & token
 
 ```
-POST /auth/login     { username, password }   → access_token, refresh_token, user
+POST /auth/login     { username, password, client }   → access_token, refresh_token, user
 POST /auth/refresh   { refresh_token }        → access_token baru
 GET  /auth/me                                 → user (roles & permissions terbaru)
 ```
@@ -57,6 +57,9 @@ GET  /auth/me                                 → user (roles & permissions terb
 - Kredensial salah selalu `401` dengan pesan sama ("Username atau kredensial salah") — memang disengaja.
 - `403` saat login = akun nonaktif / pegawai nonaktif / belum punya role → tampilkan `message`.
 - **Logout** = hapus token di client. Tidak ada endpoint logout.
+- `client` wajib: `admin` (web admin), `absensi` (web absen), `mobile` (Android). `absensi` & `mobile` hanya untuk
+  pegawai dengan `absensi.self`. `mobile`: access token berlaku `JWT_MOBILE_EXPIRES` hari (default 365), tanpa
+  refresh; 401 → login ulang.
 - Simpan `user.permissions` untuk menampilkan menu (lihat §3). Panggil `GET /auth/me` saat app dibuka
   agar permission selalu terbaru.
 

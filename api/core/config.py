@@ -19,6 +19,8 @@ if not JWT_SECRET_KEY:
     raise RuntimeError("JWT_SECRET_KEY wajib diisi di .env")
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=int(os.getenv("JWT_ACCESS_EXPIRES", 60)))
 JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.getenv("JWT_REFRESH_EXPIRES", 7)))
+# access token client=mobile (aplikasi Android), tanpa refresh: habis = login ulang
+JWT_MOBILE_ACCESS_EXPIRES = timedelta(days=int(os.getenv("JWT_MOBILE_EXPIRES", 365)))
 
 # === Upload === #
 UPLOAD_DIR = os.path.abspath(os.getenv("UPLOAD_DIR", "uploads"))

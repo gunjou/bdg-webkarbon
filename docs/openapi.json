@@ -2266,7 +2266,8 @@
           "description": "Aplikasi asal login. Dikirim otomatis oleh frontend, bukan input user",
           "enum": [
             "admin",
-            "absensi"
+            "absensi",
+            "mobile"
           ],
           "example": "admin",
           "type": "string"
@@ -2298,7 +2299,8 @@
         "client": {
           "enum": [
             "admin",
-            "absensi"
+            "absensi",
+            "mobile"
           ],
           "example": "admin",
           "type": "string"
@@ -2307,7 +2309,7 @@
           "type": "string"
         },
         "user": {
-          "description": "client=admin → AuthUser (roles & permissions untuk menu); client=absensi → PegawaiLogin",
+          "description": "client=admin → AuthUser (roles & permissions untuk menu); client=absensi|mobile → PegawaiLogin. client=mobile: access token berlaku JWT_MOBILE_EXPIRES hari (default 365)",
           "type": "object"
         }
       },
@@ -5980,7 +5982,7 @@
     },
     "/auth/login": {
       "post": {
-        "description": "Login; field password menerima password atau kode pemulihan. client: admin|absensi.",
+        "description": "Login; field password menerima password atau kode pemulihan. client: admin|absensi|mobile.",
         "operationId": "post_login_resource",
         "parameters": [
           {

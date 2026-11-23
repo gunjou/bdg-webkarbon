@@ -4,6 +4,7 @@ import hmac
 from flask_jwt_extended import create_access_token, create_refresh_token
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from api.core import config
 from api.shared.exceptions import AuthError, ForbiddenError, ValidationError
 from . import query
 
@@ -102,7 +103,9 @@ def login(username, password, client):
     identity = str(user["id_user"])
     claims = _claims(user, roles, permissions)
     return {
-        "access_token": create_access_token(identity=identity, additional_claims=claims),
+        "access_token": create_access_token(
+            identity=identity, additional_claims=claims,
+            expires_delta=config.JWT_MOBILE_ACCESS_EXPIRES if client == "mobile" else None),
         "refresh_token": create_refresh_token(identity=identity),
         "client": client,
         "user": _user_payload(user, roles, permissions) if client == "admin" else _pegawai_payload(user),
