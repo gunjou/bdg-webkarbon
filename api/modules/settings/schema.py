@@ -14,7 +14,7 @@ settings_input = ns.model("SettingsInput", {
     "desa.website": _s(example="karangbongkot.id"),
     "surat.kode_desa": _s(example="KRB"),
     "surat.format_nomor": _s(example="{klasifikasi}/{urut}/{kode_desa}/{tahun}",
-                             description="Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib"),
+                             description="Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib; {klasifikasi} wajib bila cakupan PER_JENIS"),
     "surat.cakupan_nomor": _s(enum=["GLOBAL", "PER_JENIS"], example="PER_JENIS"),
     "surat.ukuran_kertas": _s(enum=["F4", "A4"], example="F4"),
 })

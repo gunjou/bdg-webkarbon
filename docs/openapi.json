@@ -3718,7 +3718,7 @@
           "type": "string"
         },
         "surat.format_nomor": {
-          "description": "Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib",
+          "description": "Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib; {klasifikasi} wajib bila cakupan PER_JENIS",
           "example": "{klasifikasi}/{urut}/{kode_desa}/{tahun}",
           "type": "string"
         },
@@ -3772,7 +3772,7 @@
           "type": "string"
         },
         "surat.format_nomor": {
-          "description": "Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib",
+          "description": "Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib; {klasifikasi} wajib bila cakupan PER_JENIS",
           "example": "{klasifikasi}/{urut}/{kode_desa}/{tahun}",
           "type": "string"
         },

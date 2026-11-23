@@ -255,6 +255,7 @@ lalu scan-nya di-upload sebagai arsip. Skema & bentuk data lengkap: `SCHEMA.md` 
 Nomor urut surat **terpisah per jenis surat** (`surat.cakupan_nomor` = `PER_JENIS`, default), reset tiap tahun.
 Format `{klasifikasi}/{urut}/{kode_desa}/{tahun}` → mis. `470/1/KRB/2026`. Karena itu `kode_klasifikasi`
 **unik per jenis surat** (termasuk yang nonaktif); duplikat → `422` di `errors["kode_klasifikasi"]`.
+Selama `PER_JENIS`, `surat.format_nomor` wajib memuat `{klasifikasi}` → bila tidak `422` di `errors["surat.format_nomor"]`.
 | `GET /settings/logo?posisi=`, `POST /settings/logo?posisi=` (multipart `logo`) | Logo kop. `posisi=kanan` (default) = logo desa, bawaan PNG desa; `posisi=kiri` = logo kabupaten, bawaan SVG Lombok Barat. Upload disimpan PNG ≤ 600 px. |
 | `GET/PUT /master/jabatan...` field `can_sign` | `1` = pejabat boleh menandatangani surat. Tidak dikirim saat PUT = nilai lama tetap. |
 

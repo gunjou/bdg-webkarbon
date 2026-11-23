@@ -90,6 +90,10 @@ def update(data, id_user):
             values[k] = REGISTRY[k][1](v)
         except ValueError as e:
             errors[k] = str(e)
+    final = {**get_all(), **values}
+    # urut per jenis: tanpa {klasifikasi} nomor antar jenis bentrok (klasifikasi unik per jenis)
+    if final["surat.cakupan_nomor"] == "PER_JENIS" and "{klasifikasi}" not in final["surat.format_nomor"]:
+        errors.setdefault("surat.format_nomor", "Nomor urut per jenis wajib memuat {klasifikasi}")
     if errors:
         raise ValidationError("Pengaturan tidak valid", errors)
     if values:
