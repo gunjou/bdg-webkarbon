@@ -361,9 +361,10 @@ Publik (tanpa token):
 | Endpoint | Fungsi |
 |---|---|
 | `GET /landing/publik` | `{konten, perangkat[], potensi[]}` — satu panggilan untuk Beranda & Profile |
-| `GET /landing/publik/berita?q&limit&offset` | Berita terbit, `meta: {total, limit, offset}` (limit maks 50) |
+| `GET /landing/publik/berita?q&limit&offset` | Berita terbit, `meta: {total, limit, offset}` (limit maks 50). Urutan: tanggal terbit terbaru, lalu waktu dibuat terbaru |
 | `GET /landing/publik/berita/{slug}` | Detail berita (404 bila draft/terjadwal) |
 | `GET /landing/publik/file/{path}` | Gambar (hanya folder `landing/`) |
+| `GET /landing/publik/sitemap.xml` | sitemap website (halaman tetap + berita terbit), domain dari `desa.website`. Nginx `karangbongkot.com/sitemap.xml` meneruskan ke sini. |
 
 - **Kategori potensi** & **ikon statistik** = kode konstanta di frontend (mis. `PERTANIAN`, `PERIKANAN`, `UMKM`;
   `PENDUDUK`, `KK`). Backend hanya cek format `A-Z0-9_`. Kode tak dikenal → frontend pakai ikon default.

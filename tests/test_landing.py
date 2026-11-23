@@ -85,3 +85,13 @@ class PotensiTest(unittest.TestCase):
                          "PERIKANAN")
         with self.assertRaises(ValidationError):
             service._clean_potensi({"judul": "a", "deskripsi": "b", "kategori": "ikan laut!"})
+
+
+class SitemapTest(unittest.TestCase):
+    @patch.object(service.settings_service, "get_all", return_value={"desa.website": "https://karangbongkot.com/"})
+    @patch.object(service.query, "berita_sitemap", return_value=[
+        {"slug": "a&b", "tanggal_terbit": __import__("datetime").date(2026, 8, 11), "updated_at": None}])
+    def test_isi(self, *_):
+        xml = service.publik_sitemap()
+        self.assertIn("<loc>https://karangbongkot.com/profile</loc>", xml)
+        self.assertIn("<loc>https://karangbongkot.com/berita/a%26b</loc><lastmod>2026-08-11</lastmod>", xml)

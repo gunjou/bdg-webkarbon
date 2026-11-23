@@ -93,9 +93,19 @@ def berita_list(status, q, sampai, limit, offset):
         total = conn.execute(text(f"SELECT count(*) FROM berita {_FILTER}"), params).scalar()
         rows = conn.execute(text(f"""
             SELECT {_LIST_COLS} FROM berita {_FILTER}
-            ORDER BY tanggal_terbit DESC NULLS FIRST, id_berita DESC LIMIT :limit OFFSET :offset
+            ORDER BY tanggal_terbit DESC NULLS FIRST, created_at DESC, id_berita DESC LIMIT :limit OFFSET :offset
         """), params).mappings().all()
     return rows, total
+
+
+def berita_sitemap(sampai):
+    sql = text("""
+        SELECT slug, tanggal_terbit, updated_at FROM berita
+        WHERE is_active = 1 AND status = 'terbit' AND tanggal_terbit <= :sampai
+        ORDER BY tanggal_terbit DESC, created_at DESC, id_berita DESC
+    """)
+    with get_engine().connect() as conn:
+        return conn.execute(sql, {"sampai": sampai}).mappings().all()
 
 
 def berita_get(id_berita):

@@ -7423,6 +7423,25 @@
         }
       ]
     },
+    "/landing/publik/sitemap.xml": {
+      "get": {
+        "description": "sitemap.xml website (halaman tetap + berita terbit). Nginx karangbongkot.com/sitemap.xml\nmeneruskan ke sini, jadi berita baru langsung masuk tanpa deploy website.",
+        "operationId": "get_publik_sitemap",
+        "produces": [
+          "application/xml"
+        ],
+        "responses": {
+          "200": {
+            "description": "File application/xml"
+          }
+        },
+        "security": [],
+        "summary": "Akses: publik",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
     "/master/hari-libur": {
       "get": {
         "description": "manage. Daftar hari libur aktif, urut tanggal.",

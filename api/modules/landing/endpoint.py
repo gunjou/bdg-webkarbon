@@ -1,5 +1,5 @@
 # api/modules/landing/endpoint.py
-from flask import request, send_file
+from flask import Response, request, send_file
 from flask_jwt_extended import get_jwt_identity
 from flask_restx import Resource
 
@@ -166,6 +166,17 @@ class PublikBeritaList(Resource):
         a = publik_berita_parser.parse_args()
         rows, meta = service.publik_berita_list(a["q"], a["limit"], a["offset"])
         return success(rows, meta=meta)
+
+
+@ns.route("/publik/sitemap.xml")
+class PublikSitemap(Resource):
+    @ns.doc(**PUBLIK)
+    @file_doc(ns, mimetype="application/xml", errors=())
+    def get(self):
+        """Akses: publik. sitemap.xml website (halaman tetap + berita terbit). Nginx karangbongkot.com/sitemap.xml
+        meneruskan ke sini, jadi berita baru langsung masuk tanpa deploy website."""
+        return Response(service.publik_sitemap(), mimetype="application/xml",
+                        headers={"Cache-Control": "public, max-age=3600"})
 
 
 @ns.route("/publik/berita/<string:slug>")

@@ -15,6 +15,8 @@ import json
 import os
 import re
 import unicodedata
+from urllib.parse import quote
+from xml.sax.saxutils import escape
 
 import nh3
 from PIL import Image, UnidentifiedImageError
@@ -22,6 +24,7 @@ from PIL import Image, UnidentifiedImageError
 from api.core.storage import full_path, save_file
 from api.shared.exceptions import NotFoundError, ValidationError
 from api.utils.datetime import get_wita
+from api.modules.settings import service as settings_service
 from . import query
 
 KONTEN_KEYS = ("hero", "sekilas", "sejarah", "visi", "visi_kata", "misi", "batas", "dusun",
@@ -247,6 +250,29 @@ def publik_berita_list(q=None, limit=10, offset=0):
     limit, offset = _paging(limit, offset)
     rows, total = query.berita_list("terbit", (q or "").strip() or None, get_wita().date(), limit, offset)
     return rows, {"total": total, "limit": limit, "offset": offset}
+
+
+# halaman tetap website (path, prioritas); berita ditambahkan dari DB
+SITEMAP_HALAMAN = (("/", "1.0"), ("/profile", "0.8"), ("/berita", "0.9"), ("/kontak", "0.6"))
+
+
+def publik_sitemap():
+    """sitemap.xml website; domain dari pengaturan desa.website. Disajikan Nginx karangbongkot.com/sitemap.xml."""
+    site = "https://" + re.sub(r"^https?://", "", settings_service.get_all()["desa.website"]).strip("/")
+
+    def url(path, prio, lastmod=None):
+        mod = f"<lastmod>{lastmod}</lastmod>" if lastmod else ""
+        return f"  <url><loc>{escape(site + path)}</loc>{mod}<priority>{prio}</priority></url>"
+
+    rows = query.berita_sitemap(get_wita().date())
+    return "\n".join([
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        *(url(p, prio) for p, prio in SITEMAP_HALAMAN),
+        *(url(f"/berita/{quote(r['slug'])}", "0.7", str((r["updated_at"] or r["tanggal_terbit"]))[:10]) for r in rows),
+        "</urlset>",
+        "",
+    ])
 
 
 def publik_berita(slug):
