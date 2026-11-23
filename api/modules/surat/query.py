@@ -16,22 +16,24 @@ def _riwayat(aksi, id_user, catatan=None):
     return json.dumps([{"aksi": aksi, "oleh": id_user, "pada": get_wita().isoformat(), "catatan": catatan}])
 
 
+_SEARCH_WHERE = """
+    FROM surat s JOIN jenis_surat js ON js.id_jenis_surat = s.id_jenis_surat
+    WHERE (CAST(:status AS VARCHAR) IS NULL OR s.status = :status)
+      AND (CAST(:id_jenis_surat AS INTEGER) IS NULL OR s.id_jenis_surat = :id_jenis_surat)
+      AND (CAST(:tahun AS INTEGER) IS NULL
+           OR extract(year FROM coalesce(s.tanggal_surat, s.created_at)) = :tahun)
+      AND (CAST(:nomor AS VARCHAR) IS NULL OR s.nik_pemohon LIKE :nomor || '%')
+      AND (CAST(:nama AS VARCHAR) IS NULL OR lower(s.nama_pemohon) LIKE :nama || '%')
+"""
+
+
 def search(f):
-    """f: status | id_jenis_surat | tahun | nomor (awalan NIK) | nama (awalan, lower) | limit | offset."""
-    sql = text(f"""
-        SELECT {LIST_COLUMNS}
-        FROM surat s JOIN jenis_surat js ON js.id_jenis_surat = s.id_jenis_surat
-        WHERE (CAST(:status AS VARCHAR) IS NULL OR s.status = :status)
-          AND (CAST(:id_jenis_surat AS INTEGER) IS NULL OR s.id_jenis_surat = :id_jenis_surat)
-          AND (CAST(:tahun AS INTEGER) IS NULL
-               OR extract(year FROM coalesce(s.tanggal_surat, s.created_at)) = :tahun)
-          AND (CAST(:nomor AS VARCHAR) IS NULL OR s.nik_pemohon LIKE :nomor || '%')
-          AND (CAST(:nama AS VARCHAR) IS NULL OR lower(s.nama_pemohon) LIKE :nama || '%')
-        ORDER BY s.created_at DESC, s.id_surat DESC
-        LIMIT :limit OFFSET :offset
-    """)
+    """f: status | id_jenis_surat | tahun | nomor (awalan NIK) | nama (awalan, lower) | limit | offset.
+    Kembalikan (rows, total); total = jumlah semua yang cocok filter, tanpa limit/offset."""
+    rows_sql = text(f"SELECT {LIST_COLUMNS} {_SEARCH_WHERE} ORDER BY s.created_at DESC, s.id_surat DESC LIMIT :limit OFFSET :offset")
+    count_sql = text(f"SELECT COUNT(*) {_SEARCH_WHERE}")
     with get_engine().connect() as conn:
-        return conn.execute(sql, f).mappings().all()
+        return conn.execute(rows_sql, f).mappings().all(), conn.execute(count_sql, f).scalar()
 
 
 def get_by_id(id_surat):

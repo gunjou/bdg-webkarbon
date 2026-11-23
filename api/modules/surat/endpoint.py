@@ -34,8 +34,10 @@ class SuratList(Resource):
     @permission_required(VIEW)
     @measure_execution_time
     def get(self):
-        """Akses: surat.view / surat.create. Daftar surat terbaru, filter status/jenis/tahun/q, maks 200."""
-        return success(service.search(surat_parser.parse_args()))
+        """Akses: surat.view / surat.create. Daftar surat terbaru, filter status/jenis/tahun/q, maks 200.
+        meta: {total, limit, offset}; total = jumlah semua yang cocok filter."""
+        rows, meta = service.search(surat_parser.parse_args())
+        return success(rows, meta=meta)
 
     @api_doc(ns, surat_out, status=201, errors=(400, 401, 403, 404, 422))
     @ns.expect(surat_create, validate=True)

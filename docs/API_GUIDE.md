@@ -301,7 +301,7 @@ POST /surat ─► draft ──PUT /surat/{id} (isi, penandatangan)──► POS
 
 | Endpoint | Fungsi |
 |---|---|
-| `GET /surat?status=&id_jenis_surat=&tahun=&q=&limit=&offset=` | Daftar terbaru. `q` angka = awalan NIK pemohon, selain itu awalan nama. `terkunci` = scan arsip sudah ada. |
+| `GET /surat?status=&id_jenis_surat=&tahun=&q=&limit=&offset=` | Daftar terbaru. `q` angka = awalan NIK pemohon, selain itu awalan nama. `terkunci` = scan arsip sudah ada. `meta = {total, limit, offset}`, `total` = jumlah semua yang cocok filter. |
 | `POST /surat` `{id_jenis_surat, data?}` | Buat draft (jenis surat harus aktif). |
 | `GET /surat/{id}` | Detail: `skema_form` (render form dari sini, **bukan** dari jenis surat), `data`, `redaksi`, `lampiran`, `riwayat`, ... |
 | `PUT /surat/{id}` `{data, id_penandatangan}` | Simpan draft. `data` dikirim **lengkap** (menimpa). `id_penandatangan` `null` / tidak dikirim = belum dipilih (menghapus pilihan lama). Hanya format yang dicek; field wajib dicek saat terbit. |

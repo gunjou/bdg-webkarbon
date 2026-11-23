@@ -55,7 +55,7 @@ def _draft(id_surat):
 def search(args):
     q = (args.get("q") or "").strip()
     digits = q.isdigit()
-    return query.search({
+    f = {
         "status": args.get("status") or None,
         "id_jenis_surat": args.get("id_jenis_surat"),
         "tahun": args.get("tahun"),
@@ -63,7 +63,9 @@ def search(args):
         "nama": q.lower() if q and not digits else None,
         "limit": min(max(args.get("limit") or 50, 1), MAX_LIMIT),
         "offset": max(args.get("offset") or 0, 0),
-    })
+    }
+    rows, total = query.search(f)
+    return rows, {"total": total, "limit": f["limit"], "offset": f["offset"]}
 
 
 def list_penandatangan():
