@@ -148,7 +148,7 @@ Semua endpoint butuh `absensi.self`; data selalu milik akun di token. Aturan len
 |---|---|
 | `GET /presensi/hari-ini` | Layar absen: `waktu_server` (pakai ini, bukan jam HP), `pegawai.face_enrolled`, `hari_kerja` + `keterangan`, `jadwal` (`masuk_dibuka`, `masuk`, `pulang`), `masuk`/`pulang` (`null` = belum), `gps_max_akurasi_meter` (tunggu GPS sampai `coords.accuracy` ≤ nilai ini sebelum kirim). |
 | `POST /presensi` (multipart) | Absen: `jenis` (`masuk|pulang`), `latitude`, `longitude`, `akurasi_gps`, `foto`. Cek: akun → jadwal → GPS → wajah. `201` berisi `status` (`tepat_waktu|terlambat|pulang_cepat`) & `terlambat_menit`. |
-| `POST /presensi/gagal` (JSON) | Lapor gagal sebelum request terkirim: `stage` (`GPS|CAMERA|LOCATION|FACE`), `error_code` (mis. `GPS_PERMISSION_DENIED`), `jenis`, `error_message`, `detail`. Fire-and-forget. |
+| `POST /presensi/gagal` (JSON) | Lapor gagal sebelum request terkirim: `stage` (`GPS|CAMERA|LOCATION|FACE`), `error_code` (mis. `GPS_PERMISSION_DENIED`; aplikasi mobile: `GPS_MOCKED` = lokasi palsu/fake GPS, absen diblokir di HP), `jenis`, `error_message`, `latitude`/`longitude`/`akurasi_gps?`, `detail`. Fire-and-forget. |
 | `GET /presensi/riwayat?tanggal_mulai&tanggal_selesai` | Riwayat sendiri. Default awal bulan ini s/d hari ini, maks 62 hari. `is_koreksi = true` → absen dikoreksi admin (beri label). |
 | `GET /presensi/{id}/foto` | Foto selfie absen sendiri (milik orang lain → 404). |
 
