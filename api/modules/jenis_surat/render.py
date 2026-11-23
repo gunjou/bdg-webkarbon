@@ -176,8 +176,8 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 .nomor { text-align: center; margin: 0 0 18px; }
 .isi p { text-align: justify; text-indent: 12mm; margin: 0 0 10px; }
 /* tabel di redaksi (mis. Nama/Jabatan penandatangan, rincian undangan) = tanpa garis, seperti biodata */
-.isi table { border-collapse: collapse; margin: 0 0 10px 12mm; }
-.isi table td { padding: 0 4px; vertical-align: top; }
+.isi table:not(.daftar):not(.biodata) { border-collapse: collapse; margin: 0 0 10px 12mm; }
+.isi table:not(.daftar):not(.biodata) td { padding: 0 4px; vertical-align: top; }
 .dinas { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
 .dinas td { vertical-align: top; padding: 0; }
 .dinas .kiri td { padding: 0 4px 0 0; }
