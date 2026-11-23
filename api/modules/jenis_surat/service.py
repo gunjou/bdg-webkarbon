@@ -246,6 +246,10 @@ def _clean(data, current=None):
         raise ValidationError("Judul surat wajib diisi", {"name": "required"})
     if not KLASIFIKASI_RE.fullmatch(klasifikasi):
         raise ValidationError("Kode klasifikasi tidak valid", {"kode_klasifikasi": "Angka/huruf/titik/strip"})
+    dup = query.find_by_klasifikasi(klasifikasi, current["id_jenis_surat"] if current else None)
+    if dup:
+        raise ValidationError(f"Kode klasifikasi sudah dipakai jenis {dup['code']}",
+                              {"kode_klasifikasi": "Sudah dipakai"})
     skema = validate_skema(data.get("skema_form"))
     return {
         "code": _clean_code(data.get("code"), current),

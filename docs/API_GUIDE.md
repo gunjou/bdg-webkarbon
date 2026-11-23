@@ -251,6 +251,10 @@ lalu scan-nya di-upload sebagai arsip. Skema & bentuk data lengkap: `SCHEMA.md` 
 | `GET/POST/PUT/DELETE /penduduk...`, `POST /penduduk/{id}/activate` | Kelola warga. Field opsional boleh `null`/`""`. NIK & No. KK 16 digit, NIK unik. RT/RW otomatis 3 digit. Kode pilihan baru harus aktif; kode lama yang tidak diganti tetap diterima walau opsinya sudah nonaktif. |
 | `GET /settings` | `{ "desa.nama": ..., "surat.format_nomor": ..., ... }` (key lihat SCHEMA.md). |
 | `PUT /settings` | Kirim **hanya key yang diubah**. Error per key di `errors["surat.format_nomor"]`, dst. |
+
+Nomor urut surat **terpisah per jenis surat** (`surat.cakupan_nomor` = `PER_JENIS`, default), reset tiap tahun.
+Format `{klasifikasi}/{urut}/{kode_desa}/{tahun}` → mis. `470/1/KRB/2026`. Karena itu `kode_klasifikasi`
+**unik per jenis surat** (termasuk yang nonaktif); duplikat → `422` di `errors["kode_klasifikasi"]`.
 | `GET /settings/logo?posisi=`, `POST /settings/logo?posisi=` (multipart `logo`) | Logo kop. `posisi=kanan` (default) = logo desa, bawaan PNG desa; `posisi=kiri` = logo kabupaten, bawaan SVG Lombok Barat. Upload disimpan PNG ≤ 600 px. |
 | `GET/PUT /master/jabatan...` field `can_sign` | `1` = pejabat boleh menandatangani surat. Tidak dikirim saat PUT = nilai lama tetap. |
 

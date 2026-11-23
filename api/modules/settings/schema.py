@@ -15,7 +15,7 @@ settings_input = ns.model("SettingsInput", {
     "surat.kode_desa": _s(example="KRB"),
     "surat.format_nomor": _s(example="{klasifikasi}/{urut}/{kode_desa}/{tahun}",
                              description="Token: {klasifikasi} {urut} {kode_desa} {tahun}; {urut} wajib"),
-    "surat.cakupan_nomor": _s(enum=["GLOBAL", "PER_JENIS"], example="GLOBAL"),
+    "surat.cakupan_nomor": _s(enum=["GLOBAL", "PER_JENIS"], example="PER_JENIS"),
     "surat.ukuran_kertas": _s(enum=["F4", "A4"], example="F4"),
 })
 

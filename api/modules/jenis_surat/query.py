@@ -41,6 +41,17 @@ def find_by_code(code, exclude_id=None):
         return conn.execute(sql, {"code": code, "exclude_id": exclude_id}).mappings().first()
 
 
+def find_by_klasifikasi(klasifikasi, exclude_id=None):
+    """Nomor urut per jenis: klasifikasi kembar -> nomor surat kembar. Termasuk yang nonaktif."""
+    sql = text("""
+        SELECT code FROM jenis_surat
+        WHERE kode_klasifikasi = :klasifikasi
+          AND (CAST(:exclude_id AS INTEGER) IS NULL OR id_jenis_surat <> CAST(:exclude_id AS INTEGER))
+    """)
+    with get_engine().connect() as conn:
+        return conn.execute(sql, {"klasifikasi": klasifikasi, "exclude_id": exclude_id}).mappings().first()
+
+
 def count_surat(id_jenis_surat):
     sql = text("SELECT count(*) FROM surat WHERE id_jenis_surat = :id_jenis_surat")
     with get_engine().connect() as conn:

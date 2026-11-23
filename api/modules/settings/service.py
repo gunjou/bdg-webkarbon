@@ -68,7 +68,7 @@ REGISTRY = {
     "desa.logo_kiri_path": (None, None, "Path logo kiri kop (upload); kosong = logo Kabupaten Lombok Barat bawaan"),
     "surat.kode_desa": ("KRB", _kode_desa, "Kode desa di nomor surat"),
     "surat.format_nomor": ("{klasifikasi}/{urut}/{kode_desa}/{tahun}", _format_nomor, "Format nomor surat"),
-    "surat.cakupan_nomor": ("GLOBAL", _choice("GLOBAL", "PER_JENIS"), "Nomor urut global atau per jenis surat"),
+    "surat.cakupan_nomor": ("PER_JENIS", _choice("GLOBAL", "PER_JENIS"), "Nomor urut global atau per jenis surat"),
     "surat.ukuran_kertas": ("F4", _choice("F4", "A4"), "Ukuran kertas PDF surat"),
 }
 DESCRIPTIONS = {k: d for k, (_, _, d) in REGISTRY.items()}
