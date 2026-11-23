@@ -44,7 +44,8 @@ api/
     ├── penduduk/      data induk warga (sumber pencarian pemohon surat)
     ├── settings/      pengaturan desa & surat (REGISTRY key + default), logo kop
     ├── jenis_surat/   cetakan surat; + form.py (validasi isian surat) & render.py (HTML/PDF surat)
-    └── surat/         draft → terbit → perbaikan/arsip/batal/pengganti, agenda & register
+    ├── surat/         draft → terbit → perbaikan/arsip/batal/pengganti, agenda & register
+    └── landing/       website desa: konten (settings 'landing.konten'), perangkat, potensi, berita + endpoint publik /landing/publik
 ```
 
 Patokan letak kode: butuh env/DB/app → `core/`; aturan bersama antar modul → `shared/`;

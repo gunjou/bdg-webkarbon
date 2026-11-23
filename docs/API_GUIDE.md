@@ -112,6 +112,7 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 | `ref_option.manage` | Master daftar pilihan (agama, pekerjaan, dusun, ...) | `POST/PUT/DELETE /master/ref-options...` |
 | `penduduk.view` / `penduduk.manage` | Menu Penduduk | `GET /penduduk...` / `POST/PUT/DELETE /penduduk...` |
 | `settings.surat_manage` | Pengaturan desa (kop) & penomoran surat | `PUT /settings`, `POST /settings/logo` |
+| `landing.manage` | **Website Desa**: konten, perangkat, potensi, berita | `/landing/konten`, `/landing/gambar`, `/landing/perangkat...`, `/landing/potensi...`, `/landing/berita...` (lihat §8a) |
 | `perizinan.view_all` / `surat.view` / `surat.create` | Badge notifikasi di header | `GET /notifikasi` → `{perizinan: {jumlah, items[5]} \| null, surat: {jumlah, items[5]} \| null}`. `perizinan` = pengajuan izin/koreksi `diajukan` **tanpa milik akun sendiri**; `surat` = draft. `null` = tanpa akses (sembunyikan tombolnya). Ringan (COUNT), aman dipanggil berkala. |
 | `jenis_surat.manage` | Kelola jenis surat (wizard form + redaksi) | `/jenis-surat...` (tulis), `/jenis-surat/placeholder`, `/jenis-surat/preview` |
 | `surat.view` | Daftar & detail surat, PDF, agenda, register | `GET /surat...`, `/surat/{id}/pdf`, `/surat/agenda`, `/surat/register` |
@@ -340,6 +341,34 @@ Tombol per status: **draft** → Simpan, Preview, Terbitkan, Batal; **diterbitka
 Tiap baris: `no, nomor_surat, tanggal_surat, judul, nama_pemohon, nik_pemohon, status, penandatangan, diarsip,
 keterangan` (mis. "DIBATALKAN – Salah nama; Diganti dengan 148.1/3/KRB/2026"). Ekspor PDF/Excel belum ada:
 cetak dari tampilan tabel.
+
+---
+
+## 8a. Website desa (landing, karangbongkot.com)
+
+Admin (`landing.manage`, role ADMIN):
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET/PUT /landing/konten` | Satu JSON: `hero`, `sekilas`, `sejarah`, `visi`, `visi_kata`, `misi`, `batas`, `dusun`, `statistik`, `kontak`, `sosmed`. PUT cukup kirim bagian yang diubah. |
+| `POST /landing/gambar` (multipart `gambar`) | → `{path}` (`landing/<hex>.jpg`). Upload dulu, lalu kirim `path` ke field `gambar` / `foto_path` / `sampul_path`. |
+| `GET/POST /landing/perangkat`, `PUT/DELETE /landing/perangkat/{id}` | Perangkat desa (`nama`, `jabatan`, `foto_path`, `urutan`). Terpisah dari data pegawai. |
+| `GET/POST /landing/potensi`, `PUT/DELETE /landing/potensi/{id}` | Potensi (`judul`, `deskripsi`, `kategori`, `foto_path`, `urutan`). |
+| `GET /landing/berita?status&q&limit&offset`, `POST`, `GET/PUT/DELETE /landing/berita/{id}` | Berita/artikel. `isi` = HTML editor (disanitasi server). `status` `draft`/`terbit`; terbit tanpa tanggal = hari ini; tanggal masa depan = terjadwal. `slug` kosong = dari judul. |
+
+Publik (tanpa token):
+
+| Endpoint | Fungsi |
+|---|---|
+| `GET /landing/publik` | `{konten, perangkat[], potensi[]}` — satu panggilan untuk Beranda & Profile |
+| `GET /landing/publik/berita?q&limit&offset` | Berita terbit, `meta: {total, limit, offset}` (limit maks 50) |
+| `GET /landing/publik/berita/{slug}` | Detail berita (404 bila draft/terjadwal) |
+| `GET /landing/publik/file/{path}` | Gambar (hanya folder `landing/`) |
+
+- **Kategori potensi** & **ikon statistik** = kode konstanta di frontend (mis. `PERTANIAN`, `PERIKANAN`, `UMKM`;
+  `PENDUDUK`, `KK`). Backend hanya cek format `A-Z0-9_`. Kode tak dikenal → frontend pakai ikon default.
+- Gambar di dalam isi artikel: editor menyisipkan URL lengkap `<VITE_API_URL>/landing/publik/file/<path>`.
+- Teks konten ditampilkan sebagai teks biasa (bukan HTML); hanya `berita.isi` yang HTML.
 
 ---
 

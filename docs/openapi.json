@@ -818,6 +818,203 @@
       },
       "type": "object"
     },
+    "Berita": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "id_berita": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "isi": {
+          "type": "string"
+        },
+        "judul": {
+          "type": "string"
+        },
+        "ringkasan": {
+          "type": "string"
+        },
+        "sampul_path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "terbit"
+          ],
+          "example": "draft",
+          "type": "string"
+        },
+        "tanggal_terbit": {
+          "format": "date",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "BeritaInput": {
+      "properties": {
+        "isi": {
+          "description": "HTML artikel (disanitasi: p, h2-h4, list, a, img, blockquote, ...)",
+          "type": "string"
+        },
+        "judul": {
+          "example": "Jalan Sehat HUT RI ke-81",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "ringkasan": {
+          "maxLength": 500,
+          "type": "string"
+        },
+        "sampul_path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        },
+        "slug": {
+          "description": "Kosong = dibuat dari judul; bentrok → ditambah -2, -3",
+          "example": "jalan-sehat-hut-ri-81",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "terbit"
+          ],
+          "example": "draft",
+          "type": "string"
+        },
+        "tanggal_terbit": {
+          "description": "Kosong saat terbit = hari ini; masa depan = terjadwal",
+          "example": "2026-11-23",
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "isi",
+        "judul",
+        "ringkasan"
+      ],
+      "type": "object"
+    },
+    "BeritaResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Berita"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "BeritaRingkas": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "id_berita": {
+          "example": 1,
+          "type": "integer"
+        },
+        "judul": {
+          "type": "string"
+        },
+        "ringkasan": {
+          "type": "string"
+        },
+        "sampul_path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "terbit"
+          ],
+          "example": "draft",
+          "type": "string"
+        },
+        "tanggal_terbit": {
+          "format": "date",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "BeritaRingkasPageResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/BeritaRingkas"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "$ref": "#/definitions/PageMeta"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "BukuAgenda": {
       "properties": {
         "rows": {
@@ -1862,6 +2059,207 @@
       },
       "type": "object"
     },
+    "LandingGambar": {
+      "properties": {
+        "path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LandingGambarResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/LandingGambar"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "LandingKonten": {
+      "properties": {
+        "batas": {
+          "example": [
+            {
+              "nama": "Desa Terong Tawah",
+              "sisi": "Utara"
+            }
+          ],
+          "type": "object"
+        },
+        "dusun": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hero": {
+          "example": {
+            "badge": "Selamat Datang",
+            "gambar": null,
+            "judul": "Desa",
+            "judul_sorot": "Karang Bongkot",
+            "lokasi": "Kec. Labuapi",
+            "subjudul": "..."
+          },
+          "type": "object"
+        },
+        "kontak": {
+          "example": {
+            "alamat": "...",
+            "email": "...",
+            "jam": "...",
+            "koordinat": "-8.63,116.09"
+          },
+          "type": "object"
+        },
+        "misi": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "sejarah": {
+          "example": {
+            "gambar": null,
+            "paragraf": [
+              "..."
+            ]
+          },
+          "type": "object"
+        },
+        "sekilas": {
+          "example": {
+            "gambar": null,
+            "isi": "...",
+            "judul": "Mengenal Desa",
+            "poin": [
+              "..."
+            ]
+          },
+          "type": "object"
+        },
+        "sosmed": {
+          "example": {
+            "facebook": "",
+            "instagram": "",
+            "youtube": ""
+          },
+          "type": "object"
+        },
+        "statistik": {
+          "description": "ikon = kode konstanta frontend",
+          "example": [
+            {
+              "ikon": "PENDUDUK",
+              "label": "Penduduk",
+              "nilai": "8.898"
+            }
+          ],
+          "type": "object"
+        },
+        "visi": {
+          "example": "Menuju Desa Karang Bongkot yang ROMANTIS",
+          "type": "string"
+        },
+        "visi_kata": {
+          "example": [
+            "Religius",
+            "Optimis"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LandingKontenResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/LandingKonten"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "LandingPublik": {
+      "properties": {
+        "konten": {
+          "$ref": "#/definitions/LandingKonten"
+        },
+        "perangkat": {
+          "items": {
+            "$ref": "#/definitions/PerangkatDesa"
+          },
+          "type": "array"
+        },
+        "potensi": {
+          "items": {
+            "$ref": "#/definitions/Potensi"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LandingPublikResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/LandingPublik"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "Login": {
       "properties": {
         "client": {
@@ -2819,6 +3217,138 @@
       },
       "type": "object"
     },
+    "PerangkatDesa": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "foto_path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        },
+        "id_perangkat_desa": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "jabatan": {
+          "example": "Kepala Desa",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "nama": {
+          "example": "Muldan, S.H",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        },
+        "urutan": {
+          "description": "Kecil tampil dulu",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "jabatan",
+        "nama"
+      ],
+      "type": "object"
+    },
+    "PerangkatDesaInput": {
+      "properties": {
+        "foto_path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        },
+        "jabatan": {
+          "example": "Kepala Desa",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "nama": {
+          "example": "Muldan, S.H",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "urutan": {
+          "description": "Kecil tampil dulu",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "jabatan",
+        "nama"
+      ],
+      "type": "object"
+    },
+    "PerangkatDesaListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/PerangkatDesa"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PerangkatDesaResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/PerangkatDesa"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "PerizinanReviewInput": {
       "properties": {
         "catatan_peninjau": {
@@ -2929,6 +3459,148 @@
             "$ref": "#/definitions/Placeholder"
           },
           "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Potensi": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "created_by": {
+          "type": "integer"
+        },
+        "deskripsi": {
+          "example": "Areal persawahan ± 45 Ha",
+          "maxLength": 2000,
+          "type": "string"
+        },
+        "foto_path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        },
+        "id_potensi": {
+          "example": 1,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "1 aktif, 0 nonaktif",
+          "example": 1,
+          "type": "integer"
+        },
+        "judul": {
+          "example": "Pertanian",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "kategori": {
+          "description": "Kode konstanta frontend (A-Z0-9_)",
+          "example": "PERTANIAN",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "integer"
+        },
+        "urutan": {
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "deskripsi",
+        "judul",
+        "kategori"
+      ],
+      "type": "object"
+    },
+    "PotensiInput": {
+      "properties": {
+        "deskripsi": {
+          "example": "Areal persawahan ± 45 Ha",
+          "maxLength": 2000,
+          "type": "string"
+        },
+        "foto_path": {
+          "description": "Path dari POST /landing/gambar; null = tanpa gambar",
+          "example": "landing/0123456789abcdef0123456789abcdef.jpg",
+          "type": "string"
+        },
+        "judul": {
+          "example": "Pertanian",
+          "maxLength": 150,
+          "type": "string"
+        },
+        "kategori": {
+          "description": "Kode konstanta frontend (A-Z0-9_)",
+          "example": "PERTANIAN",
+          "type": "string"
+        },
+        "urutan": {
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "deskripsi",
+        "judul",
+        "kategori"
+      ],
+      "type": "object"
+    },
+    "PotensiListResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "items": {
+            "$ref": "#/definitions/Potensi"
+          },
+          "type": "array"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PotensiResponse": {
+      "properties": {
+        "code": {
+          "example": 201,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/Potensi"
         },
         "message": {
           "example": "Success",
@@ -5869,6 +6541,887 @@
           "jenis-surat"
         ]
       }
+    },
+    "/landing/berita": {
+      "get": {
+        "description": "manage. Daftar berita (draft & terbit), terbaru dulu; tanpa `isi`. meta: {total, limit, offset}.",
+        "operationId": "get_berita_list",
+        "parameters": [
+          {
+            "enum": [
+              "draft",
+              "terbit"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "description": "cari judul",
+            "in": "query",
+            "name": "q",
+            "type": "string"
+          },
+          {
+            "default": 10,
+            "description": "maks 50",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BeritaRingkasPageResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah berita.",
+        "operationId": "post_berita_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BeritaInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BeritaResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/berita/{id_berita}": {
+      "delete": {
+        "description": "manage. Hapus berita (soft delete).",
+        "operationId": "delete_berita_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "get": {
+        "description": "manage. Detail berita (termasuk `isi`).",
+        "operationId": "get_berita_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BeritaResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_berita",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah berita (termasuk terbitkan / kembalikan ke draft).",
+        "operationId": "put_berita_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BeritaInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BeritaResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/gambar": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "manage. Upload gambar (multipart, field `gambar`) → disimpan JPEG maks 1920px.\nURL publik: `/landing/publik/file/<path>`.",
+        "operationId": "post_gambar",
+        "parameters": [
+          {
+            "description": "png/jpg/webp",
+            "in": "formData",
+            "name": "gambar",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LandingGambarResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "413": {
+            "description": "File terlalu besar",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/konten": {
+      "get": {
+        "description": "manage. Konten website (hero, sekilas, sejarah, visi-misi, wilayah, statistik, kontak).",
+        "operationId": "get_konten",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LandingKontenResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "put": {
+        "description": "manage. Simpan konten; kirim hanya bagian yang diubah (bagian lain tetap).",
+        "operationId": "put_konten",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LandingKonten"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LandingKontenResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/perangkat": {
+      "get": {
+        "description": "manage. Daftar perangkat desa aktif (urut `urutan`).",
+        "operationId": "get_perangkat_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PerangkatDesaListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah perangkat desa.",
+        "operationId": "post_perangkat_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PerangkatDesaInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PerangkatDesaResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/perangkat/{id_}": {
+      "delete": {
+        "description": "manage. Hapus perangkat desa (soft delete).",
+        "operationId": "delete_perangkat_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah perangkat desa.",
+        "operationId": "put_perangkat_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PerangkatDesaInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PerangkatDesaResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/potensi": {
+      "get": {
+        "description": "manage. Daftar potensi aktif (urut `urutan`).",
+        "operationId": "get_potensi_list",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PotensiListResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "post": {
+        "description": "manage. Tambah potensi.",
+        "operationId": "post_potensi_list",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PotensiInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PotensiResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/potensi/{id_}": {
+      "delete": {
+        "description": "manage. Hapus potensi (soft delete).",
+        "operationId": "delete_potensi_detail",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/EmptyResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id_",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "description": "manage. Ubah potensi.",
+        "operationId": "put_potensi_detail",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PotensiInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PotensiResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: landing",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/publik": {
+      "get": {
+        "description": "Konten website + perangkat desa + potensi dalam satu respons.",
+        "operationId": "get_publik",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/LandingPublikResponse"
+            }
+          }
+        },
+        "security": [],
+        "summary": "Akses: publik",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/publik/berita": {
+      "get": {
+        "description": "Berita terbit (tanggal_terbit <= hari ini), terbaru dulu. meta: {total, limit, offset}.",
+        "operationId": "get_publik_berita_list",
+        "parameters": [
+          {
+            "description": "cari judul",
+            "in": "query",
+            "name": "q",
+            "type": "string"
+          },
+          {
+            "default": 10,
+            "description": "maks 50",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BeritaRingkasPageResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [],
+        "summary": "Akses: publik",
+        "tags": [
+          "landing"
+        ]
+      }
+    },
+    "/landing/publik/berita/{slug}": {
+      "get": {
+        "description": "Detail berita terbit berdasarkan slug.",
+        "operationId": "get_publik_berita",
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/BeritaResponse"
+            }
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [],
+        "summary": "Akses: publik",
+        "tags": [
+          "landing"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "slug",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/landing/publik/file/{path}": {
+      "get": {
+        "description": "Gambar website (hanya folder landing/). Cache 30 hari (nama file unik).",
+        "operationId": "get_publik_file",
+        "produces": [
+          "image/jpeg"
+        ],
+        "responses": {
+          "200": {
+            "description": "File image/jpeg"
+          },
+          "404": {
+            "description": "Data tidak ditemukan",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [],
+        "summary": "Akses: publik",
+        "tags": [
+          "landing"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
     },
     "/master/hari-libur": {
       "get": {
@@ -10764,6 +12317,10 @@
     {
       "description": "Ringkasan hal yang menunggu tindakan (lonceng & surat di header admin)",
       "name": "notifikasi"
+    },
+    {
+      "description": "Konten website desa (karangbongkot.com): admin & publik",
+      "name": "landing"
     },
     {
       "description": "Master Jabatan",
