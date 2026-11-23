@@ -147,7 +147,9 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 .kop { width: 100%; border-collapse: collapse; border-bottom: 3px solid #000; margin-bottom: 2px; }
 .kop-garis { border-bottom: 1px solid #000; margin-bottom: 14px; }
 .kop td { vertical-align: middle; text-align: center; padding: 0 0 4px; line-height: 1.15; }
-.kop .logo { width: 26mm; text-align: left; } .kop .logo img { width: 22mm; max-height: 26mm; }
+.kop .logo { width: 26mm; text-align: left; }
+/* kotak logo = rasio logo kabupaten (780:1005); logo lain dimuat utuh di dalamnya */
+.kop .logo img { width: 22mm; height: 28.35mm; object-fit: contain; }
 .kop .logo.kanan { text-align: right; }
 .kop .kab { font-size: 14pt; }
 .kop .desa { font-size: 18pt; letter-spacing: 1px; }
