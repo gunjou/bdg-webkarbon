@@ -2205,6 +2205,28 @@
       },
       "type": "object"
     },
+    "PageMeta": {
+      "properties": {
+        "execution_time_ms": {
+          "example": 7.2,
+          "type": "number"
+        },
+        "limit": {
+          "example": 50,
+          "type": "integer"
+        },
+        "offset": {
+          "example": 0,
+          "type": "integer"
+        },
+        "total": {
+          "description": "Jumlah semua data yang cocok filter (tanpa limit/offset)",
+          "example": 9059,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
     "Pegawai": {
       "properties": {
         "created_at": {
@@ -2747,7 +2769,7 @@
       ],
       "type": "object"
     },
-    "PendudukListResponse": {
+    "PendudukPageResponse": {
       "properties": {
         "code": {
           "example": 200,
@@ -2764,8 +2786,7 @@
           "type": "string"
         },
         "meta": {
-          "description": "mis. {execution_time_ms}",
-          "type": "object"
+          "$ref": "#/definitions/PageMeta"
         },
         "success": {
           "example": true,
@@ -4263,7 +4284,7 @@
       },
       "type": "object"
     },
-    "SuratRingkasListResponse": {
+    "SuratRingkasPageResponse": {
       "properties": {
         "code": {
           "example": 200,
@@ -4280,8 +4301,7 @@
           "type": "string"
         },
         "meta": {
-          "description": "mis. {execution_time_ms}",
-          "type": "object"
+          "$ref": "#/definitions/PageMeta"
         },
         "success": {
           "example": true,
@@ -8032,7 +8052,7 @@
     },
     "/penduduk": {
       "get": {
-        "description": "view / penduduk.manage / surat.create. Cari penduduk (NIK/KK/awalan nama), maks 200 baris.",
+        "description": "view / penduduk.manage / surat.create. Cari penduduk (NIK/KK/awalan nama), maks 200 baris.\nmeta: {total, limit, offset}; total = jumlah semua yang cocok filter (q/dusun/include_inactive).",
         "operationId": "get_penduduk_list",
         "parameters": [
           {
@@ -8075,7 +8095,7 @@
           "200": {
             "description": "Sukses",
             "schema": {
-              "$ref": "#/definitions/PendudukListResponse"
+              "$ref": "#/definitions/PendudukPageResponse"
             }
           },
           "401": {
@@ -9179,7 +9199,7 @@
     },
     "/surat": {
       "get": {
-        "description": "view / surat.create. Daftar surat terbaru, filter status/jenis/tahun/q, maks 200.",
+        "description": "view / surat.create. Daftar surat terbaru, filter status/jenis/tahun/q, maks 200.\nmeta: {total, limit, offset}; total = jumlah semua yang cocok filter.",
         "operationId": "get_surat_list",
         "parameters": [
           {
@@ -9227,7 +9247,7 @@
           "200": {
             "description": "Sukses",
             "schema": {
-              "$ref": "#/definitions/SuratRingkasListResponse"
+              "$ref": "#/definitions/SuratRingkasPageResponse"
             }
           },
           "401": {

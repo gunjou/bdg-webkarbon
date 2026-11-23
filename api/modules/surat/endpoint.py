@@ -29,7 +29,7 @@ def _strip(row):
 
 @ns.route("")
 class SuratList(Resource):
-    @api_doc(ns, surat_list_out, many=True)
+    @api_doc(ns, surat_list_out, many=True, paged=True)
     @ns.expect(surat_parser)
     @permission_required(VIEW)
     @measure_execution_time

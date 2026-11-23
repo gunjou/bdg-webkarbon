@@ -4,6 +4,7 @@
 Pemakaian di endpoint (taruh di atas decorator auth):
     @api_doc(ns, user_out)                      # data = object
     @api_doc(ns, user_out, many=True)           # data = array
+    @api_doc(ns, user_out, many=True, paged=True)  # data = array + meta {total, limit, offset}
     @api_doc(ns, status=201, errors=(401, 403, 422))
 """
 from flask_restx import fields
@@ -30,11 +31,23 @@ def _error_model(ns):
     return ns.models["ErrorResponse"]
 
 
-def _envelope(ns, model, many, status):
+def _page_meta(ns):
+    if "PageMeta" not in ns.models:
+        ns.model("PageMeta", {
+            "total": fields.Integer(example=9059, description="Jumlah semua data yang cocok filter (tanpa limit/offset)"),
+            "limit": fields.Integer(example=50),
+            "offset": fields.Integer(example=0),
+            "execution_time_ms": fields.Float(example=7.2),
+        })
+    return ns.models["PageMeta"]
+
+
+def _envelope(ns, model, many, status, paged=False):
     if model is None:
         name, data = "EmptyResponse", fields.Raw(description="null")
     elif many:
-        name, data = f"{model.name}ListResponse", fields.List(fields.Nested(model))
+        name = f"{model.name}{'Page' if paged else 'List'}Response"
+        data = fields.List(fields.Nested(model))
     else:
         name, data = f"{model.name}Response", fields.Nested(model)
     if name not in ns.models:
@@ -43,16 +56,16 @@ def _envelope(ns, model, many, status):
             "success": fields.Boolean(example=True),
             "message": fields.String(example="Success"),
             "data": data,
-            "meta": fields.Raw(description="mis. {execution_time_ms}"),
+            "meta": fields.Nested(_page_meta(ns)) if paged else fields.Raw(description="mis. {execution_time_ms}"),
         })
     return ns.models[name]
 
 
-def api_doc(ns, model=None, *, many=False, status=200, errors=DEFAULT_ERRORS, description="Sukses"):
+def api_doc(ns, model=None, *, many=False, paged=False, status=200, errors=DEFAULT_ERRORS, description="Sukses"):
     def deco(fn):
         for code in errors:
             fn = ns.response(code, ERROR_DESC.get(code, "Gagal"), _error_model(ns))(fn)
-        return ns.response(status, description, _envelope(ns, model, many, status))(fn)
+        return ns.response(status, description, _envelope(ns, model, many, status, paged))(fn)
     return deco
 
 

@@ -16,7 +16,7 @@ READ_PERMS = ["penduduk.view", "penduduk.manage", "surat.create"]
 
 @ns.route("")
 class PendudukList(Resource):
-    @api_doc(ns, penduduk_out, many=True)
+    @api_doc(ns, penduduk_out, many=True, paged=True)
     @ns.expect(penduduk_parser)
     @permission_required(READ_PERMS)
     @measure_execution_time

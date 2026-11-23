@@ -42,9 +42,9 @@ class PendudukCleanTest(unittest.TestCase):
 
 
 class PendudukSearchTest(unittest.TestCase):
-    @patch.object(service.query, "search", return_value=[])
+    @patch.object(service.query, "search", return_value=([], 0))
     def test_angka_cari_nomor_nama_lowercase(self, search):
-        service.search({"q": "5201", "limit": 999})
+        self.assertEqual(service.search({"q": "5201", "limit": 999}), ([], {"total": 0, "limit": 200, "offset": 0}))
         f = search.call_args.args[0]
         self.assertEqual((f["nomor"], f["nama"], f["limit"]), ("5201", None, 200))
         service.search({"q": "Gugun"})
