@@ -40,14 +40,24 @@ def find_by_nik(nik, exclude_id=None):
         return conn.execute(sql, {"nik": nik, "exclude_id": exclude_id}).mappings().first()
 
 
+_INSERT = text(f"""
+    INSERT INTO penduduk ({", ".join(COLUMNS)}, created_at, created_by)
+    VALUES ({", ".join(":" + c for c in COLUMNS)}, :now, :id_user)
+    RETURNING id_penduduk
+""")
+
+
 def insert(data, id_user):
-    sql = text(f"""
-        INSERT INTO penduduk ({", ".join(COLUMNS)}, created_at, created_by)
-        VALUES ({", ".join(":" + c for c in COLUMNS)}, :now, :id_user)
-        RETURNING id_penduduk
-    """)
     with get_engine().begin() as conn:
-        return conn.execute(sql, {**data, "now": get_wita(), "id_user": id_user}).scalar()
+        return conn.execute(_INSERT, {**data, "now": get_wita(), "id_user": id_user}).scalar()
+
+
+def insert_many(rows, id_user):
+    """Satu transaksi: gagal satu, batal semua."""
+    now = get_wita()
+    with get_engine().begin() as conn:
+        for data in rows:
+            conn.execute(_INSERT, {**data, "now": now, "id_user": id_user})
 
 
 def update(id_penduduk, data, id_user):

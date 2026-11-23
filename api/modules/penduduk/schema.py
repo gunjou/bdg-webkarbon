@@ -49,3 +49,21 @@ penduduk_out = ns.model("Penduduk", {
     "alamat": fields.String(example="Jl. Raya Labuapi"),
     **audit_fields(),
 })
+
+penduduk_bulk_input = ns.model("PendudukBulkInput", {
+    "rows": fields.List(fields.Nested(penduduk_input), required=True, description="Maks 500 baris"),
+    "dry_run": fields.Integer(enum=[0, 1], default=0, description="1 = cek saja, tidak disimpan"),
+})
+
+penduduk_bulk_error = ns.model("PendudukBulkError", {
+    "baris": fields.Integer(example=3, description="Nomor baris di rows, mulai 1"),
+    "message": fields.String(example="NIK sudah terdaftar (YUSUF)"),
+    "errors": fields.Raw(example={"nik": "Sudah terdaftar"}),
+})
+
+penduduk_bulk_out = ns.model("PendudukBulkResult", {
+    "total": fields.Integer(example=7),
+    "valid": fields.Integer(example=6),
+    "errors": fields.List(fields.Nested(penduduk_bulk_error)),
+    "saved": fields.Boolean(description="true = semua baris tersimpan; false = tidak ada yang tersimpan"),
+})

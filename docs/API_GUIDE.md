@@ -249,6 +249,7 @@ lalu scan-nya di-upload sebagai arsip. Skema & bentuk data lengkap: `SCHEMA.md` 
 | `POST/PUT/DELETE /master/ref-options...`, `POST .../{id}/activate` | Kelola pilihan. `is_system = 1` (bawaan): kode & grup tidak bisa diubah, tidak bisa dinonaktifkan (`422`); label & urutan boleh. |
 | `GET /penduduk?q=&dusun=&include_inactive=&limit=&offset=` | Cari warga. `q` angka = awalan NIK / No. KK; selain itu = awalan nama. |
 | `GET/POST/PUT/DELETE /penduduk...`, `POST /penduduk/{id}/activate` | Kelola warga. Field opsional boleh `null`/`""`. NIK & No. KK 16 digit, NIK unik. RT/RW otomatis 3 digit. Kode pilihan baru harus aktif; kode lama yang tidak diganti tetap diterima walau opsinya sudah nonaktif. |
+| `POST /penduduk/bulk` `{rows: [PendudukInput], dry_run: 0/1}` | Impor maks 500 baris, **semua atau tidak sama sekali**. Aturan sama dengan `POST /penduduk` + NIK tidak boleh ganda di dalam file. Status tetap 200; `data.errors = [{baris, message, errors}]` (baris mulai 1), `data.saved` = tersimpan atau tidak. Alur: kirim `dry_run: 1` → tampilkan error → kirim ulang `dry_run: 0`. |
 | `GET /settings` | `{ "desa.nama": ..., "surat.format_nomor": ..., ... }` (key lihat SCHEMA.md). |
 | `PUT /settings` | Kirim **hanya key yang diubah**. Error per key di `errors["surat.format_nomor"]`, dst. |
 

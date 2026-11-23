@@ -2564,6 +2564,93 @@
       },
       "type": "object"
     },
+    "PendudukBulkError": {
+      "properties": {
+        "baris": {
+          "description": "Nomor baris di rows, mulai 1",
+          "example": 3,
+          "type": "integer"
+        },
+        "errors": {
+          "example": {
+            "nik": "Sudah terdaftar"
+          },
+          "type": "object"
+        },
+        "message": {
+          "example": "NIK sudah terdaftar (YUSUF)",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PendudukBulkInput": {
+      "properties": {
+        "dry_run": {
+          "default": 0,
+          "description": "1 = cek saja, tidak disimpan",
+          "type": "integer"
+        },
+        "rows": {
+          "description": "Maks 500 baris",
+          "items": {
+            "$ref": "#/definitions/PendudukInput"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "rows"
+      ],
+      "type": "object"
+    },
+    "PendudukBulkResult": {
+      "properties": {
+        "errors": {
+          "items": {
+            "$ref": "#/definitions/PendudukBulkError"
+          },
+          "type": "array"
+        },
+        "saved": {
+          "description": "true = semua baris tersimpan; false = tidak ada yang tersimpan",
+          "type": "boolean"
+        },
+        "total": {
+          "example": 7,
+          "type": "integer"
+        },
+        "valid": {
+          "example": 6,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "PendudukBulkResultResponse": {
+      "properties": {
+        "code": {
+          "example": 200,
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/PendudukBulkResult"
+        },
+        "message": {
+          "example": "Success",
+          "type": "string"
+        },
+        "meta": {
+          "description": "mis. {execution_time_ms}",
+          "type": "object"
+        },
+        "success": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "PendudukInput": {
       "properties": {
         "agama": {
@@ -8027,6 +8114,58 @@
             "description": "Sukses",
             "schema": {
               "$ref": "#/definitions/PendudukResponse"
+            }
+          },
+          "400": {
+            "description": "Input tidak valid (format/field wajib)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Token tidak ada / tidak valid / expired",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Tidak punya akses",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Validasi / aturan bisnis gagal (lihat code & errors)",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "summary": "Akses: penduduk",
+        "tags": [
+          "penduduk"
+        ]
+      }
+    },
+    "/penduduk/bulk": {
+      "post": {
+        "description": "manage. Impor banyak penduduk sekaligus (semua atau tidak sama sekali).\ndry_run=1 hanya memvalidasi. Error per baris ada di data.errors (status tetap 200).",
+        "operationId": "post_penduduk_bulk",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "payload",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PendudukBulkInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sukses",
+            "schema": {
+              "$ref": "#/definitions/PendudukBulkResultResponse"
             }
           },
           "400": {

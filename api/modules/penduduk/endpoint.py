@@ -8,7 +8,7 @@ from api.shared.docs import api_doc
 from api.shared.response import success
 from api.utils.timing import measure_execution_time
 from . import ns, service
-from .schema import penduduk_input, penduduk_out, penduduk_parser
+from .schema import penduduk_bulk_input, penduduk_bulk_out, penduduk_input, penduduk_out, penduduk_parser
 
 # pencarian juga dipakai form pembuatan surat
 READ_PERMS = ["penduduk.view", "penduduk.manage", "surat.create"]
@@ -32,6 +32,21 @@ class PendudukList(Resource):
         """Akses: penduduk.manage. Tambah penduduk."""
         data = service.create(request.get_json(), int(get_jwt_identity()))
         return success(data, "Penduduk berhasil ditambahkan", 201)
+
+
+@ns.route("/bulk")
+class PendudukBulk(Resource):
+    @api_doc(ns, penduduk_bulk_out, errors=(400, 401, 403, 422))
+    @ns.expect(penduduk_bulk_input)
+    @permission_required("penduduk.manage")
+    @measure_execution_time
+    def post(self):
+        """Akses: penduduk.manage. Impor banyak penduduk sekaligus (semua atau tidak sama sekali).
+        dry_run=1 hanya memvalidasi. Error per baris ada di data.errors (status tetap 200)."""
+        body = request.get_json() or {}
+        data = service.bulk(body.get("rows"), body.get("dry_run") == 1, int(get_jwt_identity()))
+        msg = "Penduduk berhasil diimpor" if data["saved"] else "Ada baris yang tidak valid" if data["errors"] else "Data valid"
+        return success(data, msg)
 
 
 @ns.route("/<int:id_penduduk>")

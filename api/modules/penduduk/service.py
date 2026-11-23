@@ -19,6 +19,7 @@ REF_FIELDS = {
     "dusun": "DUSUN",
 }
 MAX_LIMIT = 200
+MAX_BULK = 500
 
 
 def _opt(data, key, upper=False):
@@ -85,6 +86,33 @@ def get(id_penduduk):
 
 def create(data, id_user):
     return get(query.insert(_clean(data), id_user))
+
+
+def bulk(rows, dry_run, id_user):
+    """rows = list data seperti create. Semua divalidasi dulu; tersimpan hanya jika tidak ada error dan bukan dry_run.
+    errors = [{baris (mulai 1), message, errors}]."""
+    if not isinstance(rows, list) or not rows:
+        raise ValidationError("Data kosong", {"rows": "Minimal 1 baris"})
+    if len(rows) > MAX_BULK:
+        raise ValidationError(f"Maksimal {MAX_BULK} baris per impor", {"rows": f"Maks {MAX_BULK}"})
+    clean, errors, nik_baris = [], [], {}
+    # shortcut: 2 query per baris (kode pilihan + NIK), cukup untuk 500 baris; batch-kan bila impor jadi lambat
+    for i, data in enumerate(rows, 1):
+        try:
+            out = _clean(data if isinstance(data, dict) else {})
+        except ValidationError as e:
+            errors.append({"baris": i, "message": e.message, "errors": e.errors})
+            continue
+        if out["nik"] in nik_baris:
+            errors.append({"baris": i, "message": f"NIK sama dengan baris {nik_baris[out['nik']]}",
+                           "errors": {"nik": "Ganda di file"}})
+            continue
+        if out["nik"]:
+            nik_baris[out["nik"]] = i
+        clean.append(out)
+    if not errors and not dry_run:
+        query.insert_many(clean, id_user)
+    return {"total": len(rows), "valid": len(clean), "errors": errors, "saved": not errors and not dry_run}
 
 
 def update(id_penduduk, data, id_user):
