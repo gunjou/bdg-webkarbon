@@ -24,13 +24,19 @@ class SettingsTest(unittest.TestCase):
         upsert.assert_not_called()
 
     def test_key_asing_dan_logo_ditolak(self, *_):
-        for k in ("foo", "desa.logo_path"):
+        for k in ("foo", "desa.logo_path", "desa.logo_kiri_path"):
             with self.assertRaises(ValidationError):
                 service.update({k: "x"}, 1)
 
     def test_logo_bukan_gambar(self, *_):
         with self.assertRaises(ValidationError):
             service.set_logo(b"bukan gambar", 1)
+
+    def test_logo_posisi(self, *_):
+        with self.assertRaises(ValidationError):
+            service.set_logo(b"x", 1, "tengah")
+        self.assertTrue(service.get_logo_file("kiri")[0].endswith("logo-kabupaten.svg"))
+        self.assertTrue(service.get_logo_file()[0].endswith("logo-desa.png"))
 
 
 if __name__ == "__main__":

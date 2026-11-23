@@ -33,7 +33,7 @@ api/
 │   ├── face.py        process_face_photo (1 wajah → jpeg + embedding 128), face_distance
 │   ├── geo.py         haversine_m
 │   └── template.py    Jinja SandboxedEnvironment (make_env), sanitize_html (nh3), tgl_indo, terbilang
-├── assets/            logo-kabupaten.svg (logo kop default) + fonts/ (Liberation Serif untuk PDF)
+├── assets/            logo-kabupaten.svg (kiri kop) + logo-desa.png (kanan kop default) + fonts/ (Liberation Serif untuk PDF)
 └── modules/           satu folder per modul bisnis (modular monolith)
     ├── auth/          login, refresh, me
     ├── users/         akun & role; juga validasi user untuk pegawai (prepare_new/prepare_update)

@@ -62,7 +62,7 @@ pastikan pegawai Kepala Desa / Sekretaris Desa aktif (penandatangan surat).
   `export DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` (taruh di `~/.zshrc`).
 - Font surat dibundel (`api/assets/fonts/`, Liberation Serif — metrik sama dengan Times New Roman, lisensi SIL OFL),
   jadi hasil PDF sama di semua mesin tanpa memasang font di server.
-- Logo kop default: `api/assets/logo-kabupaten.svg` (Kabupaten Lombok Barat); bisa diganti lewat upload logo.
+- Kop: logo kiri (default `api/assets/logo-kabupaten.svg`) & kanan (default `api/assets/logo-desa.png`), keduanya bisa di-upload (`POST /settings/logo?posisi=kiri|kanan`).
 
 ## Menjalankan
 

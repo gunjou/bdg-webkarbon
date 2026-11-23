@@ -3691,8 +3691,13 @@
           "example": "Labuapi",
           "type": "string"
         },
+        "desa.logo_kiri_path": {
+          "description": "Logo kiri; diubah lewat POST /settings/logo?posisi=kiri",
+          "example": "settings/def.png",
+          "type": "string"
+        },
         "desa.logo_path": {
-          "description": "Diubah lewat POST /settings/logo",
+          "description": "Logo kanan; diubah lewat POST /settings/logo",
           "example": "settings/abc.png",
           "type": "string"
         },
@@ -8923,8 +8928,21 @@
     },
     "/settings/logo": {
       "get": {
-        "description": "Logo kop: upload (image/png) atau logo kabupaten bawaan (image/svg+xml).",
+        "description": "Logo kop `posisi=kanan` (default, logo desa) /\n`kiri` (logo kabupaten): upload (image/png) atau bawaan (desa PNG, kabupaten SVG).",
         "operationId": "get_settings_logo",
+        "parameters": [
+          {
+            "default": "kanan",
+            "description": "kiri = logo kabupaten, kanan = logo desa",
+            "enum": [
+              "kiri",
+              "kanan"
+            ],
+            "in": "query",
+            "name": "posisi",
+            "type": "string"
+          }
+        ],
         "produces": [
           "image/png"
         ],
@@ -8954,7 +8972,7 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "description": "surat_manage. Upload logo desa (png/jpg, disimpan sebagai PNG maks 600px). multipart/form-data.",
+        "description": "surat_manage. Upload logo kop `?posisi=kanan|kiri` (png/jpg, disimpan PNG maks 600px).\nmultipart/form-data.",
         "operationId": "post_settings_logo",
         "parameters": [
           {
@@ -8963,6 +8981,17 @@
             "name": "logo",
             "required": true,
             "type": "file"
+          },
+          {
+            "default": "kanan",
+            "description": "kiri = logo kabupaten, kanan = logo desa",
+            "enum": [
+              "kiri",
+              "kanan"
+            ],
+            "in": "query",
+            "name": "posisi",
+            "type": "string"
           }
         ],
         "responses": {

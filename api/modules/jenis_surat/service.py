@@ -334,7 +334,8 @@ def render_pdf(*, judul, redaksi, skema, data, nomor=None, tanggal=None, penanda
     try:
         html = render.render_html(
             judul=judul, redaksi=redaksi, skema=skema, data=data, labels=labels(),
-            settings=settings_service.get_all(), logo=settings_service.get_logo_bytes(), nomor=nomor,
+            settings=settings_service.get_all(), logo=settings_service.get_logo_bytes(),
+            logo_kiri=settings_service.get_logo_bytes("kiri"), nomor=nomor,
             tanggal=tanggal, penandatangan=penandatangan, watermark=watermark)
     except (TemplateError, TypeError, ValueError) as e:
         raise ValidationError("Redaksi gagal dirender", {"template_isi": str(e)})

@@ -20,8 +20,13 @@ settings_input = ns.model("SettingsInput", {
 })
 
 settings_out = ns.clone("Settings", settings_input, {
-    "desa.logo_path": _s(example="settings/abc.png", description="Diubah lewat POST /settings/logo"),
+    "desa.logo_path": _s(example="settings/abc.png", description="Logo kanan; diubah lewat POST /settings/logo"),
+    "desa.logo_kiri_path": _s(example="settings/def.png", description="Logo kiri; diubah lewat POST /settings/logo?posisi=kiri"),
 })
 
 logo_parser = reqparse.RequestParser()
 logo_parser.add_argument("logo", type=FileStorage, location="files", required=True, help="Logo desa (png/jpg)")
+
+posisi_parser = reqparse.RequestParser()
+posisi_parser.add_argument("posisi", choices=("kiri", "kanan"), default="kanan", location="args",
+                           help="kiri = logo kabupaten, kanan = logo desa")

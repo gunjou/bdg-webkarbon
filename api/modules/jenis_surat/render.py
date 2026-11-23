@@ -129,7 +129,8 @@ def render_isi(redaksi, skema, data, labels, desa):
 
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
-LOGO_DEFAULT = ASSETS / "logo-kabupaten.svg"
+LOGO_KAB = ASSETS / "logo-kabupaten.svg"
+LOGO_DESA = ASSETS / "logo-desa.png"
 FONTS = ASSETS / "fonts"
 # font dibundel (Liberation Serif, metrik sama dengan Times New Roman) agar tampilan sama di dev & server
 FONT_FACE = "".join(
@@ -146,12 +147,11 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 .kop { width: 100%; border-collapse: collapse; border-bottom: 3px solid #000; margin-bottom: 2px; }
 .kop-garis { border-bottom: 1px solid #000; margin-bottom: 14px; }
 .kop td { vertical-align: middle; text-align: center; padding: 0 0 4px; line-height: 1.15; }
-.kop .logo { width: 26mm; text-align: left; } .kop .logo img { width: 22mm; }
-.kop .seimbang { width: 26mm; }
-.kop .kab { font-size: 14pt; font-weight: bold; letter-spacing: 1px; }
-.kop .kec { font-size: 14pt; font-weight: bold; letter-spacing: 4px; }
-.kop .desa { font-size: 20pt; font-weight: bold; }
-.kop .info { font-size: 9.5pt; font-style: italic; }
+.kop .logo { width: 26mm; text-align: left; } .kop .logo img { width: 22mm; max-height: 26mm; }
+.kop .logo.kanan { text-align: right; }
+.kop .kab { font-size: 14pt; }
+.kop .desa { font-size: 18pt; letter-spacing: 1px; }
+.kop .info { font-size: 10pt; }
 .judul { text-align: center; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin: 0; }
 .nomor { text-align: center; margin: 0 0 18px; }
 .isi p { text-align: justify; text-indent: 12mm; margin: 0 0 10px; }
@@ -167,16 +167,17 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 </style></head><body>
 {% if watermark %}<div class="watermark" style="font-size: {{ 110 if watermark|length <= 6 else 64 }}pt">{{ watermark }}</div>{% endif %}
 <table class="kop"><tr>
-  <td class="logo">{% if logo %}<img src="{{ logo }}">{% endif %}</td>
+  <td class="logo"><img src="{{ logo_kab }}"></td>
   <td>
-    <div class="kab">KABUPATEN {{ desa.kabupaten | upper }}</div>
-    <div class="kec">KECAMATAN {{ desa.kecamatan | upper }}</div>
+    <div class="kab">PEMERINTAH KABUPATEN {{ desa.kabupaten | upper }}</div>
+    <div class="kab">KECAMATAN {{ desa.kecamatan | upper }}</div>
     <div class="desa">DESA {{ desa.nama | upper }}</div>
     {% if desa.alamat %}<div class="info">{{ desa.alamat }}</div>{% endif %}
-    {% if desa.email %}<div class="info">email: {{ desa.email }}</div>{% endif %}
-    {% if desa.website %}<div class="info">website: {{ desa.website }}</div>{% endif %}
+    {% if desa.website or desa.email %}<div class="info">
+      {%- if desa.website %}Website: {{ desa.website }}{% endif %}{% if desa.website and desa.email %} &nbsp; {% endif %}
+      {%- if desa.email %}E-mail: {{ desa.email }}{% endif %}</div>{% endif %}
   </td>
-  <td class="seimbang"></td>
+  <td class="logo kanan"><img src="{{ logo }}"></td>
 </tr></table>
 <div class="kop-garis"></div>
 <p class="judul">{{ judul }}</p>
@@ -193,21 +194,26 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 
 
 def logo_uri(data=None):
-    """Logo upload (PNG) bila ada, selain itu logo kabupaten bawaan (SVG)."""
+    """Logo desa (kanan kop): upload (PNG) bila ada, selain itu logo desa bawaan."""
+    return "data:image/png;base64," + base64.b64encode(data or LOGO_DESA.read_bytes()).decode()
+
+
+def logo_kiri_uri(data=None):
+    """Logo kiri kop: upload (PNG) bila ada, selain itu logo kabupaten bawaan (SVG)."""
     if data:
         return "data:image/png;base64," + base64.b64encode(data).decode()
-    return "data:image/svg+xml;base64," + base64.b64encode(LOGO_DEFAULT.read_bytes()).decode()
+    return "data:image/svg+xml;base64," + base64.b64encode(LOGO_KAB.read_bytes()).decode()
 
 
-def render_html(*, judul, redaksi, skema, data, labels, settings, logo=None, nomor=None, tanggal=None,
+def render_html(*, judul, redaksi, skema, data, labels, settings, logo=None, logo_kiri=None, nomor=None, tanggal=None,
                 penandatangan=None, watermark=None):
-    """logo = bytes PNG upload atau None (pakai logo bawaan); penandatangan = {nama, jabatan, nip, atas_nama};
+    """logo = bytes PNG logo desa upload atau None (pakai logo desa bawaan); logo_kiri sama, bawaan logo kabupaten; penandatangan = {nama, jabatan, nip, atas_nama};
     tanggal = date/ISO; watermark mis. 'DRAF' / 'DIBATALKAN'."""
     desa = {k: settings.get(f"desa.{k}") or "" for k in ("nama", "kecamatan", "kabupaten", "alamat", "email", "website")}
     return LAYOUT.render(
         kertas=KERTAS.get(settings.get("surat.ukuran_kertas"), KERTAS["F4"]),
         font_face=Markup(FONT_FACE), desa=desa, judul=judul, nomor=nomor, tanggal=tgl_indo(tanggal), ttd=penandatangan or {},
-        watermark=watermark, isi=render_isi(redaksi, skema, data, labels, desa), logo=logo_uri(logo),
+        watermark=watermark, isi=render_isi(redaksi, skema, data, labels, desa), logo=logo_uri(logo), logo_kab=logo_kiri_uri(logo_kiri),
     )
 
 

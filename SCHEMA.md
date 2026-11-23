@@ -50,7 +50,8 @@ Daftar key valid ada di kode; key yang belum punya baris memakai default dari ko
 | `ABSEN_MASUK_BUKA_MENIT`, `GPS_MAX_AKURASI_METER`, `FACE_MATCH_THRESHOLD` | 60, 50, 0.5 | `presensi/service.py` (belum ada UI) |
 | `desa.nama`, `desa.kecamatan`, `desa.kabupaten` | Karang Bongkot, Labuapi, Lombok Barat | `PUT /settings` |
 | `desa.alamat`, `desa.email`, `desa.website` | dari kop surat asli desa | `PUT /settings` |
-| `desa.logo_path` | `null` = logo Kabupaten Lombok Barat bawaan (`api/assets/logo-kabupaten.svg`) | `POST /settings/logo` |
+| `desa.logo_path` | logo kanan kop; `null` = logo desa bawaan (`api/assets/logo-desa.png`) | `POST /settings/logo` |
+| `desa.logo_kiri_path` | logo kiri kop; `null` = logo Kabupaten Lombok Barat bawaan (`api/assets/logo-kabupaten.svg`) | `POST /settings/logo?posisi=kiri` |
 | `surat.kode_desa` | `KRB` | `PUT /settings` |
 | `surat.format_nomor` | `{klasifikasi}/{urut}/{kode_desa}/{tahun}` (wajib memuat `{urut}`) | `PUT /settings` |
 | `surat.cakupan_nomor` | `GLOBAL` (`GLOBAL` / `PER_JENIS`) | `PUT /settings` |
