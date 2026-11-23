@@ -27,12 +27,6 @@ def find_active_by_name(name, exclude_id=None):
         return conn.execute(sql, {"name": name, "exclude_id": exclude_id}).first()
 
 
-def count_active_pegawai(id_lokasi_kantor):
-    sql = text("SELECT count(*) FROM pegawai WHERE id_lokasi_kantor = :id_lokasi_kantor AND is_active = 1")
-    with get_engine().connect() as conn:
-        return conn.execute(sql, {"id_lokasi_kantor": id_lokasi_kantor}).scalar()
-
-
 def insert(data, id_user):
     sql = text("""
         INSERT INTO lokasi_kantor (name, latitude, longitude, radius_meter, created_at, created_by)

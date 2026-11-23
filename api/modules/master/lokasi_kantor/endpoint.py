@@ -52,7 +52,7 @@ class LokasiKantorDetail(Resource):
     @permission_required("lokasi_kantor.manage")
     @measure_execution_time
     def delete(self, id_lokasi_kantor):
-        """Akses: lokasi_kantor.manage. Nonaktifkan lokasi kantor (ditolak jika masih dipakai pegawai aktif)."""
+        """Akses: lokasi_kantor.manage. Nonaktifkan lokasi kantor."""
         service.deactivate(id_lokasi_kantor, int(get_jwt_identity()))
         return success(None, "Lokasi kantor berhasil dinonaktifkan")
 

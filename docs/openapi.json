@@ -3714,7 +3714,7 @@
             "GLOBAL",
             "PER_JENIS"
           ],
-          "example": "GLOBAL",
+          "example": "PER_JENIS",
           "type": "string"
         },
         "surat.format_nomor": {
@@ -3768,7 +3768,7 @@
             "GLOBAL",
             "PER_JENIS"
           ],
-          "example": "GLOBAL",
+          "example": "PER_JENIS",
           "type": "string"
         },
         "surat.format_nomor": {
@@ -6933,7 +6933,7 @@
     },
     "/master/lokasi-kantor/{id_lokasi_kantor}": {
       "delete": {
-        "description": "manage. Nonaktifkan lokasi kantor (ditolak jika masih dipakai pegawai aktif).",
+        "description": "manage. Nonaktifkan lokasi kantor.",
         "operationId": "delete_lokasi_kantor_detail",
         "responses": {
           "200": {

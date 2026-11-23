@@ -41,10 +41,8 @@ def update(id_lokasi_kantor, data, id_user):
 
 
 def deactivate(id_lokasi_kantor, id_user):
+    # lokasi tidak terikat ke pegawai (semua lokasi aktif berlaku untuk semua), jadi tidak ada cek pemakaian
     get(id_lokasi_kantor)
-    used = query.count_active_pegawai(id_lokasi_kantor)
-    if used:
-        raise ValidationError(f"Lokasi masih dipakai {used} pegawai aktif")
     query.set_active(id_lokasi_kantor, 0, id_user)
 
 
