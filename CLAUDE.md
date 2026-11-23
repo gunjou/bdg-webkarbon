@@ -187,4 +187,6 @@ bentuk `skema_form` / `surat.data` di SCHEMA.md §4. Yang wajib dijaga saat meng
   client (`endpoint._strip`); unduh lewat endpoint yang dicek permission-nya.
 - **Pengaturan**: key desa/surat hanya yang ada di `settings.service.REGISTRY` (default di kode).
 - Rencana (JANGAN dibuat tanpa diminta): pengesahan di sistem (`diajukan/ditolak/disahkan`, QR, `surat.sign`),
-  impor penduduk, ekspor PDF agenda/register.
+  ekspor PDF agenda/register.
+- Impor penduduk: `POST /penduduk/bulk` (`penduduk.service.bulk`), maks 10000 baris, semua atau tidak sama sekali.
+  NIK `9999999999999999` = NIK sementara, boleh ganda (`NIK_SEMENTARA`, index unik di migrasi 013).

@@ -33,6 +33,11 @@ def get(id_ref_option):
     return row
 
 
+def active_codes(group_codes):
+    """Dipakai modul lain (impor bulk): {group_code: set(code)} aktif, satu query."""
+    return query.get_active_codes(group_codes)
+
+
 def validate_codes(values):
     """Dipakai modul lain. values = {field: (group_code, code)}; code kosong dilewati.
     Raise ValidationError berisi field yang kodenya tidak ada / nonaktif."""

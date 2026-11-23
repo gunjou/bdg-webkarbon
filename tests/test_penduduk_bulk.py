@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from api.modules.master.ref_options import service as ref
 from api.modules.penduduk import service
+from api.shared.exceptions import ValidationError
 
 AKTIF = {"AGAMA": set(), "PEKERJAAN": set(), "STATUS_PERKAWINAN": set(), "KEWARGANEGARAAN": {"WNI"},
          "DUSUN": {"KARANG_BONGKOT"}}
@@ -12,7 +13,7 @@ B = {"full_name": "NUR", "nik": "5201085206790005", "dusun": "KARANG_BONGKOT"}
 
 
 @patch.object(ref.query, "get_active_codes", return_value=AKTIF)
-@patch.object(service.query, "find_by_nik", return_value=None)
+@patch.object(service.query, "find_by_niks", return_value={})
 @patch.object(service.query, "insert_many")
 class PendudukBulkTest(unittest.TestCase):
     def test_semua_valid_tersimpan(self, ins, *_):
@@ -25,7 +26,7 @@ class PendudukBulkTest(unittest.TestCase):
         ins.assert_not_called()
 
     def test_nik_ganda_di_file_dan_db(self, ins, find, _):
-        find.side_effect = lambda nik, _=None: {"full_name": "LAMA", "is_active": 1} if nik == B["nik"] else None
+        find.return_value = {B["nik"]: {"full_name": "LAMA", "is_active": 1}}
         r = service.bulk([A, B, A, {"full_name": ""}], False, 1)
         self.assertEqual([e["baris"] for e in r["errors"]], [2, 3, 4])
         self.assertIn("LAMA", r["errors"][0]["message"])
@@ -34,6 +35,20 @@ class PendudukBulkTest(unittest.TestCase):
     def test_dusun_tidak_ada(self, ins, *_):
         r = service.bulk([{**A, "dusun": "X"}], False, 1)
         self.assertEqual(r["errors"][0]["errors"], {"dusun": "Pilihan tidak valid (DUSUN)"})
+
+    def test_query_tetap_sekali_untuk_banyak_baris(self, ins, find, codes):
+        rows = [{"full_name": "W", "nik": f"52010806087{i:05d}"} for i in range(10000)]
+        self.assertTrue(service.bulk(rows, False, 1)["saved"])
+        self.assertEqual((find.call_count, codes.call_count, len(ins.call_args[0][0])), (1, 1, 10000))
+
+    def test_nik_sementara_boleh_ganda(self, ins, find, _):
+        find.return_value = {service.NIK_SEMENTARA: {"full_name": "LAMA", "is_active": 1}}
+        t = {"full_name": "X", "nik": service.NIK_SEMENTARA}
+        self.assertTrue(service.bulk([t, t], False, 1)["saved"])
+
+    def test_lebih_dari_batas(self, *_):
+        with self.assertRaises(ValidationError):
+            service.bulk([A] * 10001, True, 1)
 
 
 if __name__ == "__main__":

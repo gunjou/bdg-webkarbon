@@ -146,7 +146,7 @@ Grup bawaan: `AGAMA, STATUS_PERKAWINAN, KEWARGANEGARAAN, PENDIDIKAN, HUBUNGAN_KE
 | Kolom | Tipe | Catatan |
 |---|---|---|
 | id_penduduk | INTEGER PK | |
-| nik, no_kk | VARCHAR(16) | 16 digit; NIK unik jika diisi (termasuk nonaktif) |
+| nik, no_kk | VARCHAR(16) | 16 digit; NIK unik jika diisi (termasuk nonaktif), kecuali NIK sementara `9999999999999999` (migrasi 013) |
 | full_name | VARCHAR(150) | wajib; index `lower(full_name)` untuk cari awalan |
 | tempat_lahir, tanggal_lahir | VARCHAR(100), DATE | |
 | jenis_kelamin | CHAR(1) | `L` / `P` |

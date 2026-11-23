@@ -19,7 +19,8 @@ REF_FIELDS = {
     "dusun": "DUSUN",
 }
 MAX_LIMIT = 200
-MAX_BULK = 500
+MAX_BULK = 10000
+NIK_SEMENTARA = "9999999999999999"  # NIK asli belum diketahui; boleh ganda (lihat migrasi 013)
 
 
 def _opt(data, key, upper=False):
@@ -27,7 +28,8 @@ def _opt(data, key, upper=False):
     return (v.upper() if upper else v) or None
 
 
-def _clean(data, current=None):
+def _clean(data, current=None, prefetch=None):
+    """prefetch (impor bulk) = {"active": {group: set(code)}, "nik": {nik: row}} supaya tidak query per baris."""
     id_penduduk = current["id_penduduk"] if current else None
     out = {c: _opt(data, c) for c in query.COLUMNS}
     if not out["full_name"]:
@@ -55,9 +57,14 @@ def _clean(data, current=None):
             raise ValidationError("Tanggal lahir di masa depan", {"tanggal_lahir": "Tidak valid"})
     # kode lama yang tidak diganti tetap boleh disimpan walau opsinya sudah dinonaktifkan
     changed = {k: g for k, g in REF_FIELDS.items() if not current or out[k] != current[k]}
-    ref_options_service.validate_codes({k: (g, out[k]) for k, g in changed.items()})
-    if out["nik"]:
-        dup = query.find_by_nik(out["nik"], id_penduduk)
+    if prefetch is None:
+        ref_options_service.validate_codes({k: (g, out[k]) for k, g in changed.items()})
+    else:
+        bad = {k: f"Pilihan tidak valid ({g})" for k, g in changed.items() if out[k] and out[k] not in prefetch["active"][g]}
+        if bad:
+            raise ValidationError("Pilihan tidak valid", bad)
+    if out["nik"] and out["nik"] != NIK_SEMENTARA:
+        dup = query.find_by_nik(out["nik"], id_penduduk) if prefetch is None else prefetch["nik"].get(out["nik"])
         if dup:
             hint = "" if dup["is_active"] == 1 else ", nonaktif — aktifkan kembali saja"
             raise ValidationError(f"NIK sudah terdaftar ({dup['full_name']}{hint})", {"nik": "Sudah terdaftar"})
@@ -95,11 +102,15 @@ def bulk(rows, dry_run, id_user):
         raise ValidationError("Data kosong", {"rows": "Minimal 1 baris"})
     if len(rows) > MAX_BULK:
         raise ValidationError(f"Maksimal {MAX_BULK} baris per impor", {"rows": f"Maks {MAX_BULK}"})
+    rows = [r if isinstance(r, dict) else {} for r in rows]
+    prefetch = {
+        "active": ref_options_service.active_codes(set(REF_FIELDS.values())),
+        "nik": query.find_by_niks([str(r.get("nik") or "").strip() for r in rows]),
+    }
     clean, errors, nik_baris = [], [], {}
-    # shortcut: 2 query per baris (kode pilihan + NIK), cukup untuk 500 baris; batch-kan bila impor jadi lambat
     for i, data in enumerate(rows, 1):
         try:
-            out = _clean(data if isinstance(data, dict) else {})
+            out = _clean(data, prefetch=prefetch)
         except ValidationError as e:
             errors.append({"baris": i, "message": e.message, "errors": e.errors})
             continue
@@ -107,7 +118,7 @@ def bulk(rows, dry_run, id_user):
             errors.append({"baris": i, "message": f"NIK sama dengan baris {nik_baris[out['nik']]}",
                            "errors": {"nik": "Ganda di file"}})
             continue
-        if out["nik"]:
+        if out["nik"] and out["nik"] != NIK_SEMENTARA:
             nik_baris[out["nik"]] = i
         clean.append(out)
     if not errors and not dry_run:
@@ -128,7 +139,7 @@ def deactivate(id_penduduk, id_user):
 
 def activate(id_penduduk, id_user):
     row = get(id_penduduk)
-    if row["nik"]:
+    if row["nik"] and row["nik"] != NIK_SEMENTARA:
         dup = query.find_by_nik(row["nik"], id_penduduk)
         if dup:
             raise ValidationError(f"NIK sudah dipakai {dup['full_name']}", {"nik": "Sudah terdaftar"})

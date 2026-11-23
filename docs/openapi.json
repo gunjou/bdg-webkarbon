@@ -2592,7 +2592,7 @@
           "type": "integer"
         },
         "rows": {
-          "description": "Maks 500 baris",
+          "description": "Maks 10000 baris",
           "items": {
             "$ref": "#/definitions/PendudukInput"
           },

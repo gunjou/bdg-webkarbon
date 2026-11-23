@@ -52,12 +52,22 @@ def insert(data, id_user):
         return conn.execute(_INSERT, {**data, "now": get_wita(), "id_user": id_user}).scalar()
 
 
+def find_by_niks(niks):
+    """{nik: row} untuk NIK yang sudah ada (termasuk nonaktif); satu query untuk impor bulk."""
+    sql = text("SELECT nik, id_penduduk, full_name, is_active FROM penduduk WHERE nik = ANY(:niks)")
+    with get_engine().connect() as conn:
+        return {r["nik"]: r for r in conn.execute(sql, {"niks": [n for n in niks if n]}).mappings()}
+
+
 def insert_many(rows, id_user):
-    """Satu transaksi: gagal satu, batal semua."""
+    """Satu transaksi (executemany): gagal satu, batal semua."""
+    sql = text(f"""
+        INSERT INTO penduduk ({", ".join(COLUMNS)}, created_at, created_by)
+        VALUES ({", ".join(":" + c for c in COLUMNS)}, :now, :id_user)
+    """)
     now = get_wita()
     with get_engine().begin() as conn:
-        for data in rows:
-            conn.execute(_INSERT, {**data, "now": now, "id_user": id_user})
+        conn.execute(sql, [{**d, "now": now, "id_user": id_user} for d in rows])
 
 
 def update(id_penduduk, data, id_user):

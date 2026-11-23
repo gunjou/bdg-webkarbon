@@ -51,7 +51,7 @@ penduduk_out = ns.model("Penduduk", {
 })
 
 penduduk_bulk_input = ns.model("PendudukBulkInput", {
-    "rows": fields.List(fields.Nested(penduduk_input), required=True, description="Maks 500 baris"),
+    "rows": fields.List(fields.Nested(penduduk_input), required=True, description="Maks 10000 baris"),
     "dry_run": fields.Integer(enum=[0, 1], default=0, description="1 = cek saja, tidak disimpan"),
 })
 
