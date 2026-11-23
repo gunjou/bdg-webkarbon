@@ -74,14 +74,16 @@ def _clean(data, current=None, prefetch=None):
 def search(args):
     q = (args.get("q") or "").strip()
     digits = q.isdigit()
-    return query.search({
+    f = {
         "nomor": q if digits else None,
         "nama": q.lower() if q and not digits else None,
         "dusun": (args.get("dusun") or "").strip().upper() or None,
         "include_inactive": 1 if args.get("include_inactive") == 1 else 0,
         "limit": min(max(args.get("limit") or 50, 1), MAX_LIMIT),
         "offset": max(args.get("offset") or 0, 0),
-    })
+    }
+    rows, total = query.search(f)
+    return rows, {"total": total, "limit": f["limit"], "offset": f["offset"]}
 
 
 def get(id_penduduk):

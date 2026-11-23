@@ -21,8 +21,10 @@ class PendudukList(Resource):
     @permission_required(READ_PERMS)
     @measure_execution_time
     def get(self):
-        """Akses: penduduk.view / penduduk.manage / surat.create. Cari penduduk (NIK/KK/awalan nama), maks 200 baris."""
-        return success(service.search(penduduk_parser.parse_args()))
+        """Akses: penduduk.view / penduduk.manage / surat.create. Cari penduduk (NIK/KK/awalan nama), maks 200 baris.
+        meta: {total, limit, offset}; total = jumlah semua yang cocok filter (q/dusun/include_inactive)."""
+        rows, meta = service.search(penduduk_parser.parse_args())
+        return success(rows, meta=meta)
 
     @api_doc(ns, penduduk_out, status=201, errors=(400, 401, 403, 422))
     @ns.expect(penduduk_input)  # tanpa validate: field opsional boleh null/"", divalidasi di service

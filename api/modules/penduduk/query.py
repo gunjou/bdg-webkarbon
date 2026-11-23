@@ -8,19 +8,21 @@ COLUMNS = ("nik", "no_kk", "full_name", "tempat_lahir", "tanggal_lahir", "jenis_
            "status_perkawinan", "kewarganegaraan", "dusun", "rt", "rw", "alamat")
 
 
+_SEARCH_WHERE = """
+    WHERE (:include_inactive = 1 OR is_active = 1)
+      AND (CAST(:dusun AS VARCHAR) IS NULL OR dusun = :dusun)
+      AND (CAST(:nomor AS VARCHAR) IS NULL OR nik LIKE :nomor || '%' OR no_kk LIKE :nomor || '%')
+      AND (CAST(:nama AS VARCHAR) IS NULL OR lower(full_name) LIKE :nama || '%')
+"""
+
+
 def search(f):
-    """f: nomor (awalan NIK/KK) | nama (awalan, lower) | dusun | include_inactive | limit | offset."""
-    sql = text("""
-        SELECT * FROM penduduk
-        WHERE (:include_inactive = 1 OR is_active = 1)
-          AND (CAST(:dusun AS VARCHAR) IS NULL OR dusun = :dusun)
-          AND (CAST(:nomor AS VARCHAR) IS NULL OR nik LIKE :nomor || '%' OR no_kk LIKE :nomor || '%')
-          AND (CAST(:nama AS VARCHAR) IS NULL OR lower(full_name) LIKE :nama || '%')
-        ORDER BY full_name, id_penduduk
-        LIMIT :limit OFFSET :offset
-    """)
+    """f: nomor (awalan NIK/KK) | nama (awalan, lower) | dusun | include_inactive | limit | offset.
+    Kembalikan (rows, total); total = jumlah semua baris yang cocok filter, tanpa limit/offset."""
+    rows_sql = text(f"SELECT * FROM penduduk {_SEARCH_WHERE} ORDER BY full_name, id_penduduk LIMIT :limit OFFSET :offset")
+    count_sql = text(f"SELECT COUNT(*) FROM penduduk {_SEARCH_WHERE}")
     with get_engine().connect() as conn:
-        return conn.execute(sql, f).mappings().all()
+        return conn.execute(rows_sql, f).mappings().all(), conn.execute(count_sql, f).scalar()
 
 
 def get_by_id(id_penduduk):
