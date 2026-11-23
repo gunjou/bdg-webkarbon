@@ -164,7 +164,7 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 .biodata .bl { width: 46mm; } .biodata .bt { width: 4mm; }
 .daftar { width: 100%; border-collapse: collapse; margin: 4px 0 12px; }
 .daftar td, .daftar th { border: 1px solid #000; padding: 1px 5px; }
-.ttd { margin: 20px 0 0 55%; text-align: center; line-height: 1.3; page-break-inside: avoid; }
+.ttd { margin: 20px 0 0 50%; text-align: center; line-height: 1.3; page-break-inside: avoid; white-space: nowrap; }
 .ttd .nama { margin-top: 72px; font-weight: bold; text-transform: uppercase; }
 .watermark { position: fixed; top: 38%; left: 0; width: 100%; text-align: center; font-size: 110pt; font-weight: bold;
              color: rgba(200, 0, 0, 0.13); transform: rotate(-35deg); z-index: -1; }
@@ -189,7 +189,7 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 <div class="isi">{{ isi }}</div>
 <div class="ttd">
   <div>{{ desa.nama }}, {{ tanggal or "...................." }}</div>
-  {% if ttd.atas_nama %}<div>a.n Kepala Desa {{ desa.nama }}</div><div>{{ ttd.jabatan }}</div>
+  {% if ttd.atas_nama %}<div>a.n. Kepala Desa {{ desa.nama }}</div><div>{{ ttd.jabatan }}</div>
   {% else %}<div>Kepala Desa {{ desa.nama }}</div>{% endif %}
   <div class="nama">{{ ttd.nama or "...................................." }}</div>
   {% if ttd.nip %}<div>NIP. {{ ttd.nip }}</div>{% endif %}

@@ -2426,7 +2426,7 @@
     "Penandatangan": {
       "properties": {
         "atas_nama": {
-          "description": "1 = dicetak 'a.n Kepala Desa'",
+          "description": "1 = dicetak 'a.n. Kepala Desa'",
           "example": 1,
           "type": "integer"
         },

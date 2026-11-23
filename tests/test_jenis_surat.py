@@ -98,6 +98,6 @@ class RenderHtmlTest(unittest.TestCase):
                                   penandatangan={"nama": "Budi", "jabatan": "Sekretaris Desa", "atas_nama": 1},
                                   watermark="DRAF")
         for teks in ("&lt;b&gt;Gugun&lt;/b&gt;", "Mataram, 3 November 1998", "Rp 50.000.000",
-                     "lima puluh juta rupiah", "Dasan Kebon", "<td>Utara</td>", "a.n Kepala Desa Karang Bongkot",
+                     "lima puluh juta rupiah", "Dasan Kebon", "<td>Utara</td>", "a.n. Kepala Desa Karang Bongkot",
                      "Sekretaris Desa", "16 November 2026", "215mm 330mm", "DRAF"):
             self.assertIn(teks, html)

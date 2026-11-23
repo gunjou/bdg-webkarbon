@@ -220,7 +220,7 @@ bila penerbitan gagal. Nomor surat yang dibatalkan tetap hangus.
 | redaksi_diubah | 1 = redaksi disesuaikan khusus surat ini |
 | data | isian + snapshot biodata semua pihak (bentuk di bawah) |
 | lampiran | `[{"id", "nama", "path", "mimetype"}]` (pdf/jpg/png) |
-| id_penandatangan, atas_nama | pegawai (jabatan `can_sign = 1`); `atas_nama = 1` bila bukan Kepala Desa → dicetak "a.n Kepala Desa ..." |
+| id_penandatangan, atas_nama | pegawai (jabatan `can_sign = 1`); `atas_nama = 1` bila bukan Kepala Desa → dicetak "a.n. Kepala Desa ..." |
 | data_penandatangan | snapshot `{id_pegawai, nama, jabatan, nip, atas_nama}` saat terbit/perbaikan |
 | diterbitkan_oleh, diterbitkan_pada | |
 | pdf_path | PDF hasil sistem (`uploads/surat/pdf/`) |

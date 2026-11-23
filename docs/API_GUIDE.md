@@ -292,7 +292,7 @@ POST /surat ─► draft ──PUT /surat/{id} (isi, penandatangan)──► POS
 | `POST /surat` `{id_jenis_surat, data?}` | Buat draft (jenis surat harus aktif). |
 | `GET /surat/{id}` | Detail: `skema_form` (render form dari sini, **bukan** dari jenis surat), `data`, `redaksi`, `lampiran`, `riwayat`, ... |
 | `PUT /surat/{id}` `{data, id_penandatangan}` | Simpan draft. `data` dikirim **lengkap** (menimpa). `id_penandatangan` `null` / tidak dikirim = belum dipilih (menghapus pilihan lama). Hanya format yang dicek; field wajib dicek saat terbit. |
-| `GET /surat/penandatangan` | Pilihan penandatangan + `atas_nama` (1 = dicetak "a.n Kepala Desa"). |
+| `GET /surat/penandatangan` | Pilihan penandatangan + `atas_nama` (1 = dicetak "a.n. Kepala Desa"). |
 | `PUT /surat/{id}/redaksi` `{redaksi}` / `DELETE /surat/{id}/redaksi` | Sesuaikan redaksi surat ini (`redaksi_diubah = 1`) / kembalikan ke template standar. Hanya draft. |
 | `POST /surat/{id}/lampiran` (multipart `nama`, `file`) | Lampiran pdf/jpg/png sesuai `persyaratan`. `GET/DELETE /surat/{id}/lampiran/{id_lampiran}`. |
 | `GET /surat/{id}/pdf` | PDF: draft = watermark DRAF (belum bernomor); diterbitkan = PDF tersimpan (cetak ini); dibatalkan = watermark DIBATALKAN. (`/preview` = render ulang, tanpa PDF tersimpan.) |

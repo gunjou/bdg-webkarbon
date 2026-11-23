@@ -58,7 +58,7 @@ penandatangan_out = ns.model("Penandatangan", {
     "nip": fields.String(),
     "id_jabatan": fields.Integer(example=2),
     "jabatan": fields.String(example="Sekretaris Desa"),
-    "atas_nama": fields.Integer(example=1, description="1 = dicetak 'a.n Kepala Desa'"),
+    "atas_nama": fields.Integer(example=1, description="1 = dicetak 'a.n. Kepala Desa'"),
 })
 
 _audit = {
