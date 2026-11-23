@@ -151,8 +151,10 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 .kop .logo.kanan { text-align: right; }
 .kop .kab { font-size: 14pt; }
 .kop .desa { font-size: 18pt; letter-spacing: 1px; }
-.kop .info { font-size: 10pt; }
-.judul { text-align: center; font-weight: bold; text-decoration: underline; text-transform: uppercase; margin: 0; }
+.kop .info { font-size: 9pt; }  /* setara text-xs pratinjau Pengaturan; alamat muat 1 baris */
+.judul { text-align: center; font-weight: bold; text-transform: uppercase; margin: 0; }
+/* garis judul pakai border agar ada jarak dari huruf (underline bawaan terlalu mepet) */
+.judul span { display: inline-block; border-bottom: 1px solid #000; padding-bottom: 2px; line-height: 1.2; }
 .nomor { text-align: center; margin: 0 0 18px; }
 .isi p { text-align: justify; text-indent: 12mm; margin: 0 0 10px; }
 .biodata { margin: 4px 0 12px 12mm; border-collapse: collapse; }
@@ -180,7 +182,7 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
   <td class="logo kanan"><img src="{{ logo }}"></td>
 </tr></table>
 <div class="kop-garis"></div>
-<p class="judul">{{ judul }}</p>
+<p class="judul"><span>{{ judul }}</span></p>
 <p class="nomor">Nomor : {{ nomor or "......................................" }}</p>
 <div class="isi">{{ isi }}</div>
 <div class="ttd">
