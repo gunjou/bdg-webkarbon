@@ -328,6 +328,7 @@ status_perkawinan, kewarganegaraan, dusun, rt, rw, alamat}`.
 - Pilih dari pencarian `GET /penduduk` → salin field warga ke objek orang + `id_penduduk`. Operator tetap boleh
   mengoreksi isian (tersimpan sebagai snapshot di surat, tabel penduduk tidak berubah).
 - Isi manual → `id_penduduk: null`. Warga manual **tidak** masuk ke tabel penduduk.
+- Orang `pekerjaan`: kode `PEKERJAAN` **atau teks manual** (maks 100, tidak dicek ke ref-options; dicetak apa adanya).
 - `select` dengan `options_group` → kirim `code`; `rupiah` → angka; `date` → `YYYY-MM-DD`; `daftar` → array baris.
 - Error isian: `errors["pemohon.nik"]`, `errors["keperluan"]`, `errors["batas[0].arah"]`.
 

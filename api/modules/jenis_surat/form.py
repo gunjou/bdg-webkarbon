@@ -10,8 +10,9 @@ from api.shared.exceptions import ValidationError
 from api.utils.template import sanitize_html
 
 TEXT_MAX = 2000
-ORANG_TEXT = {"nama": 150, "tempat_lahir": 100, "alamat": 255}
-ORANG_REF = {"agama": "AGAMA", "pekerjaan": "PEKERJAAN", "status_perkawinan": "STATUS_PERKAWINAN",
+ORANG_TEXT = {"nama": 150, "tempat_lahir": 100, "alamat": 255, "pekerjaan": 100}
+# pekerjaan tidak dicek ke ref_options: boleh kode PEKERJAAN atau teks manual (daftar belum lengkap)
+ORANG_REF = {"agama": "AGAMA", "status_perkawinan": "STATUS_PERKAWINAN",
              "kewarganegaraan": "KEWARGANEGARAAN", "dusun": "DUSUN"}
 
 
