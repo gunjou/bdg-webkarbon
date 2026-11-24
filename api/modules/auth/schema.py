@@ -9,7 +9,8 @@ login_model = ns.model("Login", {
     "password": fields.String(required=True, min_length=1, example="rahasia",
                               description="Password atau kode pemulihan"),
     "client": fields.String(required=True, enum=["admin", "absensi", "mobile"], example="admin",
-                            description="Aplikasi asal login. Dikirim otomatis oleh frontend, bukan input user"),
+                            description="Aplikasi asal login. Dikirim otomatis oleh frontend, bukan input user. "
+                                        "admin: hanya role ADMIN/SUPER_ADMIN (sementara KADES/SEKDES → 403 CLIENT_FORBIDDEN)"),
 })
 
 refresh_model = ns.model("Refresh", {

@@ -2263,7 +2263,7 @@
     "Login": {
       "properties": {
         "client": {
-          "description": "Aplikasi asal login. Dikirim otomatis oleh frontend, bukan input user",
+          "description": "Aplikasi asal login. Dikirim otomatis oleh frontend, bukan input user. admin: hanya role ADMIN/SUPER_ADMIN (sementara KADES/SEKDES → 403 CLIENT_FORBIDDEN)",
           "enum": [
             "admin",
             "absensi",
