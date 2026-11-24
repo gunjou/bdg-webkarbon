@@ -62,6 +62,10 @@ class LoginClientTest(unittest.TestCase):
     def test_pegawai_only_cannot_admin(self):
         self.assert_forbidden(PEGAWAI, [R_PEGAWAI], "admin")
 
+    def test_kades_cannot_admin_for_now(self):
+        r_kades = {"code": "KADES", "permissions": ["pegawai.view", "perizinan.review"]}
+        self.assert_forbidden(PEGAWAI, [r_kades, R_PEGAWAI], "admin")
+
     def test_non_pegawai_cannot_absensi(self):
         self.assert_forbidden(ADMIN_NON_PEGAWAI, [R_ADMIN], "absensi")
 

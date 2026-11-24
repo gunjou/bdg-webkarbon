@@ -47,10 +47,11 @@ def _user_payload(user, roles, permissions):
 _SELF_PERMISSIONS = {"absensi.self", "perizinan.self"}
 
 
-def _check_client(user, permissions, client):
+def _check_client(user, roles, permissions, client):
     """Kembalikan (error_code, pesan) jika akun tidak boleh masuk aplikasi `client`, atau None."""
     if client == "admin":
-        if not set(permissions) - _SELF_PERMISSIONS:
+        # shortcut: sementara hanya ADMIN/SUPER_ADMIN (KADES/SEKDES ditahan); kembalikan ke cek permission bila dibuka lagi
+        if not {"ADMIN", "SUPER_ADMIN"} & set(roles) or not set(permissions) - _SELF_PERMISSIONS:
             return "CLIENT_FORBIDDEN", "Akun tidak memiliki akses ke aplikasi admin"
     elif user["id_pegawai"] is None or not ({"absensi.self", "*"} & set(permissions)):
         return "CLIENT_FORBIDDEN", "Akun tidak memiliki akses ke aplikasi absensi"
@@ -93,7 +94,7 @@ def login(username, password, client):
         raise AuthError(message)
 
     roles, permissions = _load_roles(user["id_user"])
-    problem = _check_account(user, roles) or _check_client(user, permissions, client)
+    problem = _check_account(user, roles) or _check_client(user, roles, permissions, client)
     if problem:
         code, message = problem
         query.insert_login_failure(user["id_user"], code, message)

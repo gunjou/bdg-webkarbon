@@ -56,6 +56,7 @@ GET  /auth/me                                 → user (roles & permissions terb
   cukup beri teks bantuan "Lupa password? Masukkan kode pemulihan dari admin".
 - Kredensial salah selalu `401` dengan pesan sama ("Username atau kredensial salah") — memang disengaja.
 - `403` saat login = akun nonaktif / pegawai nonaktif / belum punya role → tampilkan `message`.
+- Sementara: `client=admin` hanya untuk role `ADMIN`/`SUPER_ADMIN`; `KADES`/`SEKDES` → `403 CLIENT_FORBIDDEN`.
 - **Logout** = hapus token di client. Tidak ada endpoint logout.
 - `client` wajib: `admin` (web admin), `absensi` (web absen), `mobile` (Android). `absensi` & `mobile` hanya untuk
   pegawai dengan `absensi.self`. `mobile`: access token berlaku `JWT_MOBILE_EXPIRES` hari (default 365), tanpa
@@ -128,7 +129,7 @@ Data pilihan & pencarian yang dibutuhkan form surat juga terbuka untuk `surat.cr
 `GET /master/ref-options`, `GET /penduduk`, `GET /penduduk/{id}`, `GET /settings`, `GET /jenis-surat...`.
 
 Role bawaan: `SUPER_ADMIN` (`*`; satu-satunya yang mengelola pegawai, absensi, izin, master, penduduk & akun),
-`ADMIN` (hanya persuratan + Website Desa: `jenis_surat.manage`, `surat.*`, `settings.surat_manage`, `landing.manage`), `SEKDES`/`KADES`
+`ADMIN` (hanya menu Surat, Buku Surat & Website Desa: `surat.*`, `landing.manage`; jenis surat & pengaturan = SUPER_ADMIN), `SEKDES`/`KADES`
 (lihat pegawai, absensi, log gagal, penduduk & surat; review izin; koreksi absen — tanpa master, pengaturan & akun), `PEGAWAI` (absen & izin sendiri). Satu akun bisa punya beberapa role;
 permission-nya digabung (mis. Sekdes yang juga absen = `SEKDES` + `PEGAWAI`).
 
