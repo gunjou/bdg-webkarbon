@@ -127,8 +127,8 @@ Backend tetap mengecek; menyembunyikan menu hanya untuk UX.
 Data pilihan & pencarian yang dibutuhkan form surat juga terbuka untuk `surat.create`/`surat.view`:
 `GET /master/ref-options`, `GET /penduduk`, `GET /penduduk/{id}`, `GET /settings`, `GET /jenis-surat...`.
 
-Role bawaan: `SUPER_ADMIN` (`*`), `ADMIN` (semua kecuali review izin & absen sendiri; termasuk
-seluruh persuratan — tidak ada role OPERATOR terpisah), `SEKDES`/`KADES`
+Role bawaan: `SUPER_ADMIN` (`*`; satu-satunya yang mengelola pegawai, absensi, izin, master, penduduk & akun),
+`ADMIN` (hanya persuratan + Website Desa: `jenis_surat.manage`, `surat.*`, `settings.surat_manage`, `landing.manage`), `SEKDES`/`KADES`
 (lihat pegawai, absensi, log gagal, penduduk & surat; review izin; koreksi absen — tanpa master, pengaturan & akun), `PEGAWAI` (absen & izin sendiri). Satu akun bisa punya beberapa role;
 permission-nya digabung (mis. Sekdes yang juga absen = `SEKDES` + `PEGAWAI`).
 
