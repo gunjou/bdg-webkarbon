@@ -235,8 +235,8 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 {% endif %}
 <div class="ttd">
   {% if layout != "dinas" %}<div>{{ tgl }}</div>{% endif %}
-  {% if ttd.atas_nama %}<div>a.n. KEPALA DESA {{ desa.nama | upper }}</div><div>{{ ttd.jabatan }}</div>
-  {% else %}<div>KEPALA DESA {{ desa.nama | upper }}</div>{% endif %}
+  {% if ttd.atas_nama %}<div>a.n. Kepala Desa {{ desa.nama | title }}</div><div>{{ ttd.jabatan }}</div>
+  {% else %}<div>Kepala Desa {{ desa.nama | title }}</div>{% endif %}
   <div class="nama">{{ ttd.nama or "...................................." }}</div>
   {% if ttd.nip %}<div>NIP. {{ ttd.nip }}</div>{% endif %}
 </div>

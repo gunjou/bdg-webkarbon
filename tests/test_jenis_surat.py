@@ -104,7 +104,7 @@ class RenderHtmlTest(unittest.TestCase):
                                   penandatangan={"nama": "Budi", "jabatan": "Sekretaris Desa", "atas_nama": 1},
                                   watermark="DRAF")
         for teks in ("&lt;b&gt;Gugun&lt;/b&gt;", "Mataram, 3 November 1998", "Rp 50.000.000",
-                     "lima puluh juta rupiah", "Dasan Kebon", "<td>Utara</td>", "a.n. KEPALA DESA KARANG BONGKOT",
+                     "lima puluh juta rupiah", "Dasan Kebon", "<td>Utara</td>", "a.n. Kepala Desa Karang Bongkot",
                      "Sekretaris Desa", "16 November 2026", "215mm 330mm", "DRAF"):
             self.assertIn(teks, html)
 
@@ -122,7 +122,7 @@ class SeedTest(unittest.TestCase):
             data = {**service.sample_data(sk), "kepada": "Camat", "tembusan": "Arsip\nBPD"}
             html = render.render_html(judul=name, redaksi=service.clean_template(redaksi, sk), skema=sk, data=data,
                                       labels={}, settings=settings, penandatangan={"nama": "Budi", "jabatan": "Kepala Desa"})
-            self.assertIn("KEPALA DESA KARANG BONGKOT", html, code)
+            self.assertIn("Kepala Desa Karang Bongkot", html, code)
             if sk["layout"] == "dinas":
                 self.assertIn("Yth. Camat", html)
                 self.assertIn("<li>BPD</li>", html)
