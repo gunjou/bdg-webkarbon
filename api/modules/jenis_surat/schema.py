@@ -37,6 +37,8 @@ jenis_surat_input = ns.model("JenisSuratInput", {
 duplikat_input = ns.model("JenisSuratDuplikatInput", {
     "code": fields.String(required=True, min_length=1, max_length=30, example="SKBM2"),
     "name": fields.String(required=True, min_length=1, max_length=150, example="Salinan Surat Keterangan Belum Menikah"),
+    "kode_klasifikasi": fields.String(required=True, min_length=1, max_length=30, example="148.2",
+                                      description="Harus beda dari jenis lain (nomor surat per jenis)"),
 })
 
 placeholder_input = ns.model("PlaceholderInput", {

@@ -105,6 +105,6 @@ class JenisSuratDuplikat(Resource):
     @permission_required(MANAGE)
     @measure_execution_time
     def post(self, id_jenis_surat):
-        """Akses: jenis_surat.manage. Salin skema, redaksi & persyaratan ke jenis surat baru (versi 1)."""
+        """Akses: jenis_surat.manage. Salin skema, redaksi & persyaratan ke jenis surat baru (versi 1) dengan kode & kode klasifikasi baru."""
         data = service.duplicate(id_jenis_surat, request.get_json(), _uid())
         return success(data, "Jenis surat berhasil diduplikat", 201)

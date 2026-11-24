@@ -1805,6 +1805,13 @@
           "minLength": 1,
           "type": "string"
         },
+        "kode_klasifikasi": {
+          "description": "Harus beda dari jenis lain (nomor surat per jenis)",
+          "example": "148.2",
+          "maxLength": 30,
+          "minLength": 1,
+          "type": "string"
+        },
         "name": {
           "example": "Salinan Surat Keterangan Belum Menikah",
           "maxLength": 150,
@@ -1814,6 +1821,7 @@
       },
       "required": [
         "code",
+        "kode_klasifikasi",
         "name"
       ],
       "type": "object"
@@ -6488,7 +6496,7 @@
         }
       ],
       "post": {
-        "description": "manage. Salin skema, redaksi & persyaratan ke jenis surat baru (versi 1).",
+        "description": "manage. Salin skema, redaksi & persyaratan ke jenis surat baru (versi 1) dengan kode & kode klasifikasi baru.",
         "operationId": "post_jenis_surat_duplikat",
         "parameters": [
           {

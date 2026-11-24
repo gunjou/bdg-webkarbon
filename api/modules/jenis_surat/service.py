@@ -291,7 +291,8 @@ def update(id_jenis_surat, data, id_user):
 
 def duplicate(id_jenis_surat, data, id_user):
     src = get(id_jenis_surat)
-    return create({**src, "code": data.get("code"), "name": data.get("name")}, id_user)
+    return create({**src, "code": data.get("code"), "name": data.get("name"),
+                   "kode_klasifikasi": data.get("kode_klasifikasi")}, id_user)
 
 
 def deactivate(id_jenis_surat, id_user):
