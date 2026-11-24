@@ -108,6 +108,17 @@ class RenderHtmlTest(unittest.TestCase):
                      "Sekretaris Desa", "16 November 2026", "215mm 330mm", "DRAF"):
             self.assertIn(teks, html)
 
+    def test_pengantar_tanpa_penduduk_kepada_di_atas_judul(self):
+        from api.modules.jenis_surat import render
+        skema = service.validate_skema({"layout": "pengantar", "sections": [
+            {"key": "tujuan", "label": "Tujuan", "type": "fields", "fields": [{"key": "kepada", "label": "Kepada", "type": "text"}]},
+            {"key": "dokumen", "label": "Dokumen", "type": "daftar", "columns": [{"key": "uraian", "label": "Uraian", "type": "text"}]}]})
+        html = render.render_html(judul="Surat Pengantar", redaksi="{{ tabel(dokumen) }}", skema=skema,
+                                  data={"kepada": "Dinas Sosial", "dokumen": [{"uraian": "Data DTKS"}]}, labels={},
+                                  settings={"desa.nama": "Karang Bongkot"})
+        self.assertLess(html.index("Dinas Sosial"), html.index("Surat Pengantar</span>"))
+        self.assertIn("<td>Data DTKS</td>", html)
+
 
 class SeedTest(unittest.TestCase):
     def test_seed_valid_dan_dinas_render(self):

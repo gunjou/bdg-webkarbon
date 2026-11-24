@@ -15,6 +15,8 @@ Bentuk cetak = skema["layout"]:
   - dinas (surat biasa / undangan): blok Nomor/Sifat/Lampiran/Perihal di kiri, tanggal + Kepada Yth. di kanan,
     tanpa judul; diisi dari field ber-key tetap: sifat, lampiran, perihal, kepada, di_tempat, tembusan (textarea,
     satu tujuan per baris). Field yang tidak ada di skema dicetak kosong / tidak dicetak.
+  - pengantar: blok Kepada Yth. (field kepada, di_tempat) di kanan atas, lalu judul + NOMOR di tengah, lalu isi
+    (biasanya {{ tabel(<daftar>) }}: No | Uraian | Banyaknya | Keterangan).
 Redaksi juga bisa memakai penandatangan: {{ ttd.nama }}, {{ ttd.jabatan }}, {{ ttd.nip }}."""
 import base64
 from pathlib import Path
@@ -229,6 +231,14 @@ body { font-family: "Surat Serif", serif; font-size: 12pt; line-height: 1.5; col
 </tr></table>
 <div class="isi dinas-isi">{{ isi }}</div>
 {% else %}
+{% if layout == "pengantar" %}
+<table class="dinas"><tr><td style="width: 50%"></td><td>
+  <div>Kepada</div>
+  <table class="kiri"><tr><td style="width: 12mm">Yth.</td><td>{{ f.kepada or "......................" }}</td></tr>
+    <tr><td></td><td>di&ndash;</td></tr>
+    <tr><td></td><td style="padding-left: 6mm">{{ f.di_tempat or "Tempat" }}</td></tr></table>
+</td></tr></table>
+{% endif %}
 <p class="judul"><span>{{ judul }}</span></p>
 <p class="nomor">NOMOR : {{ nomor or "......................................" }}</p>
 <div class="isi">{{ isi }}</div>
@@ -262,7 +272,7 @@ def render_html(*, judul, redaksi, skema, data, labels, settings, logo=None, log
     tanggal = date/ISO; watermark mis. 'DRAF' / 'DIBATALKAN'."""
     desa = {k: settings.get(f"desa.{k}") or "" for k in ("nama", "kecamatan", "kabupaten", "alamat", "email", "website")}
     ctx = build_context(skema, data, labels, desa)
-    layout = "dinas" if skema.get("layout") == "dinas" else "keterangan"
+    layout = skema.get("layout") if skema.get("layout") in ("dinas", "pengantar") else "keterangan"
     tembusan = [t.strip() for t in str(ctx.get("tembusan") or "").splitlines() if t.strip()] if layout == "dinas" else []
     return LAYOUT.render(
         layout=layout, f=ctx, tembusan=tembusan,

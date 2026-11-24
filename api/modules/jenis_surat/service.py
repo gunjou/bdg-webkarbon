@@ -1,11 +1,11 @@
 # api/modules/jenis_surat/service.py
 """Jenis surat = cetakan: skema_form (form dinamis) + template_isi (redaksi HTML + placeholder Jinja).
 
-skema_form  : {"layout": "keterangan"|"dinas", "sections": [...]}. layout = bentuk cetak (lihat render.py); dinas =
+skema_form  : {"layout": "keterangan"|"dinas"|"pengantar", "sections": [...]}. layout = bentuk cetak (lihat render.py); dinas =
   surat biasa/undangan, field ber-key sifat/lampiran/perihal/kepada/di_tempat/tembusan dicetak di blok kepala surat.
   4 tipe section:
   - penduduk   : biodata 1 orang; `tampilkan` = field biodata yang dicetak. Section penduduk PERTAMA = pemohon utama
-                 (wajib untuk layout keterangan; layout dinas boleh tanpa, nama_pemohon = field `kepada`).
+                 (wajib untuk layout keterangan; layout dinas/pengantar boleh tanpa, nama_pemohon = field `kepada`).
   - fields     : isian biasa (`fields`), type text|textarea|number|date|rupiah|select.
   - daftar     : tabel isian berulang (`columns`, type sama dengan fields kecuali textarea).
   - teks_bebas : paragraf yang ditulis operator.
@@ -37,7 +37,7 @@ BIODATA = {
     "kewarganegaraan": "Kewarganegaraan", "alamat": "Alamat",
 }
 HELPERS = ("biodata", "tabel", "label", "tgl_indo", "terbilang")
-LAYOUTS = ("keterangan", "dinas")
+LAYOUTS = ("keterangan", "dinas", "pengantar")
 TTD_KEYS = {"nama": "Nama Penandatangan", "jabatan": "Jabatan Penandatangan", "nip": "NIP Penandatangan"}
 DESA_KEYS = {"nama": "Nama Desa", "kecamatan": "Kecamatan", "kabupaten": "Kabupaten", "alamat": "Alamat Desa"}
 RESERVED = {"desa", "surat", "ttd", *HELPERS, "range", "dict", "lipsum", "cycler", "joiner", "namespace", "loop", "self",
@@ -145,7 +145,7 @@ def validate_skema(skema):
         else:
             errors[f"{path}.type"] = "Pilihan: " + ", ".join(SECTION_TYPES)
         out.append(sec)
-    if layout != "dinas" and not any(s["type"] == "penduduk" for s in out):
+    if layout == "keterangan" and not any(s["type"] == "penduduk" for s in out):
         errors["skema_form.sections"] = "Wajib ada minimal 1 section penduduk (pemohon utama)"
     if errors:
         raise ValidationError("Skema form tidak valid", errors)
